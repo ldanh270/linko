@@ -1,0 +1,633 @@
+{
+  "info": {
+    "_postman_id": "40e397fe-460c-429e-8436-402c106f6975",
+    "name": "Linko",
+    "description": "Tester account:\n\n- test : Abc1234@\n    \n- ldanh270: ADLlk!27@\"\n    \n- test2: Abc1234@",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Signup",
+          "id": "d13df4d0-11c4-4a6e-88ce-3be7d013ad95",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"test2\",\r\n    \"password\": \"Abc1234@\",\r\n    \"email\": \"asd.dn@gmail.com\",\r\n    \"displayName\": \"test2\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "id": "ad1019f0-7fe4-428a-a8b8-287c63d06494",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"Abc1234@\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh token",
+          "id": "5ff9166c-c984-43c1-961e-47cb6e75b2ca",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "99e7e8db-6ea5-4bdf-b439-6c3334a47968"
+    },
+    {
+      "name": "friend",
+      "item": [
+        {
+          "name": "GetAllFriend",
+          "id": "0d8dc31d-378f-4e1d-9f82-32158b162ec6",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxMDY3YzBmY2NlZjY4MmEwODNiZDAiLCJpYXQiOjE3NjYwNDUxNTYsImV4cCI6MTc2NjA0NjA1Nn0.OR9uthaiWwcsOGoj4VnN52ra9tdqR8YUZAtVCO2X6EU",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/friends",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "friends"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSentRequests",
+          "id": "e3f73d18-f07b-4056-aac1-bec76a2e6994",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxMDY3YzBmY2NlZjY4MmEwODNiZDAiLCJpYXQiOjE3NjYwNDYwODMsImV4cCI6MTc2NjA0Njk4M30.1RDKFmK7PmFR6UERDti101OvYhKejuniz9vo4a1lwTM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/friends/sent",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "friends",
+                "sent"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getReceivedRequests",
+          "id": "a7ba2873-db27-4fdb-9bba-a52cc70e5289",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxMDY3YzBmY2NlZjY4MmEwODNiZDAiLCJpYXQiOjE3NjYwNDYwODMsImV4cCI6MTc2NjA0Njk4M30.1RDKFmK7PmFR6UERDti101OvYhKejuniz9vo4a1lwTM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/friends/received",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "friends",
+                "received"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SendRequest",
+          "id": "d4e85963-e7ce-4b0b-863c-c87a365f8def",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxMDY3YzBmY2NlZjY4MmEwODNiZDAiLCJpYXQiOjE3NjYwNjM1NDQsImV4cCI6MTc2NjA2NDQ0NH0.ym_dB8HHHHuKCDdiwgzqsvhb4NAbyY_djpXvfpz0cwU",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"to\": \"69417c7cac9f402a62d5df38\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/friends/sent",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "friends",
+                "sent"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AcceptFriend",
+          "id": "acb34623-5f7a-4aba-bfa1-0466823c0338",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjYwNjQyMDYsImV4cCI6MTc2NjA2NTEwNn0.NXrMPtRu9YX-20XnlkaCmm5zDb-H3MEQYuUD8BsOExw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/friends/6943fdd327a969900a6c7d51/accept",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "friends",
+                "6943fdd327a969900a6c7d51",
+                "accept"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeclineFriend",
+          "id": "e91008ba-974e-43fe-bbcb-b55a98e1173b",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjU4OTk0MTYsImV4cCI6MTc2NTkwMDMxNn0.B1wM8-8c61bSbtVmT2VaND7HgtEzfk-SVqfJfuXQasU",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"to\": \"6941067c0fccef682a083bd0\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/friends/sent",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "friends",
+                "sent"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "c969248d-4fe6-4a77-bd0a-b54052a3fbf8"
+    },
+    {
+      "name": "user",
+      "item": [],
+      "id": "e4407669-1300-41b5-bcf6-3a4abe898123"
+    },
+    {
+      "name": "message",
+      "item": [
+        {
+          "name": "getMessages",
+          "id": "9b3b825e-ae9e-4c50-994f-b8d430556e0c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjY0OTc3NjIsImV4cCI6MTc2NjQ5ODY2Mn0.7J4BlvmvtsDPPrLmrWnlEEDDIEfMXZ__4QhGylrfavo",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/69495bd8d0dcb3c1b253a4a8",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                "69495bd8d0dcb3c1b253a4a8"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SendMessage",
+          "id": "60e1d5d9-4165-43a9-b148-fa8a0d25cbca",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjY0MTUzNTYsImV4cCI6MTc2NjQxNjI1Nn0.L6wGl7iU2F2NRdunyh18Xpb7Q24ctGIrI5SMWQgCT-E",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"recipientId\": \"6941067c0fccef682a083bd0\",\r\n    \"content\": \"hehe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "e3bc8af2-ba13-45ab-a9c9-669b4c4985e7"
+    },
+    {
+      "name": "conversation",
+      "item": [
+        {
+          "name": "Get Conversations",
+          "id": "d806c564-4fcc-4cd4-a41a-34a27b29b546",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjY0MjA2ODgsImV4cCI6MTc2NjQyMTU4OH0.Fk4O9045Cuwr4P9ltkzaPQHhcojPeJFG-N1RgkDm0PQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/conversations/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create group chat",
+          "id": "e9f30472-3ee6-49fa-83a9-a59c15d8d388",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjY0MTc4NTQsImV4cCI6MTc2NjQxODc1NH0.u_I681zmSoaA2nBfBJOQ-V1EuiRJAnH_cKzpuFnF6hM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Front-end\",\r\n    \"type\": \"GROUP\",\r\n    \"memberIds\": [\r\n        \"6941067c0fccef682a083bd0\",\r\n        \"6947668d22a93f4cca25ec8b\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/conversations/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "conversations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "bb6d160c-a3ba-4262-a2aa-c427ca220871"
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "Get User Profile (me)",
+          "id": "769fd602-73d3-4e64-93db-86f1463c4406",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjY1NjQ2MzAsImV4cCI6MTc2NjU2NTUzMH0.oSH7mfLsD9gL7ZUpXaTSLXoSoWPmbxQ9ntz_5-A3tjc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"ldanh270\",\r\n    \"password\": \"ADLlk!27@\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Users",
+          "id": "074ec48c-378e-4d9c-a27e-51b6ea38241d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN2M3Y2FjOWY0MDJhNjJkNWRmMzgiLCJpYXQiOjE3NjY1OTQ0MzgsImV4cCI6MTc2NjU5NTMzOH0.Jm7YDZ3xFY2PqnVB8bFbAnt6S2r39kuvCg4nzndxf9o",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"type\": \"TYPING\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/search/?keyword=test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "search",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "test"
+                },
+                {
+                  "key": "type",
+                  "value": null,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "id": "e3e8a331-4e9e-461c-b4b1-5000ca8a9254",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxMDY3YzBmY2NlZjY4MmEwODNiZDAiLCJpYXQiOjE3NjY5MzUxNTgsImV4cCI6MTc2NjkzNjA1OH0.jkzRiuXyHEqF63KbIKZlbmxvZ-Xfd5GtyloxXavFZFA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "username",
+                  "value": "tester",
+                  "type": "text",
+                  "uuid": "69149477-ece7-4985-aaa0-2155961dd18a"
+                },
+                {
+                  "key": "displayName",
+                  "value": "Tester",
+                  "type": "text",
+                  "uuid": "61d57697-ea4a-4f17-a98c-2a34476010eb"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "uuid": "343df143-9e94-4fb5-9ed2-b9116122232a",
+                  "src": [
+                    "postman-cloud:///1f0e395e-9699-4b50-8c2e-714268a22aa2"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "6a1d42fe-fc33-4ee3-a343-98ed31a7f0d6"
+    }
+  ],
+  "variable": [
+    {
+      "id": "e8f0d039-e731-4954-9d3a-675d8625c084",
+      "key": "base_url",
+      "value": ""
+    }
+  ]
+}
