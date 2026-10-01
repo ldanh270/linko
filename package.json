@@ -1,0 +1,17 @@
+{
+  "name": "linko",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "i:all": "npm install && npm run i:backend && npm run i:frontend",
+    "i:backend": "npm install --prefix backend",
+    "i:frontend": "npm install --prefix frontend",
+    "build": "npm run build:frontend",
+    "build:frontend": "npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
