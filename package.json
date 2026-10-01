@@ -12,6 +12,7 @@
     "build:frontend": "nr -C frontend build"
   },
   "devDependencies": {
+    "@antfu/ni": "^30.6.0",
     "concurrently": "^9.2.1"
   }
 }
