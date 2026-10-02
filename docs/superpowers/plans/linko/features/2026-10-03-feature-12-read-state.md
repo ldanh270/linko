@@ -43,10 +43,10 @@
 
 **Files:** service/repository/types/constants trong module trên; test backend/src/modules/read/read-state.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_not_mark_future_or_pre_join_message_read; should_set_unread_zero_at_latest_visible_message; should_keep_other_members_count. Assertions cốt lõi: expect(self.unreadCount).toBe(0); expect(other.unreadCount).toBe(previousOtherCount).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/read/read-state.service.test.ts; xác nhận FAIL đúng hành vi.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_not_mark_future_or_pre_join_message_read; should_set_unread_zero_at_latest_visible_message; should_keep_other_members_count. Assertions cốt lõi: expect(self.unreadCount).toBe(0); expect(other.unreadCount).toBe(previousOtherCount). Added race ordering, visibility, and sender-unread regression cases.
+- [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/read/read-state.service.test.ts`; initial run failed because the read repository did not exist yet, confirming the tests exercised the missing implementation.
+- [x] Step 3: Added repository interface + Mongoose repository and service signatures above; multi-record writes use a transaction; constants/typed BusinessException; service does not call Mongoose.
+- [x] Step 4: Targeted read-state tests and backend typecheck pass. Domain task commit pending.
 
 ### Task 2: API boundary and integration
 
@@ -61,7 +61,7 @@
 
 **Files:** frontend/features/inbox/api/read.api.ts; test frontend/features/inbox/api/read-state.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter sends lastVisibleMessageId and invalidates only relevant inbox query; giả lập envelope và xác nhận ApiError.code.
+- [ ] Step 1: Viết test adapter thất bại: adapter sends lastVisibleMessageId and preserves ApiError.code. Inbox cache invalidation belongs in the consuming screen hook, since this adapter is transport-only and must not import React/query state.
 - [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/inbox/api/read-state.api.test.ts; xác nhận FAIL.
 - [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
 - [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.

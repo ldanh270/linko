@@ -77,6 +77,7 @@ export class MongooseMembershipRepository implements MembershipRepository {
             [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER,
             [PARTICIPANT_FIELDS.JOINED_AT]: input.joinedAt,
         })
+        document[CONVERSATION_FIELDS.UNREAD_COUNT].set(input.userId.toString(), 0)
         await document.save({ session: transaction.session })
         const group = await this.toGroupRecord(document, transaction)
         const member = group.members.find(({ userId }) => userId.equals(input.userId))

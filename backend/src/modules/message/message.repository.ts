@@ -136,7 +136,10 @@ export class MongooseMessageRepository implements MessageRepository {
             const participantId = participant[MESSAGE_PARTICIPANT_FIELDS.USER_ID]
             const participantKey = participantId.toString()
             const previousCount = unreadCount.get(participantKey) ?? 0
-            unreadCount.set(participantKey, participantId.equals(message.senderId) ? 0 : previousCount + 1)
+            unreadCount.set(
+                participantKey,
+                participantId.equals(message.senderId) ? previousCount : previousCount + 1,
+            )
         }
 
         await conversation.save({ session: transaction.session })

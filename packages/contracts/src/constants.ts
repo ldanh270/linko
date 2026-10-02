@@ -104,6 +104,20 @@ export const CONVERSATION_ROUTE_PATHS = {
     BY_ID: `/:${CONVERSATION_PARAMS.ID}`,
     LEAVE: `/:${CONVERSATION_PARAMS.ID}/leave`,
     CLOSE: `/:${CONVERSATION_PARAMS.ID}/close`,
+    READ: `/:${CONVERSATION_PARAMS.ID}/read`,
+} as const
+
+/** Read-state DTO field names shared by conversation routes and API adapters. */
+export const READ_FIELDS = {
+    CONVERSATION_ID: "conversationId",
+    LAST_READ_AT: "lastReadAt",
+    LAST_READ_MESSAGE_ID: "lastReadMessageId",
+    UNREAD_COUNT: "unreadCount",
+} as const
+
+/** Request field names shared by read-state validation and clients. */
+export const READ_REQUEST_FIELDS = {
+    LAST_VISIBLE_MESSAGE_ID: "lastVisibleMessageId",
 } as const
 
 /** Message route parameter names shared by validation, controllers, and clients. */

@@ -24,6 +24,8 @@ export const PARTICIPANT_FIELDS = {
     CLEARED_HISTORY_AT: "clearedHistoryAt",
     JOINED_AT: "joinedAt",
     LEFT_AT: "leftAt",
+    LAST_READ_AT: "lastReadAt",
+    LAST_READ_MESSAGE_ID: "lastReadMessageId",
     DEL_FLAG: "delFlag",
 } as const
 

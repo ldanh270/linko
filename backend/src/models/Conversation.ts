@@ -75,6 +75,15 @@ const participantSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        [PARTICIPANT_FIELDS.LAST_READ_AT]: {
+            type: Date,
+            default: null,
+        },
+        [PARTICIPANT_FIELDS.LAST_READ_MESSAGE_ID]: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Message",
+            default: null,
+        },
         [PARTICIPANT_FIELDS.DEL_FLAG]: {
             type: Boolean,
             default: false,
