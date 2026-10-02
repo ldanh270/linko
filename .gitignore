@@ -8,3 +8,4 @@ bun.lock
 yarn.lock
 
 node_modules
+.pnpm-store/
