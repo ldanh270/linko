@@ -5,11 +5,14 @@ import express, { type Express, type Router } from "express"
 
 import type { AuthRuntimeConfig } from "./configs/auth.config"
 import { ConversationController } from "./modules/conversation/conversation.controller"
+import { ConversationLifecycleController } from "./modules/conversation/conversationLifecycle.controller"
+import { MongooseConversationLifecycleRepository } from "./modules/conversation/conversationLifecycle.repository"
+import { ConversationLifecycleService } from "./modules/conversation/conversationLifecycle.service"
 import { MembershipController } from "./modules/membership/membership.controller"
 import { MongooseMembershipRepository } from "./modules/membership/membership.repository"
 import { createMembershipRouter } from "./modules/membership/membership.route"
 import { MembershipService } from "./modules/membership/membership.service"
-import { createConversationRouter } from "./modules/conversation/conversation.route"
+import { createConversationLifecycleRouter, createConversationRouter } from "./modules/conversation/conversation.route"
 import { MongooseConversationRepository } from "./modules/conversation/conversation.repository"
 import { R2GroupAvatarStorage } from "./modules/conversation/group-avatar.storage"
 import { ConversationService } from "./modules/conversation/conversation.service"
@@ -69,12 +72,20 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
+    const invitationRepository = new MongooseInvitationRepository()
     const invitationService = new InvitationService({
-        repository: new MongooseInvitationRepository(),
+        repository: invitationRepository,
         transactionRunner: { run: withTransaction },
         clientOrigin: dependencies.authConfig.clientOrigin,
         membershipService,
         groupReader: conversationRepository,
+        clock: { now: () => new Date() },
+    })
+    const conversationLifecycleService = new ConversationLifecycleService({
+        repository: new MongooseConversationLifecycleRepository(),
+        groupReader: conversationRepository,
+        invitationRevoker: invitationRepository,
+        transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
@@ -86,6 +97,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const profileController = new ProfileController(profileService)
     const membershipController = new MembershipController(membershipService)
     const conversationController = new ConversationController(conversationService)
+    const conversationLifecycleController = new ConversationLifecycleController(conversationLifecycleService)
     const invitationController = new InvitationController(invitationService)
     const app = express()
     app.use(withRequestContext)
@@ -97,6 +109,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.INVITATIONS, createInvitationPreviewRouter(invitationController))
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
+    app.use(API_ROUTES.CONVERSATIONS, createConversationLifecycleRouter(conversationLifecycleController))
     app.use(dependencies.privateRoutes)
     app.use(API_ROUTES.USERS, createProfileRouter(profileController))
     app.use(API_ROUTES.CONVERSATIONS, createMembershipRouter(membershipController))

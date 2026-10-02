@@ -52,10 +52,10 @@
 
 **Files:** route/controller/dto/schema/mapper trong module; test backend/src/modules/conversation/group-lifecycle.route.test.ts.
 
-- [ ] Step 1: Viết test route thất bại: member leave 200; owner close 200, member close 403; closed group rejects new sends/joins. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-lifecycle.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
-- [ ] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route thất bại: member leave 200; owner close 200, member close 403; closed group rejects new sends/joins. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-lifecycle.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
+- [x] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
 
 ### Task 3: Client contract
 
