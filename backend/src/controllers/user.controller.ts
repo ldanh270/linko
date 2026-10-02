@@ -1,6 +1,7 @@
 import { HttpStatusCode } from "#/configs/constants/httpStatusCode"
 import User from "#/models/User"
 import { UserService } from "#/services/user.service"
+import { InvalidProfileImageError } from "#/utils/image.util"
 import { checkUniqueFields } from "#/utils/user.util"
 
 import { Request, Response } from "express"
@@ -138,6 +139,9 @@ export class UserController {
                 user: updatedUser,
             })
         } catch (error) {
+            if (error instanceof InvalidProfileImageError) {
+                return res.status(HttpStatusCode.BAD_REQUEST).json({ message: error.message })
+            }
             console.error("UserController - updateProfile ERROR: " + (error as Error).message)
             return res
                 .status(HttpStatusCode.INTERNAL_SERVER)

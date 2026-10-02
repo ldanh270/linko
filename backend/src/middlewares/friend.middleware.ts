@@ -11,6 +11,8 @@ export const checkFriendship = async (req: Request, res: Response, next: NextFun
 
     const recipientId = req.body?.recipientId ?? null
 
+    if (!recipientId && req.body?.conversationId) return next()
+
     if (!recipientId)
         return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "'recipientId' is required" })
 

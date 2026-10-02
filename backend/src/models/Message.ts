@@ -45,13 +45,21 @@ const messageSchema = new mongoose.Schema(
         ],
         attachments: [
             {
-                // Link CDN to display
+                // Historical public URL; new R2 attachments use the protected application route.
                 url: {
                     type: String,
                 },
-                // Cloundinary public id to delete avatar
                 id: {
                     type: String,
+                },
+                name: {
+                    type: String,
+                },
+                contentType: {
+                    type: String,
+                },
+                size: {
+                    type: Number,
                 },
             },
         ],

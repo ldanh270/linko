@@ -1,5 +1,6 @@
 import { MessageController } from "#/controllers/message.controller"
 import { checkFriendship } from "#/middlewares/friend.middleware"
+import { parseMessageFiles } from "#/middlewares/upload.middleware"
 import { ConversationService } from "#/services/conversation.service"
 import { MessageService } from "#/services/message.service"
 
@@ -16,8 +17,11 @@ const controller = new MessageController(messageService, conversationService)
 // List of newest messages in specific conversation
 messageRoutes.get("/:conversationId", controller.getMessages)
 
+// Download a private attachment after checking conversation membership
+messageRoutes.get("/:messageId/attachments/:attachmentId", controller.downloadAttachment)
+
 // Send new message to conversation
-messageRoutes.post("/", checkFriendship, controller.sendMessage)
+messageRoutes.post("/", parseMessageFiles, checkFriendship, controller.sendMessage)
 
 // Edit a specific message in conversation
 messageRoutes.put("/:messageId", controller.editMessage)

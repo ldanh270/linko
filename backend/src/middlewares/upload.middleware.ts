@@ -1,64 +1,55 @@
-import cloudinary from "#/configs/cloudinary.config"
-
 import multer from "multer"
-import { CloudinaryStorage } from "multer-storage-cloudinary"
+import { NextFunction, Request, RequestHandler, Response } from "express"
+import {
+    isMessageAttachmentMimeType,
+    isProfileImageMimeType,
+    MAX_MESSAGE_ATTACHMENT_COUNT,
+    MAX_UPLOAD_FILE_SIZE_BYTES,
+    normalizeUploadMimeType,
+} from "#/configs/uploadPolicy.config"
 
-const sanitizeFilename = (name: string) => {
-    return name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Remove vietnamese sign
-        .replace(/[^a-zA-Z0-9]/g, "-") // Remove special sign with "-"
-        .replace(/-+/g, "-") // Avoid multi "-"
-        .replace(/^-|-$/g, "") // Remove first and last "-"
+const sendUploadError = (error: unknown, res: Response) => {
+    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+        const maxSizeMiB = MAX_UPLOAD_FILE_SIZE_BYTES / 1024 / 1024
+        return res
+            .status(413)
+            .json({ message: `Each uploaded file must be ${maxSizeMiB} MiB or smaller` })
+    }
+    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_COUNT") {
+        return res.status(400).json({ message: "Too many files in upload" })
+    }
+    return res.status(400).json({
+        message: error instanceof Error ? error.message : "Invalid uploaded file",
+    })
 }
 
-/**
- * Middleware to transfer uploaded file to Cloundinary
- * Response image url instead of save to server hardware
- */
-const storage = new CloudinaryStorage({
-    /**
-     * Connect with Cloudinary account
-     * Include CLOUD_NAME, API_KEY, API SECRET
-     */
-    cloudinary: cloudinary,
+const wrapUpload = (middleware: RequestHandler) =>
+    (req: Request, res: Response, next: NextFunction) =>
+        middleware(req, res, (error) => (error ? sendUploadError(error, res) : next()))
 
-    /**
-     * Dinamic configuration
-     * Always run whenever a file uploaded
-     * @param req request info (body, header, ...)
-     * @param file upload file info (file name, type, metadata, ...)
-     * @returns file info after uploaded to Cloudinary
-     */
-    params: async (req, file) => {
-        // Auto classify folder
-        const folderName = file.fieldname === "avatar" ? "linko/avatars" : "linko/backgrounds"
+const memoryStorage = multer.memoryStorage()
 
-        const nameWithoutExt = file.originalname.split(".").slice(0, -1).join(".")
-        const safeName = sanitizeFilename(nameWithoutExt)
-        const publicId = `${Date.now()}-${safeName}`
+export const uploadProfileImages = wrapUpload(
+    multer({
+        storage: memoryStorage,
+        limits: { fileSize: MAX_UPLOAD_FILE_SIZE_BYTES, files: 2 },
+        fileFilter: (_req, file, callback) =>
+            isProfileImageMimeType(normalizeUploadMimeType(file.mimetype))
+                ? callback(null, true)
+                : callback(new Error("Profile images must be JPEG, PNG, or WebP")),
+    }).fields([
+        { name: "avatar", maxCount: 1 },
+        { name: "background", maxCount: 1 },
+    ]),
+)
 
-        return {
-            // Folder that file was added to
-            folder: folderName,
-            // Convert to jpg to save space & bandwidth
-            format: "jpg",
-            // Only accept image for avoid error
-            resource_type: "image",
-            // Filter upload format type (Remove junk files)
-            // allowed_formats: ["jpg", "png", "jpeg", "webp"],
-            // Resize for oversize images ()
-            transformation: [
-                { width: 800, crop: "limit" }, // Only zoom out if width < 800 not zoom in
-                { quality: "auto" }, // Auto optimize quality
-                { fetch_format: "auto" }, // Auto choose format (depending on broswer)
-            ],
-            // File name (id) on Cloudinary
-            public_id: publicId,
-        }
-    },
-})
-
-const uploadCloud = multer({ storage })
-
-export { uploadCloud }
+export const parseMessageFiles = wrapUpload(
+    multer({
+        storage: memoryStorage,
+        limits: { fileSize: MAX_UPLOAD_FILE_SIZE_BYTES, files: MAX_MESSAGE_ATTACHMENT_COUNT },
+        fileFilter: (_req, file, callback) =>
+            isMessageAttachmentMimeType(normalizeUploadMimeType(file.mimetype))
+                ? callback(null, true)
+                : callback(new Error("Unsupported attachment content type")),
+    }).array("attachments", MAX_MESSAGE_ATTACHMENT_COUNT),
+)

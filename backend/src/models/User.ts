@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
                 type: String,
             },
 
-            // Cloundinary public id to delete avatar
+            // R2 key with an r2: prefix, or a legacy Cloudinary public ID.
             id: {
                 type: String,
             },

@@ -1,15 +1,9 @@
-import cloudinary from "#/configs/cloudinary.config"
 import User from "#/models/User"
-import { processImageHelper } from "#/utils/image.util"
+import { deleteStoredProfileImage, ImageParams, storeProfileImage } from "#/utils/image.util"
 
 interface KeywordsType {
     keyword: string
     type: "TYPING" | "FULL"
-}
-
-interface ImageParams {
-    url: string
-    id: string
 }
 
 interface UpdateUserParams {
@@ -70,51 +64,55 @@ export class UserService {
         const user = await User.findById(userId)
         if (!user) throw new Error("User not found")
 
-        /**
-         * Update avatar
-         */
-        if (files?.avatar?.[0]) {
-            const newAvatar = await processImageHelper({
-                currentImage: user.avatar as ImageParams,
-                newFile: files?.avatar?.[0],
-                shouldDelete: updateData.avatar === "null",
-            })
+        const uploadedImages: ImageParams[] = []
+        const obsoleteImages: ImageParams[] = []
 
-            // Only update if return value different with undefined
-            if (newAvatar !== undefined) {
-                user.avatar = newAvatar
+        try {
+            for (const field of ["avatar", "background"] as const) {
+                const currentImage = user[field] as ImageParams | undefined
+                const file = files?.[field]?.[0]
+                const shouldDelete = updateData[field] === "null"
+
+                if (file) {
+                    const newImage = await storeProfileImage({
+                        userId,
+                        field,
+                        file,
+                    })
+                    uploadedImages.push(newImage)
+                    user[field] = newImage
+                    if (currentImage?.id) obsoleteImages.push(currentImage)
+                } else if (shouldDelete) {
+                    user[field] = null
+                    if (currentImage?.id) obsoleteImages.push(currentImage)
+                }
             }
+
+            if (updateData.username) user.username = updateData.username
+            if (updateData.displayName) user.displayName = updateData.displayName
+            if (updateData.email) user.email = updateData.email
+            if (updateData.phone) user.phone = updateData.phone
+            if (updateData.bio) user.bio = updateData.bio
+
+            await user.save()
+        } catch (error) {
+            for (const image of uploadedImages) {
+                try {
+                    await deleteStoredProfileImage(image)
+                } catch (cleanupError) {
+                    console.error("Failed to clean up new R2 profile image", cleanupError)
+                }
+            }
+            throw error
         }
 
-        /**
-         * Update background
-         */
-        if (files?.background?.[0]) {
-            const newBackground = await processImageHelper({
-                currentImage: user.background as ImageParams,
-                newFile: files?.background?.[0],
-                shouldDelete: updateData.background === "null",
-            })
-
-            // Only update if return value different with undefined
-            if (newBackground !== undefined) {
-                user.background = newBackground
+        for (const image of obsoleteImages) {
+            try {
+                await deleteStoredProfileImage(image)
+            } catch (error) {
+                console.error("Failed to clean up replaced profile image", error)
             }
         }
-
-        /**
-         * Update Text Fields
-         */
-        if (updateData.username) user.username = updateData.username
-        if (updateData.displayName) user.displayName = updateData.displayName
-
-        if (updateData.email) user.email = updateData.email
-        if (updateData.phone) user.phone = updateData.phone
-
-        if (updateData.bio) user.bio = updateData.bio
-
-        // Save updated user
-        await user.save()
 
         return user
     }

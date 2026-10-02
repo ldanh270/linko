@@ -389,6 +389,61 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "SendMessage with attachments",
+          "id": "88cd135a-d7df-47e6-af70-89b443c7ffa3",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "recipientId",
+                  "value": "6941067c0fccef682a083bd0",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "Here are the files",
+                  "type": "text"
+                },
+                {
+                  "key": "mentions",
+                  "value": "[\"6947668d22a93f4cca25ec8b\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "attachments",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ]
+            }
+          },
+          "response": [],
+          "description": "Send multipart/form-data. Use either recipientId or conversationId, optional content/replyTo, mentions as a JSON array string, and repeat attachments for up to five files."
         }
       ],
       "id": "e3bc8af2-ba13-45ab-a9c9-669b4c4985e7"
@@ -628,6 +683,11 @@
       "id": "e8f0d039-e731-4954-9d3a-675d8625c084",
       "key": "base_url",
       "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
     }
   ]
 }

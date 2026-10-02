@@ -1,51 +1,61 @@
-import cloudinary from "#/configs/cloudinary.config"
+import { getProfileImageFormat, normalizeUploadMimeType } from "#/configs/uploadPolicy.config"
+import { deleteR2Object, getPublicR2Url, putR2Object } from "#/services/r2Storage.service"
 
-interface ImageParams {
-    url: string
-    id: string
+import { randomUUID } from "node:crypto"
+import sharp from "sharp"
+
+export type ImageParams = {
+    url?: string
+    id?: string
 }
 
-/**
- *
- * @param currentImage Current image in database
- * @param newFile Upload image (If exists)
- * @param shouldDelete Delete status (If "null" => true)
- * @returns
- * - Object { url, id }: If existing new image
- * - null: If delete image
- * - undefined: If not change
- */
-export const processImageHelper = async ({
-    currentImage,
-    newFile,
-    shouldDelete,
+export class InvalidProfileImageError extends Error {}
+
+export const storeProfileImage = async ({
+    userId,
+    field,
+    file,
 }: {
-    currentImage: ImageParams | null | undefined
-    newFile: Express.Multer.File | undefined
-    shouldDelete: boolean
-}) => {
-    // CASE 1: Upload new file
-    if (newFile) {
-        // Delete old file
-        if (currentImage?.id) {
-            await cloudinary.uploader.destroy(currentImage.id)
+    userId: string
+    field: "avatar" | "background"
+    file: Express.Multer.File
+}): Promise<{ url: string; id: string }> => {
+    const format = getProfileImageFormat(normalizeUploadMimeType(file.mimetype))
+    if (!format) throw new InvalidProfileImageError("Profile images must be JPEG, PNG, or WebP")
+
+    let body: Buffer
+    try {
+        const metadata = await sharp(file.buffer, {
+            failOn: "error",
+            limitInputPixels: 100_000_000,
+        }).metadata()
+        if (metadata.format !== format) {
+            throw new InvalidProfileImageError("Image bytes do not match the declared content type")
         }
-        // Return new image
-        return {
-            url: newFile.path,
-            id: newFile.filename,
-        }
+
+        body = await sharp(file.buffer, { failOn: "error", limitInputPixels: 100_000_000 })
+            .rotate()
+            .resize({ width: 800, withoutEnlargement: true })
+            .jpeg({ quality: 82 })
+            .toBuffer()
+    } catch (error) {
+        if (error instanceof InvalidProfileImageError) throw error
+        throw new InvalidProfileImageError("The uploaded profile image is invalid")
+    }
+    const key = `${field === "avatar" ? "avatars" : "backgrounds"}/${userId}/${randomUUID()}.jpg`
+
+    await putR2Object({ bucket: "public", key, body, contentType: "image/jpeg" })
+    return { url: getPublicR2Url(key), id: `r2:${key}` }
+}
+
+export const deleteStoredProfileImage = async (image: ImageParams) => {
+    if (!image.id) return
+
+    if (image.id.startsWith("r2:")) {
+        await deleteR2Object({ bucket: "public", key: image.id.slice(3) })
+        return
     }
 
-    // CASE 2: Delete image
-    if (shouldDelete) {
-        if (currentImage?.id) {
-            await cloudinary.uploader.destroy(currentImage.id)
-        }
-
-        return null
-    }
-
-    // CASE 3: Not change image
-    return undefined
+    const { default: cloudinary } = await import("#/configs/cloudinary.config")
+    await cloudinary.uploader.destroy(image.id)
 }
