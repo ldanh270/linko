@@ -1,30 +1,30 @@
-import { USER_ROUTE_PARAMS, USER_ROUTE_PATHS } from "@linko/contracts"
+import { USER_PROFILE_FIELDS, USER_ROUTE_PARAMS, USER_ROUTE_PATHS } from "@linko/contracts"
 
 /** Profile database, DTO, and media field names shared within the user module. */
 export const PROFILE_FIELDS = {
     ID: "_id",
     USER_ID: "userId",
-    USERNAME: "username",
-    DISPLAY_NAME: "displayName",
-    EMAIL: "email",
-    PHONE: "phone",
-    AVATAR: "avatar",
-    BACKGROUND: "background",
-    BIO: "bio",
+    USERNAME: USER_PROFILE_FIELDS.USERNAME,
+    DISPLAY_NAME: USER_PROFILE_FIELDS.DISPLAY_NAME,
+    EMAIL: USER_PROFILE_FIELDS.EMAIL,
+    PHONE: USER_PROFILE_FIELDS.PHONE,
+    AVATAR: USER_PROFILE_FIELDS.AVATAR,
+    BACKGROUND: USER_PROFILE_FIELDS.BACKGROUND,
+    BIO: USER_PROFILE_FIELDS.BIO,
     URL: "url",
     MEDIA_ID: "id",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
-    REMOVE_AVATAR: "removeAvatar",
-    REMOVE_BACKGROUND: "removeBackground",
-    DTO_ID: "id",
-    DTO_USERNAME: "username",
-    DTO_DISPLAY_NAME: "displayName",
-    DTO_EMAIL: "email",
-    DTO_PHONE: "phone",
-    DTO_AVATAR_URL: "avatarUrl",
-    DTO_BACKGROUND_URL: "backgroundUrl",
-    DTO_BIO: "bio",
+    REMOVE_AVATAR: USER_PROFILE_FIELDS.REMOVE_AVATAR,
+    REMOVE_BACKGROUND: USER_PROFILE_FIELDS.REMOVE_BACKGROUND,
+    DTO_ID: USER_PROFILE_FIELDS.ID,
+    DTO_USERNAME: USER_PROFILE_FIELDS.USERNAME,
+    DTO_DISPLAY_NAME: USER_PROFILE_FIELDS.DISPLAY_NAME,
+    DTO_EMAIL: USER_PROFILE_FIELDS.EMAIL,
+    DTO_PHONE: USER_PROFILE_FIELDS.PHONE,
+    DTO_AVATAR_URL: USER_PROFILE_FIELDS.AVATAR_URL,
+    DTO_BACKGROUND_URL: USER_PROFILE_FIELDS.BACKGROUND_URL,
+    DTO_BIO: USER_PROFILE_FIELDS.BIO,
 } as const
 
 /** Media slots supported by the profile image storage adapter. */
