@@ -85,6 +85,40 @@ export const CONVERSATION_ROUTE_PATHS = {
     BY_ID: `/:${CONVERSATION_PARAMS.ID}`,
 } as const
 
+/** Invitation request paths shared by conversation routes and API adapters. */
+export const INVITATION_PARAMS = {
+    CONVERSATION_ID: CONVERSATION_PARAMS.ID,
+    INVITATION_ID: "invitationId",
+} as const
+
+/** Invitation route suffixes mounted below the conversation API prefix. */
+export const INVITATION_ROUTE_PATHS = {
+    COLLECTION: `/:${INVITATION_PARAMS.CONVERSATION_ID}/invitations`,
+    BY_ID: `/:${INVITATION_PARAMS.CONVERSATION_ID}/invitations/:${INVITATION_PARAMS.INVITATION_ID}`,
+} as const
+
+/** Browser route prefix for a one-time invitation URL. */
+export const INVITATION_LINK_PATH = "/invite"
+
+/** Invitation limits shared by issuance, persistence, and API clients. */
+export const INVITATION_LIMITS = {
+    TOKEN_BYTES: 32,
+    TOKEN_HASH_LENGTH: 64,
+    LIFETIME_MS: 7 * 24 * 60 * 60 * 1000,
+    MAX_USES: 25,
+} as const
+
+/** Public invitation DTO field names shared by backend mappers and clients. */
+export const INVITATION_FIELDS = {
+    ID: "id",
+    URL: "url",
+    EXPIRES_AT: "expiresAt",
+    MAX_USES: "maxUses",
+    USE_COUNT: "useCount",
+    REVOKED_AT: "revokedAt",
+    CREATED_AT: "createdAt",
+} as const
+
 /** Group and direct conversation roles stored as text. */
 export const ROLE = {
     OWNER: "OWNER",
