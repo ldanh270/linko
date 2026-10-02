@@ -1,13 +1,10 @@
 import {
     API_ROUTES,
-    CONVERSATION_KIND,
     CONVERSATION_PARAMS,
-    CONVERSATION_QUERY_PARAMS,
     CONVERSATION_ROUTE_PATHS,
     GROUP_FIELDS,
     type CreateGroupRequest,
     type GroupDto,
-    type GroupSummaryDto,
     type UpdateGroupRequest,
 } from "@linko/contracts"
 
@@ -33,14 +30,6 @@ export function createGroup(input: CreateGroupInput): Promise<GroupDto> {
         method: "POST",
         body: createGroupBody(input),
     })
-}
-
-/** List groups visible to the current account through the shared conversation filter. */
-export function listMyGroups(): Promise<GroupSummaryDto[]> {
-    const query = new URLSearchParams({
-        [CONVERSATION_QUERY_PARAMS.KIND]: CONVERSATION_KIND.GROUP,
-    })
-    return authenticatedApiClient.request({ path: `${CONVERSATION_ENDPOINT}?${query.toString()}` })
 }
 
 /** Update group metadata or its public avatar and return the safe group DTO. */

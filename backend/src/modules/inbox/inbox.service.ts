@@ -1,5 +1,6 @@
 import {
     CONVERSATION_KIND,
+    CURSOR_PAGE_FIELDS,
     INBOX_LIMITS,
     type ConversationKind,
 } from "@linko/contracts"
@@ -45,8 +46,8 @@ export class InboxService {
         })
         const lastItem = page.items.length > 0 ? page.items[page.items.length - 1] : undefined
         return {
-            items: page.items.map(toInboxItemDto),
-            nextCursor: page.hasMore && lastItem ? encodeCursor(lastItem) : null,
+            [CURSOR_PAGE_FIELDS.ITEMS]: page.items.map(toInboxItemDto),
+            [CURSOR_PAGE_FIELDS.NEXT_CURSOR]: page.hasMore && lastItem ? encodeCursor(lastItem) : null,
         }
     }
 }

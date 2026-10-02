@@ -55,16 +55,16 @@
 - [x] Step 1: Added isolated route tests for invalid kind/cursor/limit, absent nonmember data, cursor/unread response, and `group`/`direct` filtering with closed-group visibility.
 - [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/inbox/inbox.route.test.ts`; the old route accepted invalid cursor/limit and returned the old response shape.
 - [x] Step 3: Added Zod validation, authenticated HTTP-only controller, and composition-root wiring. Removed the legacy GET/listing implementation from the conversation module so only one GET handler remains.
-- [x] Step 4: Inbox route tests (5), affected group/lifecycle regressions (30), and backend lint/typecheck pass. API task commit pending.
+- [x] Step 4: Inbox route tests (5), affected group/lifecycle regressions (30), and backend lint/typecheck pass. API task committed as `6af611f`.
 
 ### Task 3: Client contract
 
 **Files:** frontend/features/inbox/api/inbox.api.ts; test cùng thư mục tên inbox.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: API adapter serializes kind/cursor/limit and parses envelope into typed page. Giả lập HTTP envelope, xác nhận mapping dữ liệu và ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/inbox/api/inbox.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client, constants và DTO package chung; không thêm state/JSX.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Added adapter tests for kind/cursor/limit serialization, default query values, typed cursor-page unwrapping, and server error-code preservation.
+- [x] Step 2: Ran `pnpm -C frontend exec vitest run features/inbox/api/inbox.api.test.ts`; the tests initially failed because `inbox.api.ts` did not exist.
+- [x] Step 3: Added `listInbox` using the shared HTTP client, query constants, and DTO package; removed the superseded `listMyGroups` adapter and group-summary contract. No state or JSX.
+- [x] Step 4: Inbox adapter tests (3), read adapter tests (2), migrated group adapter tests (4), frontend typecheck/lint, and backend checks pass. Adapter task commit pending.
 
 ## Done when
 

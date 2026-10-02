@@ -20,19 +20,6 @@ export interface GroupDto {
     readonly updatedAt: string
 }
 
-/** Compact group data needed by the signed-in groups list. */
-export interface GroupSummaryDto {
-    readonly id: EntityId
-    readonly ownerId: EntityId
-    readonly name: string
-    readonly description: string | null
-    readonly avatarUrl: string | null
-    readonly [CONVERSATION_DTO_FIELDS.STATUS]: ConversationStatus
-    readonly memberCount: number
-    readonly lastMessageAt: string | null
-    readonly updatedAt: string
-}
-
 /** Fields accepted when a user creates a private group. */
 export interface CreateGroupRequest {
     readonly name: string

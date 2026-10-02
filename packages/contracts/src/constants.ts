@@ -101,6 +101,12 @@ export const INBOX_LIMITS = {
     MAX_CURSOR_LENGTH: 256,
 } as const
 
+/** Generic fields shared by every stable cursor-page API response. */
+export const CURSOR_PAGE_FIELDS = {
+    ITEMS: "items",
+    NEXT_CURSOR: "nextCursor",
+} as const
+
 /** Route parameter names shared by conversation handlers and schemas. */
 export const CONVERSATION_PARAMS = {
     ID: "id",
@@ -117,8 +123,6 @@ export const GROUP_FIELDS = {
     PARTICIPANTS: "participants",
     USER_ID: "userId",
     ROLE: "role",
-    MEMBER_COUNT: "memberCount",
-    LAST_MESSAGE_AT: "lastMessageAt",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
 } as const

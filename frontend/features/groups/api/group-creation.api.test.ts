@@ -1,20 +1,17 @@
 import {
     API_ROUTES,
-    CONVERSATION_KIND,
     CONVERSATION_DTO_FIELDS,
-    CONVERSATION_QUERY_PARAMS,
     CONVERSATION_ROUTE_PATHS,
     CONVERSATION_STATUS,
     ERROR_CODES,
     GROUP_FIELDS,
     type ApiEnvelope,
     type GroupDto,
-    type GroupSummaryDto,
     ROLE,
 } from "@linko/contracts"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { createGroup, listMyGroups, updateGroup } from "./groups.api"
+import { createGroup, updateGroup } from "./groups.api"
 
 const GROUP_ID = "507f1f77bcf86cd799439011"
 const OWNER_ID = "507f1f77bcf86cd799439012"
@@ -60,27 +57,6 @@ describe("group API adapter", () => {
         expect(url).toBe(API_ROUTES.CONVERSATIONS)
         expect(request.body).toBe(JSON.stringify({ name: GROUP.name, description: "Read together" }))
         expect(new Headers(request.headers).get("Content-Type")).toBe("application/json")
-    })
-
-    it("should_list_group_summaries_using_the_shared_kind_filter", async () => {
-        const summary: GroupSummaryDto = {
-            id: GROUP.id,
-            ownerId: GROUP.ownerId,
-            name: GROUP.name,
-            description: GROUP.description,
-            avatarUrl: null,
-            [CONVERSATION_DTO_FIELDS.STATUS]: CONVERSATION_STATUS.ACTIVE,
-            memberCount: 1,
-            lastMessageAt: null,
-            updatedAt: GROUP.updatedAt,
-        }
-        const fetchMock = vi.fn().mockResolvedValue(successResponse([summary], 200))
-        vi.stubGlobal("fetch", fetchMock)
-
-        await expect(listMyGroups()).resolves.toEqual([summary])
-        expect(fetchMock.mock.calls[0]?.[0]).toBe(
-            `${API_ROUTES.CONVERSATIONS}?${CONVERSATION_QUERY_PARAMS.KIND}=${CONVERSATION_KIND.GROUP}`,
-        )
     })
 
     it("should_patch_group_metadata_and_return_the_group_dto", async () => {

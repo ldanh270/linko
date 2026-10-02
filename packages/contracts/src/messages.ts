@@ -1,4 +1,4 @@
-import { MESSAGE_FIELDS } from "./constants"
+import { CURSOR_PAGE_FIELDS, MESSAGE_FIELDS } from "./constants"
 import type { EntityId } from "./envelope"
 
 /** Message data safe to return from authenticated conversation endpoints. */
@@ -21,6 +21,6 @@ export interface SendMessageRequest {
 
 /** Stable cursor page shape shared by conversation history consumers. */
 export interface CursorPage<T> {
-    readonly items: readonly T[]
-    readonly nextCursor: string | null
+    readonly [CURSOR_PAGE_FIELDS.ITEMS]: readonly T[]
+    readonly [CURSOR_PAGE_FIELDS.NEXT_CURSOR]: string | null
 }

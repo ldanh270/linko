@@ -49,6 +49,3 @@ export interface InboxItemDto {
     readonly [INBOX_FIELDS.CREATED_AT]: string
     readonly [INBOX_FIELDS.UPDATED_AT]: string
 }
-
-/** Compatibility name for inbox rows returned by earlier contract consumers. */
-export type ConversationSummaryDto = InboxItemDto
