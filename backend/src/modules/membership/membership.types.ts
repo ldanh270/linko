@@ -29,6 +29,12 @@ export interface AddMemberInput {
     readonly userId: ObjectId
 }
 
+/** Invitation member result needed to avoid charging repeat acceptance attempts. */
+export interface AddMemberFromInvitationResult {
+    readonly member: MemberDto
+    readonly wasAdded: boolean
+}
+
 /** Authenticated request to change one member's role. */
 export interface ChangeRoleInput {
     readonly conversationId: ObjectId

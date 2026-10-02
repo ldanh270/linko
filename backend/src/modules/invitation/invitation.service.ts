@@ -4,16 +4,19 @@ import {
     INVITATION_LINK_PATH,
     INVITATION_LIMITS,
     ROLE,
+    type GroupDto,
     type InvitationPreviewDto,
 } from "@linko/contracts"
 
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import { NotFoundException } from "../../shared/errors/NotFoundException"
+import { toGroupDto } from "../conversation/conversation.mapper"
 import { InvitationUnavailableException } from "./InvitationUnavailableException"
 import { INVITATION_MESSAGES } from "./invitation.constants"
 import { toInvitationPreviewDto, toInvitationSummaryDto, toIssuedInvitationDto } from "./invitation.mapper"
 import type {
+    AcceptInvitationInput,
     InvitationGroupAccessRecord,
     InvitationRepository,
     InvitationServiceDependencies,
@@ -25,7 +28,7 @@ import type {
     RevokeInvitationInput,
 } from "./invitation.types"
 
-/** Issue, list, and revoke group invitation links under owner/admin access rules.
+/** Manage group invitation links and accept them atomically under membership rules.
  *
  * Every group has at most one unrevoked link; token material leaves this service only inside
  * the one-time URL, while persistence receives only its SHA-256 digest.
@@ -39,6 +42,7 @@ export class InvitationService {
     /** Rotate the active link; a replayed key conflicts without creating another token. */
     async issue(input: IssueInvitationInput): Promise<IssuedInvitationDto> {
         const idempotencyKeyHash = this.createIdempotencyKeyHash(input)
+        const issuedAt = this.dependencies.clock.now()
         try {
             const issued = await this.dependencies.transactionRunner.run(async (transaction) => {
                 const group = await this.dependencies.repository.findGroupAccess(input.conversationId, transaction)
@@ -51,7 +55,7 @@ export class InvitationService {
 
                 await this.dependencies.repository.revokeUnrevokedInvitations(
                     input.conversationId,
-                    new Date(),
+                    issuedAt,
                     transaction,
                 )
                 const invitation = await this.dependencies.repository.createInvitation({
@@ -87,13 +91,54 @@ export class InvitationService {
     async preview(rawToken: string): Promise<InvitationPreviewDto> {
         const tokenHash = createHash("sha256").update(rawToken).digest("hex")
         const invitation = await this.dependencies.repository.findInvitationByTokenHash(tokenHash)
-        if (!invitation || !this.isInvitationAvailable(invitation)) {
+        if (!invitation || !this.isInvitationAvailable(invitation, this.dependencies.clock.now())) {
             throw new InvitationUnavailableException()
         }
 
         const group = await this.dependencies.repository.findPublicGroupPreview(invitation.conversationId)
         if (!group) throw new InvitationUnavailableException()
         return toInvitationPreviewDto(group, invitation.expiresAt)
+    }
+
+    /**
+     * Add an authenticated invitee and consume one valid link use atomically.
+     *
+     * Existing members are returned idempotently without consuming a use. A failed use reservation
+     * aborts the same transaction that added the member, so concurrent final-use joins cannot exceed
+     * the configured limit.
+     *
+     * @param input - Authenticated account and raw URL token; the token is hashed before lookup.
+     * @returns The safe group DTO to open after acceptance.
+     * @throws {InvitationUnavailableException} When the token is invalid, expired, revoked, or exhausted.
+     * @throws {ConflictException} When the group has reached its member limit.
+     */
+    async accept(input: AcceptInvitationInput): Promise<GroupDto> {
+        const tokenHash = createHash("sha256").update(input.rawToken).digest("hex")
+        return this.dependencies.transactionRunner.run(async (transaction) => {
+            const invitation = await this.dependencies.repository.findInvitationByTokenHash(tokenHash, transaction)
+            const checkedAt = this.dependencies.clock.now()
+            if (!invitation || !this.isInvitationAvailable(invitation, checkedAt)) {
+                throw new InvitationUnavailableException()
+            }
+
+            const membership = await this.dependencies.membershipService.addFromInvitation({
+                conversationId: invitation.conversationId,
+                userId: input.userId,
+            }, transaction)
+            if (membership.wasAdded) {
+                const consumed = await this.dependencies.repository.consumeInvitation(
+                    invitation.id,
+                    this.dependencies.clock.now(),
+                    invitation.maxUses,
+                    transaction,
+                )
+                if (!consumed) throw new InvitationUnavailableException()
+            }
+
+            const group = await this.dependencies.groupReader.findGroupById(invitation.conversationId, transaction)
+            if (!group) throw new InvitationUnavailableException()
+            return toGroupDto(group)
+        })
     }
 
     /** Revoke one link immediately while retaining its audit record. */
@@ -113,7 +158,7 @@ export class InvitationService {
             await this.dependencies.repository.revokeInvitation(
                 input.invitationId,
                 input.conversationId,
-                new Date(),
+                this.dependencies.clock.now(),
                 transaction,
             )
         })
@@ -137,9 +182,9 @@ export class InvitationService {
         readonly maxUses: number
         readonly useCount: number
         readonly revokedAt: Date | null
-    }): boolean {
+    }, now: Date): boolean {
         return invitation.revokedAt === null &&
-            invitation.expiresAt.getTime() > Date.now() &&
+            invitation.expiresAt.getTime() > now.getTime() &&
             invitation.useCount < invitation.maxUses
     }
 

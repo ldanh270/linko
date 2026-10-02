@@ -59,6 +59,7 @@ export class MongooseInvitationRepository implements InvitationRepository {
             {
                 [INVITATION_MODEL_FIELDS.CONVERSATION_ID]: conversationId,
                 [INVITATION_MODEL_FIELDS.REVOKED_AT]: null,
+                [INVITATION_MODEL_FIELDS.DEL_FLAG]: false,
             },
             { $set: { [INVITATION_MODEL_FIELDS.REVOKED_AT]: revokedAt } },
         ).session(transaction.session)
@@ -106,11 +107,35 @@ export class MongooseInvitationRepository implements InvitationRepository {
     }
 
     /** Resolve an invitation only by its persisted one-way token digest. */
-    async findInvitationByTokenHash(tokenHash: string): Promise<InvitationRecord | null> {
-        const invitation = await Invitation.findOne({
+    async findInvitationByTokenHash(
+        tokenHash: string,
+        transaction?: TransactionContext,
+    ): Promise<InvitationRecord | null> {
+        const query = Invitation.findOne({
             [INVITATION_MODEL_FIELDS.TOKEN_HASH]: tokenHash,
-        }).exec()
+        })
+        if (transaction) query.session(transaction.session)
+        const invitation = await query.exec()
         return invitation ? this.toInvitationRecord(invitation) : null
+    }
+
+    /** Atomically reserve one use while the invitation remains active and unexpired. */
+    async consumeInvitation(
+        invitationId: ObjectId,
+        at: Date,
+        maxUses: number,
+        transaction: TransactionContext,
+    ): Promise<boolean> {
+        const result = await Invitation.updateOne({
+            [INVITATION_MODEL_FIELDS.ID]: invitationId,
+            [INVITATION_MODEL_FIELDS.REVOKED_AT]: null,
+            [INVITATION_MODEL_FIELDS.EXPIRES_AT]: { $gt: at },
+            [INVITATION_MODEL_FIELDS.USE_COUNT]: { $lt: maxUses },
+            [INVITATION_MODEL_FIELDS.DEL_FLAG]: false,
+        }, {
+            $inc: { [INVITATION_MODEL_FIELDS.USE_COUNT]: 1 },
+        }).session(transaction.session)
+        return result.modifiedCount === 1
     }
 
     /** Return only public group metadata and the current participant count. */
@@ -165,6 +190,7 @@ export class MongooseInvitationRepository implements InvitationRepository {
                 [INVITATION_MODEL_FIELDS.ID]: invitationId,
                 [INVITATION_MODEL_FIELDS.CONVERSATION_ID]: conversationId,
                 [INVITATION_MODEL_FIELDS.REVOKED_AT]: null,
+                [INVITATION_MODEL_FIELDS.DEL_FLAG]: false,
             },
             { $set: { [INVITATION_MODEL_FIELDS.REVOKED_AT]: revokedAt } },
         ).session(transaction.session)

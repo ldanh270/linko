@@ -30,6 +30,9 @@ import { withRequestContext } from "../../shared/middlewares/requestContext"
 import { withTransaction } from "../../shared/persistence/withTransaction"
 import { createLogger, type LogRecord } from "../../shared/logger/logger"
 import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "../conversation/conversation.constants"
+import { MongooseConversationRepository } from "../conversation/conversation.repository"
+import { MongooseMembershipRepository } from "../membership/membership.repository"
+import { MembershipService } from "../membership/membership.service"
 import { InvitationController } from "./invitation.controller"
 import { MongooseInvitationRepository } from "./invitation.repository"
 import { createInvitationPreviewRouter, createInvitationRouter } from "./invitation.route"
@@ -354,10 +357,18 @@ interface TestAppOptions {
 /** Build authenticated management routes and the public preview route with real persistence. */
 function createTestApp(options: TestAppOptions = {}): { readonly app: Express } {
     const logger = createLogger(options.writeLog ?? (() => undefined))
+    const groupReader = new MongooseConversationRepository()
     const service = new InvitationService({
         repository: options.repository ?? new MongooseInvitationRepository(),
         transactionRunner: { run: withTransaction },
         clientOrigin: "https://linko.example",
+        membershipService: new MembershipService({
+            repository: new MongooseMembershipRepository(),
+            transactionRunner: { run: withTransaction },
+            clock: { now: () => new Date() },
+        }),
+        groupReader,
+        clock: { now: () => new Date() },
     })
     const controller = new InvitationController(service)
     const app = express()
@@ -463,6 +474,7 @@ function createRepository(overrides: Partial<InvitationRepository> = {}): Invita
         listInvitations: vi.fn().mockResolvedValue([]),
         revokeInvitation: vi.fn().mockResolvedValue(undefined),
         findInvitationByTokenHash: vi.fn().mockResolvedValue(null),
+        consumeInvitation: vi.fn().mockResolvedValue(false),
         findPublicGroupPreview: vi.fn().mockResolvedValue(null),
         ...overrides,
     }

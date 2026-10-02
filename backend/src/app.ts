@@ -53,8 +53,9 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
+    const conversationRepository = new MongooseConversationRepository()
     const conversationService = new ConversationService({
-        repository: new MongooseConversationRepository(),
+        repository: conversationRepository,
         transactionRunner: { run: withTransaction },
         avatarStorage: new R2GroupAvatarStorage(),
         avatarCleanupFailureRecorder: new LoggerGroupAvatarCleanupFailureRecorder(dependencies.logger),
@@ -68,6 +69,9 @@ export function createApp(dependencies: AppDependencies): Express {
         repository: new MongooseInvitationRepository(),
         transactionRunner: { run: withTransaction },
         clientOrigin: dependencies.authConfig.clientOrigin,
+        membershipService,
+        groupReader: conversationRepository,
+        clock: { now: () => new Date() },
     })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const profileService = new ProfileService({

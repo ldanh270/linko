@@ -11,6 +11,9 @@ import Invitation from "./Invitation"
 import { INVITATION_MODEL_FIELDS } from "./invitation.constants"
 import { MongooseInvitationRepository } from "./invitation.repository"
 import { InvitationService } from "./invitation.service"
+import { MongooseMembershipRepository } from "../membership/membership.repository"
+import { MembershipService } from "../membership/membership.service"
+import { MongooseConversationRepository } from "../conversation/conversation.repository"
 import { MongoMemoryReplSet } from "mongodb-memory-server"
 
 const TEST_WIRED_TIGER_CACHE_SIZE_GB = "0.25"
@@ -120,11 +123,19 @@ async function createService(): Promise<{
         }],
         [CONVERSATION_FIELDS.GROUP]: { [GROUP_FIELDS.NAME]: "Invitation group", [GROUP_FIELDS.OWNER_ID]: owner._id },
     })
+    const groupReader = new MongooseConversationRepository()
     return {
         service: new InvitationService({
             repository: new MongooseInvitationRepository(),
             transactionRunner: { run: withTransaction },
             clientOrigin: "https://linko.example",
+            membershipService: new MembershipService({
+                repository: new MongooseMembershipRepository(),
+                transactionRunner: { run: withTransaction },
+                clock: { now: () => new Date() },
+            }),
+            groupReader,
+            clock: { now: () => new Date() },
         }),
         ownerId: owner._id,
         conversationId: conversation._id,

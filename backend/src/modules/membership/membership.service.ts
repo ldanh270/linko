@@ -9,6 +9,7 @@ import { MEMBERSHIP_ADD_OUTCOMES, MEMBERSHIP_MESSAGES, MEMBERSHIP_OPERATION_FIEL
 import { toMemberDto } from "./membership.mapper"
 import type {
     AddMemberInput,
+    AddMemberFromInvitationResult,
     ChangeRoleInput,
     MembershipGroupRecord,
     MembershipMemberRecord,
@@ -36,10 +37,13 @@ export class MembershipService {
     }
 
     /** Add an invitation recipient at the current membership boundary. */
-    async addFromInvitation(input: AddMemberInput, transaction: TransactionContext): Promise<MemberDto> {
+    async addFromInvitation(
+        input: AddMemberInput,
+        transaction: TransactionContext,
+    ): Promise<AddMemberFromInvitationResult> {
         const group = await this.getGroup(input[MEMBERSHIP_OPERATION_FIELDS.CONVERSATION_ID], transaction)
         const existingMember = group.members.find(({ userId }) => userId.equals(input.userId))
-        if (existingMember) return toMemberDto(existingMember)
+        if (existingMember) return { member: toMemberDto(existingMember), wasAdded: false }
         if (group.members.length >= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP) {
             throw new ConflictException(ERROR_CODES.GROUP_LIMIT, MEMBERSHIP_MESSAGES.MEMBER_LIMIT)
         }
@@ -48,8 +52,11 @@ export class MembershipService {
             ...input,
             joinedAt: this.dependencies.clock.now(),
         }, transaction)
-        if (result.outcome === MEMBERSHIP_ADD_OUTCOMES.ADDED || result.outcome === MEMBERSHIP_ADD_OUTCOMES.EXISTING) {
-            return toMemberDto(result.member)
+        if (result.outcome === MEMBERSHIP_ADD_OUTCOMES.ADDED) {
+            return { member: toMemberDto(result.member), wasAdded: true }
+        }
+        if (result.outcome === MEMBERSHIP_ADD_OUTCOMES.EXISTING) {
+            return { member: toMemberDto(result.member), wasAdded: false }
         }
         if (result.outcome === MEMBERSHIP_ADD_OUTCOMES.LIMIT) {
             throw new ConflictException(ERROR_CODES.GROUP_LIMIT, MEMBERSHIP_MESSAGES.MEMBER_LIMIT)

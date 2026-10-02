@@ -10,6 +10,7 @@ export const INVITATION_MODEL_FIELDS = {
     MAX_USES: "maxUses",
     USE_COUNT: "useCount",
     REVOKED_AT: "revokedAt",
+    DEL_FLAG: "delFlag",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
 } as const

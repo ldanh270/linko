@@ -43,10 +43,10 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/invitation/invitation-join.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_not_increment_use_count_for_existing_member; should_allow_one_of_two_competing_final_uses; should_set_joinedAt_to_acceptance_time. Assertions cốt lõi: expect(successCount).toBe(1); expect(invitation.useCount).toBe(25); expect(member.joinedAt).toBeDefined().
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-join.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_not_increment_use_count_for_existing_member; should_allow_one_of_two_competing_final_uses; should_set_joinedAt_to_acceptance_time. Assertions cốt lõi: expect(successCount).toBe(1); expect(invitation.useCount).toBe(25); expect(member.joinedAt).toBeDefined().
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-join.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 

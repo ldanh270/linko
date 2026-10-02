@@ -262,7 +262,9 @@ describe("membership role HTTP routes", () => {
         }, transaction))
         const conversation = await Conversation.findById(conversationId)
 
-        expect(first).toEqual(repeated)
+        expect(first.member).toEqual(repeated.member)
+        expect(first.wasAdded).toBe(true)
+        expect(repeated.wasAdded).toBe(false)
         expect(conversation?.[CONVERSATION_FIELDS.PARTICIPANTS].filter((participant) => participant[PARTICIPANT_FIELDS.USER_ID].toString() === invitee.id)).toHaveLength(1)
     })
 

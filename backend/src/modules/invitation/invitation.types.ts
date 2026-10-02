@@ -1,6 +1,8 @@
-import type { InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto, Role } from "@linko/contracts"
+import type { GroupDto, InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto, Role } from "@linko/contracts"
 import type { Types } from "mongoose"
 
+import type { GroupRecord } from "../conversation/conversation.types"
+import type { AddMemberFromInvitationResult, AddMemberInput } from "../membership/membership.types"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 
 /** MongoDB ObjectId used by persistence-facing invitation operations. */
@@ -70,6 +72,30 @@ export interface RevokeInvitationInput extends ManageInvitationsInput {
     readonly invitationId: ObjectId
 }
 
+/** Authenticated invitee identity and raw URL token accepted at the service boundary. */
+export interface AcceptInvitationInput {
+    readonly rawToken: string
+    readonly userId: ObjectId
+}
+
+/** Role-specific membership operation used by invitation acceptance. */
+export interface InvitationMembershipAdder {
+    /** Add the invitee or identify an existing member inside the supplied transaction. */
+    addFromInvitation(input: AddMemberInput, transaction: TransactionContext): Promise<AddMemberFromInvitationResult>
+}
+
+/** Narrow group read port used to shape the post-acceptance destination DTO. */
+export interface InvitationGroupReader {
+    /** Load the group in the current transaction so the response reflects the committed join. */
+    findGroupById(conversationId: ObjectId, transaction?: TransactionContext): Promise<GroupRecord | null>
+}
+
+/** Clock used to evaluate invitation expiry and set membership acceptance timestamps. */
+export interface InvitationClock {
+    /** Return the current UTC instant. */
+    now(): Date
+}
+
 /** Database operations required by the invitation use cases. */
 export interface InvitationRepository {
     /** Read one group's current participant roles, optionally in a transaction. */
@@ -94,7 +120,14 @@ export interface InvitationRepository {
         transaction?: TransactionContext,
     ): Promise<InvitationRecord | null>
     /** Resolve one invitation using only the digest of its raw URL token. */
-    findInvitationByTokenHash(tokenHash: string): Promise<InvitationRecord | null>
+    findInvitationByTokenHash(tokenHash: string, transaction?: TransactionContext): Promise<InvitationRecord | null>
+    /** Atomically increment useCount only while the token remains valid and has capacity. */
+    consumeInvitation(
+        invitationId: ObjectId,
+        at: Date,
+        maxUses: number,
+        transaction: TransactionContext,
+    ): Promise<boolean>
     /** Load the limited group fields allowed on a public invitation preview. */
     findPublicGroupPreview(conversationId: ObjectId): Promise<InvitationPublicGroupPreviewRecord | null>
     /** List safe invitation metadata in creation order. */
@@ -119,7 +152,10 @@ export interface InvitationServiceDependencies {
     readonly repository: InvitationRepository
     readonly transactionRunner: InvitationTransactionRunner
     readonly clientOrigin: string
+    readonly membershipService: InvitationMembershipAdder
+    readonly groupReader: InvitationGroupReader
+    readonly clock: InvitationClock
 }
 
 /** Shared API result shapes returned by invitation service operations. */
-export type { InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto }
+export type { GroupDto, InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto }
