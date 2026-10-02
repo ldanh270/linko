@@ -1,6 +1,8 @@
 import {
     CONVERSATION_PARAMS,
     INVITATION_LIMITS,
+    INVITATION_PATTERNS,
+    INVITATION_HEADERS,
     INVITATION_PARAMS,
 } from "@linko/contracts"
 import zod from "zod"
@@ -12,6 +14,9 @@ const emptyQuerySchema = zod.object({}).strict()
 
 /** Validate the group identifier and empty body accepted for invitation issuance. */
 export const issueInvitationSchema = zod.object({
+    headers: zod.object({
+        [INVITATION_HEADERS.IDEMPOTENCY_KEY]: zod.string().uuid(),
+    }),
     params: zod.object({
         [CONVERSATION_PARAMS.ID]: zod.string().regex(REGEX.MONGO_ID),
     }).strict(),
@@ -41,7 +46,9 @@ export const revokeInvitationSchema = zod.object({
 /** Validate the URL-safe token before a public invitation lookup. */
 export const previewInvitationSchema = zod.object({
     params: zod.object({
-        [INVITATION_PARAMS.TOKEN]: zod.string().max(INVITATION_LIMITS.TOKEN_LENGTH),
+        [INVITATION_PARAMS.TOKEN]: zod.string()
+            .max(INVITATION_LIMITS.TOKEN_LENGTH)
+            .regex(INVITATION_PATTERNS.TOKEN),
     }).strict(),
     body: emptyBodySchema,
     query: emptyQuerySchema,

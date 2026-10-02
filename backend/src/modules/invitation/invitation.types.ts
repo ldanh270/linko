@@ -51,12 +51,18 @@ export interface InvitationPublicGroupPreviewRecord {
 export interface CreateInvitationRecord {
     readonly conversationId: ObjectId
     readonly tokenHash: string
+    readonly idempotencyKeyHash: string
 }
 
 /** Authenticated actor and target group for issuing or listing invitations. */
 export interface ManageInvitationsInput {
     readonly conversationId: ObjectId
     readonly actorId: ObjectId
+}
+
+/** Authenticated group manager and stable key for one issue attempt and its retries. */
+export interface IssueInvitationInput extends ManageInvitationsInput {
+    readonly idempotencyKey: string
 }
 
 /** Authenticated actor, group, and invitation for a revoke operation. */
@@ -79,6 +85,8 @@ export interface InvitationRepository {
     ): Promise<void>
     /** Store a new hashed invitation and return its generated metadata. */
     createInvitation(input: CreateInvitationRecord, transaction: TransactionContext): Promise<InvitationRecord>
+    /** Check whether this actor and group already processed the supplied issue key. */
+    hasInvitationRequest(idempotencyKeyHash: string, transaction?: TransactionContext): Promise<boolean>
     /** Read one invitation only when it belongs to the requested group. */
     findInvitation(
         invitationId: ObjectId,

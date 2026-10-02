@@ -1,5 +1,5 @@
 import { CONVERSATION_TYPE, GROUP_FIELDS, ROLE } from "@linko/contracts"
-import { createHash } from "node:crypto"
+import { createHash, randomUUID } from "node:crypto"
 import mongoose from "mongoose"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 
@@ -47,7 +47,7 @@ describe("InvitationService issue and revoke rules", () => {
     it("should_store_only_sha256_token_hash", async () => {
         const { service, ownerId, conversationId } = await createService()
 
-        const issued = await service.issue({ conversationId, actorId: ownerId })
+        const issued = await service.issue({ conversationId, actorId: ownerId, idempotencyKey: randomUUID() })
         const persisted = await Invitation.findById(issued.id).lean()
 
         expect(persisted?.[INVITATION_MODEL_FIELDS.TOKEN_HASH]).toMatch(/^[a-f\d]{64}$/)
@@ -59,7 +59,7 @@ describe("InvitationService issue and revoke rules", () => {
     it("should_expire_after_7_days", async () => {
         const { service, ownerId, conversationId } = await createService()
 
-        const issued = await service.issue({ conversationId, actorId: ownerId })
+        const issued = await service.issue({ conversationId, actorId: ownerId, idempotencyKey: randomUUID() })
         const persisted = await Invitation.findById(issued.id).lean()
         if (!persisted) throw new Error("Issued invitation was not persisted")
 
@@ -70,7 +70,7 @@ describe("InvitationService issue and revoke rules", () => {
 
     it("should_revoke_immediately", async () => {
         const { service, ownerId, conversationId } = await createService()
-        const issued = await service.issue({ conversationId, actorId: ownerId })
+        const issued = await service.issue({ conversationId, actorId: ownerId, idempotencyKey: randomUUID() })
 
         await service.revoke({
             conversationId,
@@ -84,9 +84,9 @@ describe("InvitationService issue and revoke rules", () => {
 
     it("should_revoke_the_previous_link_when_a_new_link_is_issued", async () => {
         const { service, ownerId, conversationId } = await createService()
-        const previous = await service.issue({ conversationId, actorId: ownerId })
+        const previous = await service.issue({ conversationId, actorId: ownerId, idempotencyKey: randomUUID() })
 
-        const current = await service.issue({ conversationId, actorId: ownerId })
+        const current = await service.issue({ conversationId, actorId: ownerId, idempotencyKey: randomUUID() })
         const previousToken = new URL(previous.url).pathname.split("/").at(-1)
         const currentToken = new URL(current.url).pathname.split("/").at(-1)
         if (!previousToken || !currentToken) throw new Error("Issued invitation URL did not contain a token")

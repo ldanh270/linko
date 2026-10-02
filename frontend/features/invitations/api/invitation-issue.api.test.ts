@@ -3,6 +3,7 @@ import {
     CONVERSATION_PARAMS,
     ERROR_CODES,
     INVITATION_FIELDS,
+    INVITATION_HEADERS,
     INVITATION_PARAMS,
     INVITATION_ROUTE_PATHS,
     type ApiEnvelope,
@@ -15,6 +16,7 @@ import { issueInvitation, listInvitations, revokeInvitation } from "./invitation
 
 const GROUP_ID = "507f1f77bcf86cd799439011"
 const INVITATION_ID = "507f1f77bcf86cd799439012"
+const IDEMPOTENCY_KEY = "d7f88e11-9fa1-46b0-a1de-65aab4eefddb"
 
 const ISSUED_INVITATION: IssuedInvitationDto = {
     id: INVITATION_ID,
@@ -41,11 +43,12 @@ describe("invitation API adapter", () => {
         const fetchMock = vi.fn().mockResolvedValue(successResponse(ISSUED_INVITATION, 201))
         vi.stubGlobal("fetch", fetchMock)
 
-        await expect(issueInvitation(GROUP_ID)).resolves.toEqual(ISSUED_INVITATION)
+        await expect(issueInvitation(GROUP_ID, IDEMPOTENCY_KEY)).resolves.toEqual(ISSUED_INVITATION)
 
         const [url, request] = fetchMock.mock.calls[0] as [string, RequestInit]
         expect(url).toBe(invitationCollectionPath(GROUP_ID))
         expect(request.method).toBe("POST")
+        expect(new Headers(request.headers).get(INVITATION_HEADERS.IDEMPOTENCY_KEY)).toBe(IDEMPOTENCY_KEY)
     })
 
     it("should_list_invitation_metadata_without_a_reusable_url", async () => {

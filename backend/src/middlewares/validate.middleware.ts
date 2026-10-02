@@ -8,6 +8,7 @@ const validate = (schema: ZodType): RequestHandler => (request, _response, next)
         query: request.query,
         params: request.params,
         cookies: request.cookies,
+        headers: request.headers,
     })
     if (hasValidatedBody(parsed)) request.body = parsed.body
     next()

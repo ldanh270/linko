@@ -4,6 +4,7 @@ import {
     ERROR_CODES,
     GROUP_FIELDS,
     INVITATION_FIELDS,
+    INVITATION_HEADERS,
     INVITATION_PARAMS,
     INVITATION_PREVIEW_FIELDS,
     INVITATION_PREVIEW_ROUTE_PATHS,
@@ -13,6 +14,7 @@ import {
 } from "@linko/contracts"
 import express, { type Express } from "express"
 import mongoose from "mongoose"
+import { randomUUID } from "node:crypto"
 import { MongoMemoryReplSet } from "mongodb-memory-server"
 import request from "supertest"
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
@@ -82,6 +84,7 @@ describe("invitation HTTP routes", () => {
         const response = await request(app)
             .post(collectionPath(conversationId))
             .set("Authorization", `Bearer ${owner.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, randomUUID())
             .send({})
 
         expect(response.status).toBe(201)
@@ -102,6 +105,7 @@ describe("invitation HTTP routes", () => {
         const response = await request(app)
             .post(collectionPath(conversationId))
             .set("Authorization", `Bearer ${actor.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, randomUUID())
             .send({})
 
         expect(response.status).toBe(201)
@@ -129,10 +133,91 @@ describe("invitation HTTP routes", () => {
         const response = await request(app)
             .post(collectionPath(conversationId))
             .set("Authorization", `Bearer ${member.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, randomUUID())
             .send({})
 
         expect(response.status).toBe(403)
         expect(response.body.error.code).toBe(ERROR_CODES.FORBIDDEN)
+    })
+
+    it("should_require_an_idempotency_key_for_link_issuance", async () => {
+        const owner = await createAccount("missing-idempotency-owner")
+        const conversationId = await createGroup(owner.id)
+        const { app } = createTestApp()
+
+        const response = await request(app)
+            .post(collectionPath(conversationId))
+            .set("Authorization", `Bearer ${owner.token}`)
+            .send({})
+
+        expect(response.status).toBe(400)
+        expect(response.body.error.code).toBe(ERROR_CODES.VALIDATION)
+        expect(await Invitation.countDocuments()).toBe(0)
+    })
+
+    it("should_reject_a_repeated_issue_request_without_rotating_its_link", async () => {
+        const owner = await createAccount("idempotent-issue-owner")
+        const conversationId = await createGroup(owner.id)
+        const { app } = createTestApp()
+        const requestKey = "d7f88e11-9fa1-46b0-a1de-65aab4eefddb"
+        const firstResponse = await request(app)
+            .post(collectionPath(conversationId))
+            .set("Authorization", `Bearer ${owner.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, requestKey)
+            .send({})
+        const repeatedResponse = await request(app)
+            .post(collectionPath(conversationId))
+            .set("Authorization", `Bearer ${owner.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, requestKey)
+            .send({})
+        const invitationCount = await Invitation.countDocuments()
+        const token = extractToken(firstResponse.body.data[INVITATION_FIELDS.URL])
+        const previewResponse = await request(app).get(previewPath(token))
+
+        expect(firstResponse.status).toBe(201)
+        expect(repeatedResponse.status).toBe(409)
+        expect(repeatedResponse.body.error.code).toBe(ERROR_CODES.INVITATION_REQUEST_REPLAYED)
+        expect(invitationCount).toBe(1)
+        expect(previewResponse.status).toBe(200)
+    })
+
+    it("should_create_one_link_for_concurrent_requests_with_the_same_key", async () => {
+        const owner = await createAccount("concurrent-idempotent-issue-owner")
+        const conversationId = await createGroup(owner.id)
+        const { app } = createTestApp()
+        const requestKey = "d4e495dc-d516-4e7f-9ee6-d173e906ca76"
+
+        const responses = await Promise.all([1, 2].map(() => request(app)
+            .post(collectionPath(conversationId))
+            .set("Authorization", `Bearer ${owner.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, requestKey)
+            .send({})))
+
+        expect(responses.map(({ status }) => status).sort()).toEqual([201, 409])
+        expect(responses.find(({ status }) => status === 409)?.body.error.code)
+            .toBe(ERROR_CODES.INVITATION_REQUEST_REPLAYED)
+        expect(await Invitation.countDocuments()).toBe(1)
+    })
+
+    it("should_limit_link_issuance_per_owner", async () => {
+        const owner = await createAccount("rate-limited-issue-owner")
+        const conversationId = await createGroup(owner.id)
+        const { app } = createTestApp()
+        const allowedIssueCount = 5
+
+        for (let issueNumber = 0; issueNumber < allowedIssueCount; issueNumber += 1) {
+            const response = await issueInvitation(app, owner.token, conversationId)
+            expect(response.id).toBeDefined()
+        }
+        const limitedResponse = await request(app)
+            .post(collectionPath(conversationId))
+            .set("Authorization", `Bearer ${owner.token}`)
+            .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, "37a42de8-8e78-4bd6-b7b1-ec3ad85c6571")
+            .send({})
+
+        expect(limitedResponse.status).toBe(429)
+        expect(limitedResponse.body.error.code).toBe(ERROR_CODES.INVITATION_RATE_LIMITED)
+        expect(await Invitation.countDocuments()).toBe(allowedIssueCount)
     })
 
     it("should_list_invitation_metadata_without_url_or_token_hash", async () => {
@@ -232,6 +317,14 @@ describe("invitation HTTP routes", () => {
         expect(response.body.error.code).toBe(ERROR_CODES.INVITATION_UNAVAILABLE)
     })
 
+    it("should_reject_a_malformed_public_preview_token_at_the_boundary", async () => {
+        const { app } = createTestApp()
+        const response = await request(app).get(previewPath("not-valid!"))
+
+        expect(response.status).toBe(400)
+        expect(response.body.error.code).toBe(ERROR_CODES.VALIDATION)
+    })
+
     it("should_not_leak_an_invitation_token_in_error_responses_or_logs", async () => {
         const owner = await createAccount("log-owner")
         const conversationId = await createGroup(owner.id)
@@ -323,6 +416,7 @@ async function issueInvitation(app: Express, token: string, conversationId: stri
     const response = await request(app)
         .post(collectionPath(conversationId))
         .set("Authorization", `Bearer ${token}`)
+        .set(INVITATION_HEADERS.IDEMPOTENCY_KEY, randomUUID())
         .send({})
     if (response.status !== 201) throw new Error(`Invitation issue failed with HTTP ${response.status}`)
     return response.body.data as { readonly id: string; readonly url: string }
@@ -364,6 +458,7 @@ function createRepository(overrides: Partial<InvitationRepository> = {}): Invita
         findGroupAccess: vi.fn().mockResolvedValue(null),
         revokeUnrevokedInvitations: vi.fn().mockResolvedValue(undefined),
         createInvitation: vi.fn(),
+        hasInvitationRequest: vi.fn().mockResolvedValue(false),
         findInvitation: vi.fn().mockResolvedValue(null),
         listInvitations: vi.fn().mockResolvedValue([]),
         revokeInvitation: vi.fn().mockResolvedValue(undefined),

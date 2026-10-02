@@ -72,9 +72,22 @@ export class MongooseInvitationRepository implements InvitationRepository {
         const [invitation] = await Invitation.create([{
             [INVITATION_MODEL_FIELDS.CONVERSATION_ID]: input.conversationId,
             [INVITATION_MODEL_FIELDS.TOKEN_HASH]: input.tokenHash,
+            [INVITATION_MODEL_FIELDS.IDEMPOTENCY_KEY_HASH]: input.idempotencyKeyHash,
         }], { session: transaction.session })
         if (!invitation) throw new Error(INVITATION_MESSAGES.INVALID_INSERT)
         return this.toInvitationRecord(invitation)
+    }
+
+    /** Detect a completed issue attempt without exposing or selecting its token material. */
+    async hasInvitationRequest(
+        idempotencyKeyHash: string,
+        transaction?: TransactionContext,
+    ): Promise<boolean> {
+        const query = Invitation.findOne({
+            [INVITATION_MODEL_FIELDS.IDEMPOTENCY_KEY_HASH]: idempotencyKeyHash,
+        }).select({ [INVITATION_MODEL_FIELDS.ID]: 1 })
+        if (transaction) query.session(transaction.session)
+        return (await query.exec()) !== null
     }
 
     /** Find one invitation while preserving its group ownership boundary. */

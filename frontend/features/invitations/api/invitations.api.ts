@@ -1,5 +1,6 @@
 import {
     API_ROUTES,
+    INVITATION_HEADERS,
     INVITATION_PARAMS,
     INVITATION_ROUTE_PATHS,
     type InvitationSummaryDto,
@@ -8,11 +9,15 @@ import {
 
 import { authenticatedApiClient } from "../../auth/api/auth.api"
 
-/** Create one fresh invitation and return its one-time URL to the caller. */
-export function issueInvitation(conversationId: string): Promise<IssuedInvitationDto> {
+/** Issue with a stable key so retries cannot rotate twice; only the first response has the URL. */
+export function issueInvitation(
+    conversationId: string,
+    idempotencyKey: string,
+): Promise<IssuedInvitationDto> {
     return authenticatedApiClient.request<IssuedInvitationDto>({
         path: invitationCollectionPath(conversationId),
         method: "POST",
+        headers: { [INVITATION_HEADERS.IDEMPOTENCY_KEY]: idempotencyKey },
         body: {},
     })
 }

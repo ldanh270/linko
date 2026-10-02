@@ -32,6 +32,8 @@ export const ERROR_CODES = {
     INVALID_SESSION: "INVALID_SESSION",
     GROUP_LIMIT: "GROUP_LIMIT",
     INVITATION_UNAVAILABLE: "INVITATION_UNAVAILABLE",
+    INVITATION_REQUEST_REPLAYED: "INVITATION_REQUEST_REPLAYED",
+    INVITATION_RATE_LIMITED: "INVITATION_RATE_LIMITED",
 } as const
 
 /** Conversation types stored by the persistence layer. */
@@ -94,6 +96,11 @@ export const INVITATION_PARAMS = {
     TOKEN: "token",
 } as const
 
+/** HTTP headers shared by invitation issue clients and server validation. */
+export const INVITATION_HEADERS = {
+    IDEMPOTENCY_KEY: "idempotency-key",
+} as const
+
 /** Invitation route suffixes mounted below the conversation API prefix. */
 export const INVITATION_ROUTE_PATHS = {
     COLLECTION: `/:${INVITATION_PARAMS.CONVERSATION_ID}/invitations`,
@@ -109,6 +116,7 @@ export const INVITATION_PREVIEW_ROUTE_PATHS = {
 export const INVITATION_LINK_PATH = "/invite"
 
 const INVITATION_TOKEN_BYTES = 32
+const INVITATION_TOKEN_CHARACTER_CLASS = "[A-Za-z0-9_-]"
 
 /** Invitation limits shared by issuance, persistence, and API clients. */
 export const INVITATION_LIMITS = {
@@ -121,8 +129,11 @@ export const INVITATION_LIMITS = {
 
 /** Invitation token syntax shared by public route validation and log redaction. */
 export const INVITATION_PATTERNS = {
-    TOKEN: new RegExp(`^[A-Za-z0-9_-]{${INVITATION_LIMITS.TOKEN_LENGTH}}$`),
+    TOKEN: new RegExp(`^${INVITATION_TOKEN_CHARACTER_CLASS}{${INVITATION_LIMITS.TOKEN_LENGTH}}$`),
 } as const
+
+/** Character class shared by invitation token validation and secret redaction. */
+export const INVITATION_TOKEN_CHARACTERS = INVITATION_TOKEN_CHARACTER_CLASS
 
 /** Public invitation DTO field names shared by backend mappers and clients. */
 export const INVITATION_FIELDS = {

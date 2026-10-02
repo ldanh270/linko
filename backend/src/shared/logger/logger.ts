@@ -1,4 +1,4 @@
-import { INVITATION_LIMITS } from "@linko/contracts"
+import { INVITATION_LIMITS, INVITATION_TOKEN_CHARACTERS } from "@linko/contracts"
 
 /** Structured technical error record written by the server logger. */
 export interface LogRecord {
@@ -28,14 +28,14 @@ export interface ServerLogger {
 }
 
 const INVITATION_TOKEN_LOG_PATTERN = new RegExp(
-    `(^|[^A-Za-z0-9_-])([A-Za-z0-9_-]{${INVITATION_LIMITS.TOKEN_LENGTH}})(?=$|[^A-Za-z0-9_-])`,
+    `(?<!${INVITATION_TOKEN_CHARACTERS})${INVITATION_TOKEN_CHARACTERS}{${INVITATION_LIMITS.TOKEN_LENGTH}}(?!${INVITATION_TOKEN_CHARACTERS})`,
     "g",
 )
 
 const redact = (value: string): string => value
     .replace(/\bBearer\s+[^\s"']+/gi, "Bearer [REDACTED]")
     .replace(/(\b(?:password|token|authorization|cookie|inviteToken|refreshToken|accessToken)\b["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}]+)/gi, "$1[REDACTED]")
-    .replace(INVITATION_TOKEN_LOG_PATTERN, "$1[REDACTED]")
+    .replace(INVITATION_TOKEN_LOG_PATTERN, "[REDACTED]")
 
 /** Create a logger whose sink can be replaced in tests. */
 export function createLogger(write: (record: LogRecord) => void): ServerLogger {

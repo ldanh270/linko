@@ -12,11 +12,17 @@ import {
     previewInvitationSchema,
     revokeInvitationSchema,
 } from "./invitation.schema"
+import { createInvitationIssueRateLimit } from "./invitation-issue.rate-limit"
 
 /** Register authenticated invitation issue, list, and revoke endpoints. */
 export function createInvitationRouter(controller: InvitationController): Router {
     const router = express.Router()
-    router.post(INVITATION_ROUTE_PATHS.COLLECTION, validate(issueInvitationSchema), controller.issue)
+    router.post(
+        INVITATION_ROUTE_PATHS.COLLECTION,
+        validate(issueInvitationSchema),
+        createInvitationIssueRateLimit(),
+        controller.issue,
+    )
     router.get(INVITATION_ROUTE_PATHS.COLLECTION, validate(listInvitationsSchema), controller.list)
     router.delete(INVITATION_ROUTE_PATHS.BY_ID, validate(revokeInvitationSchema), controller.revoke)
     return router

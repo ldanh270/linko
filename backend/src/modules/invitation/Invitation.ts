@@ -23,6 +23,14 @@ const invitationSchema = new mongoose.Schema(
             maxlength: INVITATION_LIMITS.TOKEN_HASH_LENGTH,
             match: INVITATION_PERSISTENCE_PATTERNS.TOKEN_HASH,
         },
+        /** Preserve retry identity without retaining the raw client request key. */
+        [INVITATION_MODEL_FIELDS.IDEMPOTENCY_KEY_HASH]: {
+            type: String,
+            required: true,
+            minlength: INVITATION_LIMITS.TOKEN_HASH_LENGTH,
+            maxlength: INVITATION_LIMITS.TOKEN_HASH_LENGTH,
+            match: INVITATION_PERSISTENCE_PATTERNS.IDEMPOTENCY_KEY_HASH,
+        },
         [INVITATION_MODEL_FIELDS.EXPIRES_AT]: {
             type: Date,
             required: true,
@@ -65,6 +73,7 @@ invitationSchema.pre("validate", function () {
 invitationSchema.plugin(auditPlugin)
 invitationSchema.plugin(softDeletePlugin)
 invitationSchema.index({ [INVITATION_MODEL_FIELDS.TOKEN_HASH]: 1 }, { unique: true })
+invitationSchema.index({ [INVITATION_MODEL_FIELDS.IDEMPOTENCY_KEY_HASH]: 1 }, { unique: true })
 invitationSchema.index({
     [INVITATION_MODEL_FIELDS.CONVERSATION_ID]: 1,
     [INVITATION_MODEL_FIELDS.CREATED_AT]: -1,

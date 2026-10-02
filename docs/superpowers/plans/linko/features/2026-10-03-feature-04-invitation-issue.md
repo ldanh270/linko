@@ -37,6 +37,8 @@
 
 **HTTP contract:** POST/GET /api/conversations/:id/invitations; DELETE /api/conversations/:id/invitations/:invitationId. Token 32 byte ngẫu nhiên, lưu SHA-256; expiresAt = createdAt + 7 ngày, maxUses=25. URL chỉ trả một lần lúc tạo; danh sách chỉ có metadata, UI tạo link mới nếu đã mất URL.
 
+**Review addendum (NFR-05/NFR-06):** POST yêu cầu UUID `Idempotency-Key`; hệ thống chỉ lưu hash khóa theo actor/nhóm. Gửi lại cùng khóa trả 409 và không thu hồi link vừa tạo (client bắt đầu lần phát hành mới bằng khóa mới nếu cần link khác). Giới hạn 5 lần thử phát hành cho mỗi manager trong cửa sổ một giờ ở mỗi process backend.
+
 **Frontend adapter:** issueInvitation, listInvitations, revokeInvitation in frontend/features/invitations/api/invitations.api.ts. File frontend/features/invitations/api/invitations.api.ts; typed result từ packages/contracts, không copy DTO.
 
 ### Task 1: Business rules and repository

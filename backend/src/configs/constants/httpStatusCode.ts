@@ -14,6 +14,7 @@ export const HttpStatusCode = {
     NOT_FOUND: 404,
     CONFLICT: 409,
     GONE: 410,
+    TOO_MANY_REQUESTS: 429,
     PAYLOAD_TOO_LARGE: 413,
     UNPROCESSABLE_ENTITY: 422,
 

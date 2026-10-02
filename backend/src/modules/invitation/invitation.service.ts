@@ -20,6 +20,7 @@ import type {
     InvitationSummaryDto,
     IssuedInvitationDto,
     ManageInvitationsInput,
+    IssueInvitationInput,
     ObjectId,
     RevokeInvitationInput,
 } from "./invitation.types"
@@ -35,12 +36,16 @@ export class InvitationService {
     /** Wire the persistence, transaction, and trusted browser-origin dependencies. */
     constructor(private readonly dependencies: InvitationServiceDependencies) {}
 
-    /** Rotate the group's active link and return the new URL exactly once. */
-    async issue(input: ManageInvitationsInput): Promise<IssuedInvitationDto> {
+    /** Rotate the active link; a replayed key conflicts without creating another token. */
+    async issue(input: IssueInvitationInput): Promise<IssuedInvitationDto> {
+        const idempotencyKeyHash = this.createIdempotencyKeyHash(input)
         try {
             const issued = await this.dependencies.transactionRunner.run(async (transaction) => {
                 const group = await this.dependencies.repository.findGroupAccess(input.conversationId, transaction)
                 this.assertCanManage(group, input.actorId)
+                if (await this.dependencies.repository.hasInvitationRequest(idempotencyKeyHash, transaction)) {
+                    throw new ConflictException(ERROR_CODES.INVITATION_REQUEST_REPLAYED, INVITATION_MESSAGES.REQUEST_REPLAYED)
+                }
                 const token = randomBytes(INVITATION_LIMITS.TOKEN_BYTES).toString("base64url")
                 const tokenHash = createHash("sha256").update(token).digest("hex")
 
@@ -52,6 +57,7 @@ export class InvitationService {
                 const invitation = await this.dependencies.repository.createInvitation({
                     conversationId: input.conversationId,
                     tokenHash,
+                    idempotencyKeyHash,
                 }, transaction)
                 return { invitation, token }
             })
@@ -60,6 +66,9 @@ export class InvitationService {
             return toIssuedInvitationDto(issued.invitation, url)
         } catch (error) {
             if (this.isDuplicateKeyError(error)) {
+                if (await this.dependencies.repository.hasInvitationRequest(idempotencyKeyHash)) {
+                    throw new ConflictException(ERROR_CODES.INVITATION_REQUEST_REPLAYED, INVITATION_MESSAGES.REQUEST_REPLAYED)
+                }
                 throw new ConflictException(ERROR_CODES.CONFLICT, INVITATION_MESSAGES.ACTIVE_CONFLICT)
             }
             throw error
@@ -132,5 +141,16 @@ export class InvitationService {
         return invitation.revokedAt === null &&
             invitation.expiresAt.getTime() > Date.now() &&
             invitation.useCount < invitation.maxUses
+    }
+
+    /** Hash a retry key with its actor and group so callers cannot collide across scopes. */
+    private createIdempotencyKeyHash(input: IssueInvitationInput): string {
+        return createHash("sha256")
+            .update(JSON.stringify([
+                input.actorId.toString(),
+                input.conversationId.toString(),
+                input.idempotencyKey,
+            ]))
+            .digest("hex")
     }
 }

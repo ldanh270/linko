@@ -1,18 +1,21 @@
 import {
     CONVERSATION_PARAMS,
+    INVITATION_HEADERS,
     INVITATION_PARAMS,
     type ApiEnvelope,
     type InvitationPreviewDto,
     type InvitationSummaryDto,
     type IssuedInvitationDto,
 } from "@linko/contracts"
-import type { RequestHandler } from "express"
+import type { Request, RequestHandler } from "express"
 import mongoose from "mongoose"
 
 import { HttpStatusCode } from "../../configs/constants/httpStatusCode"
 import { ApiResponse } from "../../shared/http/ApiResponse"
+import { ValidationException } from "../../shared/errors/ValidationException"
 import { InvitationService } from "./invitation.service"
-import type { ManageInvitationsInput, RevokeInvitationInput } from "./invitation.types"
+import { INVITATION_MESSAGES } from "./invitation.constants"
+import type { IssueInvitationInput, ManageInvitationsInput, RevokeInvitationInput } from "./invitation.types"
 
 type InvitationRequestHandler<Body, Data> = RequestHandler<Record<string, string>, ApiEnvelope<Data>, Body>
 type EmptyRequestBody = Record<string, never>
@@ -27,7 +30,11 @@ export class InvitationController {
 
     /** Issue one active invitation link for the authenticated owner or admin. */
     readonly issue: InvitationRequestHandler<EmptyRequestBody, IssuedInvitationDto> = async (request, response) => {
-        const issued = await this.service.issue(this.createManageInput(request.params[CONVERSATION_PARAMS.ID], request.user._id))
+        const issued = await this.service.issue(this.createIssueInput(
+            request.params[CONVERSATION_PARAMS.ID],
+            request.user._id,
+            request,
+        ))
         response.status(HttpStatusCode.CREATED).json(ApiResponse.ok(issued))
     }
 
@@ -57,6 +64,16 @@ export class InvitationController {
 
     private createManageInput(conversationId: string, actorId: mongoose.Types.ObjectId): ManageInvitationsInput {
         return { conversationId: new mongoose.Types.ObjectId(conversationId), actorId }
+    }
+
+    private createIssueInput(
+        conversationId: string,
+        actorId: mongoose.Types.ObjectId,
+        request: Request,
+    ): IssueInvitationInput {
+        const idempotencyKey = request.get(INVITATION_HEADERS.IDEMPOTENCY_KEY)
+        if (!idempotencyKey) throw new ValidationException(INVITATION_MESSAGES.IDEMPOTENCY_KEY_REQUIRED)
+        return { ...this.createManageInput(conversationId, actorId), idempotencyKey }
     }
 
     private createRevokeInput(
