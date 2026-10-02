@@ -61,10 +61,10 @@
 
 **Files:** frontend/features/inbox/api/read.api.ts; test frontend/features/inbox/api/read-state.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter sends lastVisibleMessageId and preserves ApiError.code. Inbox cache invalidation belongs in the consuming screen hook, since this adapter is transport-only and must not import React/query state.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/inbox/api/read-state.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Added adapter tests for sending `lastVisibleMessageId` and preserving `ApiError.code`. Inbox cache invalidation belongs in the consuming screen hook, since this adapter is transport-only and must not import React/query state.
+- [x] Step 2: Ran `pnpm -C frontend exec vitest run features/inbox/api/read-state.api.test.ts`; the test failed because `read.api.ts` did not exist yet.
+- [x] Step 3: Added the typed adapter using the shared HTTP client, route/request constants, and DTO package; no JSX or state.
+- [x] Step 4: Adapter tests (2), frontend typecheck, and lint pass. Adapter task commit pending.
 
 ## Done when
 
