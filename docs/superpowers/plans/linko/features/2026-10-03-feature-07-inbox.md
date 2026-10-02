@@ -64,7 +64,7 @@
 - [x] Step 1: Added adapter tests for kind/cursor/limit serialization, default query values, typed cursor-page unwrapping, and server error-code preservation.
 - [x] Step 2: Ran `pnpm -C frontend exec vitest run features/inbox/api/inbox.api.test.ts`; the tests initially failed because `inbox.api.ts` did not exist.
 - [x] Step 3: Added `listInbox` using the shared HTTP client, query constants, and DTO package; removed the superseded `listMyGroups` adapter and group-summary contract. No state or JSX.
-- [x] Step 4: Inbox adapter tests (3), read adapter tests (2), migrated group adapter tests (4), frontend typecheck/lint, and backend checks pass. Adapter task commit pending.
+- [x] Step 4: Inbox adapter tests (3), read adapter tests (2), migrated group adapter tests (4), frontend typecheck/lint, and backend checks pass. Adapter task committed as `f1b93b8`.
 
 ## Done when
 

@@ -46,7 +46,7 @@
 - [x] Step 1: Viết test thất bại: should_not_mark_future_or_pre_join_message_read; should_set_unread_zero_at_latest_visible_message; should_keep_other_members_count. Assertions cốt lõi: expect(self.unreadCount).toBe(0); expect(other.unreadCount).toBe(previousOtherCount). Added race ordering, visibility, and sender-unread regression cases.
 - [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/read/read-state.service.test.ts`; initial run failed because the read repository did not exist yet, confirming the tests exercised the missing implementation.
 - [x] Step 3: Added repository interface + Mongoose repository and service signatures above; multi-record writes use a transaction; constants/typed BusinessException; service does not call Mongoose.
-- [x] Step 4: Targeted read-state tests and backend typecheck pass. Domain task commit pending.
+- [x] Step 4: Targeted read-state tests and backend typecheck pass. Domain task committed as `a573284`.
 
 ### Task 2: API boundary and integration
 
@@ -55,7 +55,7 @@
 - [x] Step 1: Added isolated MongoDB route tests for auth/current membership, malformed IDs, cross-conversation messages, invitation rejoin reset, and the success envelope.
 - [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/read/read-state.route.test.ts`; requests reached the global 404 while the route was absent. Corrected the rejoin fixture timestamps to past values after the first run.
 - [x] Step 3: Added Zod validation, authenticated HTTP-only controller, and route registration through the composition root. No previous read route existed to remove.
-- [x] Step 4: Route integration tests (5) and backend typecheck pass. API task commit pending.
+- [x] Step 4: Route integration tests (5) and backend typecheck pass. API task committed as `351a302`.
 
 ### Task 3: Client contract
 
@@ -64,7 +64,7 @@
 - [x] Step 1: Added adapter tests for sending `lastVisibleMessageId` and preserving `ApiError.code`. Inbox cache invalidation belongs in the consuming screen hook, since this adapter is transport-only and must not import React/query state.
 - [x] Step 2: Ran `pnpm -C frontend exec vitest run features/inbox/api/read-state.api.test.ts`; the test failed because `read.api.ts` did not exist yet.
 - [x] Step 3: Added the typed adapter using the shared HTTP client, route/request constants, and DTO package; no JSX or state.
-- [x] Step 4: Adapter tests (2), frontend typecheck, and lint pass. Adapter task commit pending.
+- [x] Step 4: Adapter tests (2), frontend typecheck, and lint pass. Adapter task committed as `ad9a9e5`.
 
 ## Done when
 
