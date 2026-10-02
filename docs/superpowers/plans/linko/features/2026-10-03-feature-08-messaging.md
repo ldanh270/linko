@@ -61,10 +61,10 @@
 
 **Files:** frontend/features/chat/api/messages.api.ts; test cùng thư mục tên messaging.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter sends clientMessageId and normalizes message DTO; aborted request leaves retryable state. Giả lập HTTP envelope, xác nhận mapping dữ liệu và ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/chat/api/messaging.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client, constants và DTO package chung; không thêm state/JSX.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Viết test adapter thất bại: adapter sends clientMessageId, normalizes message DTO and preserves retryability after an aborted request. The adapter passes AbortSignal and stable clientMessageId; screen hooks own draft/retry presentation state.
+- [x] Step 2: Chạy pnpm -C frontend exec vitest run features/chat/api/messaging.api.test.ts; xác nhận FAIL do adapter module chưa tồn tại.
+- [x] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client, constants và DTO package chung; không thêm state/JSX.
+- [x] Step 4: Chạy test, frontend typecheck/lint; PASS. Commit adapter task.
 
 ## Done when
 
