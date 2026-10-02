@@ -42,6 +42,10 @@ import { BusinessException } from "./shared/errors/BusinessException"
 import type { ServerLogger } from "./shared/logger/logger"
 import { createGlobalErrorHandler } from "./shared/middlewares/globalErrorHandler"
 import { withRequestContext } from "./shared/middlewares/requestContext"
+import { MessageController } from "./modules/message/message.controller"
+import { MongooseMessageRepository } from "./modules/message/message.repository"
+import { createMessageRouter } from "./modules/message/message.route"
+import { MessageService } from "./modules/message/message.service"
 
 /** Collaborators and route groups wired by the composition root. */
 export interface AppDependencies {
@@ -88,6 +92,11 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
+    const messageService = new MessageService({
+        repository: new MongooseMessageRepository(),
+        transactionRunner: { run: withTransaction },
+        clock: { now: () => new Date() },
+    })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const profileService = new ProfileService({
         repository: new MongooseProfileRepository(),
@@ -99,6 +108,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const conversationController = new ConversationController(conversationService)
     const conversationLifecycleController = new ConversationLifecycleController(conversationLifecycleService)
     const invitationController = new InvitationController(invitationService)
+    const messageController = new MessageController(messageService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -109,6 +119,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.INVITATIONS, createInvitationPreviewRouter(invitationController))
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
+    app.use(API_ROUTES.MESSAGES, createMessageRouter(messageController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationLifecycleRouter(conversationLifecycleController))
     app.use(dependencies.privateRoutes)
     app.use(API_ROUTES.USERS, createProfileRouter(profileController))

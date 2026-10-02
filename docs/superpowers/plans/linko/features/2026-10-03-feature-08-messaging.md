@@ -52,10 +52,10 @@
 
 **Files:** Route/controller/dto/schema/mapper trong module; test backend/src/modules/message/messaging.route.test.ts.
 
-- [ ] Step 1: Viết test route/integration thất bại: 400 for >4000 chars; 401/403 for no auth/membership; cursor page stable on same timestamp; DIRECT checks friendship even by conversationId. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/message/messaging.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
-- [ ] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route/integration thất bại: 400 for >4000 chars; 401/403 for no auth/membership; cursor page stable on same timestamp; DIRECT checks friendship even by conversationId. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/message/messaging.route.test.ts; xác nhận FAIL với 404 ở route chưa đăng ký.
+- [x] Step 3: Nối Zod middleware, global auth, controller HTTP-only và DTO mapper; đăng ký route ở composition root, bỏ legacy message route khỏi production wiring.
+- [x] Step 4: Chạy lại route integration suite (5 tests), backend typecheck và route smoke; PASS. Commit API task.
 
 ### Task 3: Client contract
 

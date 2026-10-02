@@ -1,4 +1,4 @@
-import { MESSAGE_LIMITS } from "@linko/contracts"
+import { MEMBERSHIP_FIELDS, MESSAGE_FIELDS, MESSAGE_LIMITS } from "@linko/contracts"
 
 /** MongoDB fields persisted on messages and selected by message repositories. */
 export const MESSAGE_MODEL_FIELDS = {
@@ -29,6 +29,15 @@ export const MESSAGE_ERROR_MESSAGES = {
     INVALID_CURSOR: "Message cursor is invalid",
     INVALID_PAGE_LIMIT: "Message page limit is invalid",
     INVALID_RECORD: "Stored message is missing required fields",
+} as const
+
+/** Operation input keys assembled by HTTP controllers before service calls. */
+export const MESSAGE_OPERATION_FIELDS = {
+    CONVERSATION_ID: MESSAGE_FIELDS.CONVERSATION_ID,
+    SENDER_ID: MESSAGE_FIELDS.SENDER_ID,
+    USER_ID: MEMBERSHIP_FIELDS.USER_ID,
+    CLIENT_MESSAGE_ID: MESSAGE_FIELDS.CLIENT_MESSAGE_ID,
+    CONTENT: MESSAGE_FIELDS.CONTENT,
 } as const
 
 /** Verify the ObjectId portion of an opaque stable history cursor. */
