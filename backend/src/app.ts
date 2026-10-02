@@ -5,6 +5,10 @@ import express, { type Express, type Router } from "express"
 
 import type { AuthRuntimeConfig } from "./configs/auth.config"
 import { ConversationController } from "./modules/conversation/conversation.controller"
+import { MembershipController } from "./modules/membership/membership.controller"
+import { MongooseMembershipRepository } from "./modules/membership/membership.repository"
+import { createMembershipRouter } from "./modules/membership/membership.route"
+import { MembershipService } from "./modules/membership/membership.service"
 import { createConversationRouter } from "./modules/conversation/conversation.route"
 import { MongooseConversationRepository } from "./modules/conversation/conversation.repository"
 import { R2GroupAvatarStorage } from "./modules/conversation/group-avatar.storage"
@@ -55,6 +59,11 @@ export function createApp(dependencies: AppDependencies): Express {
         avatarStorage: new R2GroupAvatarStorage(),
         avatarCleanupFailureRecorder: new LoggerGroupAvatarCleanupFailureRecorder(dependencies.logger),
     })
+    const membershipService = new MembershipService({
+        repository: new MongooseMembershipRepository(),
+        transactionRunner: { run: withTransaction },
+        clock: { now: () => new Date() },
+    })
     const invitationService = new InvitationService({
         repository: new MongooseInvitationRepository(),
         transactionRunner: { run: withTransaction },
@@ -67,6 +76,7 @@ export function createApp(dependencies: AppDependencies): Express {
         cleanupFailureRecorder: new LoggerProfileImageCleanupFailureRecorder(dependencies.logger),
     })
     const profileController = new ProfileController(profileService)
+    const membershipController = new MembershipController(membershipService)
     const conversationController = new ConversationController(conversationService)
     const invitationController = new InvitationController(invitationService)
     const app = express()
@@ -80,6 +90,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(dependencies.privateRoutes)
     app.use(API_ROUTES.USERS, createProfileRouter(profileController))
+    app.use(API_ROUTES.CONVERSATIONS, createMembershipRouter(membershipController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationRouter(conversationController))
     app.use(API_ROUTES.CONVERSATIONS, createInvitationRouter(invitationController))
     app.use(() => {

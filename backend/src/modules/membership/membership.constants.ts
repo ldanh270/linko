@@ -17,6 +17,11 @@ export const MEMBERSHIP_ADD_OUTCOMES = {
     STALE: "stale",
 } as const
 
+/** Route validation pattern for MongoDB conversation and user IDs. */
+export const MEMBERSHIP_PATTERNS = {
+    OBJECT_ID: /^[a-f\d]{24}$/i,
+} as const
+
 /** Stable safe messages emitted by group membership rules. */
 export const MEMBERSHIP_MESSAGES = {
     NOT_FOUND: "Group or member not found",
