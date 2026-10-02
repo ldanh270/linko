@@ -61,10 +61,12 @@
 
 **Files:** frontend/features/groups/api/groupLifecycle.api.ts; test frontend/features/groups/api/group-lifecycle.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter clears inbox/group cache and navigates away after leave or close; giả lập envelope và xác nhận ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/groups/api/group-lifecycle.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Viết adapter contract test cho leave/close routes, DTO result và ApiError.code. Cache invalidation/navigating away belong to the UI hook, because the API adapter is transport-only and contains no React state.
+- [x] Step 2: Chạy pnpm -C frontend exec vitest run features/groups/api/group-lifecycle.api.test.ts; xác nhận FAIL do adapter module chưa tồn tại.
+- [x] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
+- [x] Step 4: Chạy test, frontend typecheck/lint; PASS. Commit adapter task.
+
+Cache invalidation and navigation remain a screen-hook responsibility for UI-11; no group screen hook exists in the feature layer yet. File-download revocation and socket room removal are verified with F10/F11 when those boundaries are introduced.
 
 ## Done when
 
