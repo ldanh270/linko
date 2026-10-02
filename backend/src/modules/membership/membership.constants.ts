@@ -15,6 +15,7 @@ export const MEMBERSHIP_ADD_OUTCOMES = {
     LIMIT: "limit",
     MISSING: "missing",
     STALE: "stale",
+    CLOSED: "closed",
 } as const
 
 /** Route validation pattern for MongoDB conversation and user IDs. */

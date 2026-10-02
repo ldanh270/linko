@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto"
 import {
     ERROR_CODES,
+    CONVERSATION_STATUS,
     INVITATION_LINK_PATH,
     INVITATION_LIMITS,
     ROLE,
@@ -11,6 +12,7 @@ import {
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import { NotFoundException } from "../../shared/errors/NotFoundException"
+import { GROUP_MESSAGES } from "../conversation/conversation.constants"
 import { toGroupDto } from "../conversation/conversation.mapper"
 import { InvitationUnavailableException } from "./InvitationUnavailableException"
 import { INVITATION_MESSAGES } from "./invitation.constants"
@@ -45,8 +47,11 @@ export class InvitationService {
         const issuedAt = this.dependencies.clock.now()
         try {
             const issued = await this.dependencies.transactionRunner.run(async (transaction) => {
-                const group = await this.dependencies.repository.findGroupAccess(input.conversationId, transaction)
-                this.assertCanManage(group, input.actorId)
+                const group = this.assertCanManage(
+                    await this.dependencies.repository.findGroupAccess(input.conversationId, transaction),
+                    input.actorId,
+                )
+                this.assertGroupOpen(group)
                 if (await this.dependencies.repository.hasInvitationRequest(idempotencyKeyHash, transaction)) {
                     throw new ConflictException(ERROR_CODES.INVITATION_REQUEST_REPLAYED, INVITATION_MESSAGES.REQUEST_REPLAYED)
                 }
@@ -121,6 +126,11 @@ export class InvitationService {
                 throw new InvitationUnavailableException()
             }
 
+            const availableGroup = await this.dependencies.groupReader.findGroupById(invitation.conversationId, transaction)
+            if (!availableGroup || availableGroup.status !== CONVERSATION_STATUS.ACTIVE) {
+                throw new InvitationUnavailableException()
+            }
+
             const membership = await this.dependencies.membershipService.addFromInvitation({
                 conversationId: invitation.conversationId,
                 userId: input.userId,
@@ -164,12 +174,19 @@ export class InvitationService {
         })
     }
 
-    private assertCanManage(group: InvitationGroupAccessRecord | null, actorId: ObjectId): void {
+    private assertCanManage(group: InvitationGroupAccessRecord | null, actorId: ObjectId): InvitationGroupAccessRecord {
         if (!group) throw new NotFoundException(INVITATION_MESSAGES.GROUP_NOT_FOUND)
 
         const participant = group.participants.find(({ userId }) => userId.toString() === actorId.toString())
         if (!participant || (participant.role !== ROLE.OWNER && participant.role !== ROLE.ADMIN)) {
             throw new ForbiddenException(INVITATION_MESSAGES.FORBIDDEN)
+        }
+        return group
+    }
+
+    private assertGroupOpen(group: InvitationGroupAccessRecord): void {
+        if (group.status !== CONVERSATION_STATUS.ACTIVE) {
+            throw new ConflictException(ERROR_CODES.GROUP_CLOSED, GROUP_MESSAGES.CLOSED)
         }
     }
 

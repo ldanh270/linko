@@ -43,10 +43,10 @@
 
 **Files:** service/repository/types/constants trong module trên; test backend/src/modules/conversation/group-lifecycle.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_require_owner_transfer_before_leave; should_revoke_invites_on_close; should_deny_download_after_leave. Assertions cốt lõi: expect(error.code).toBe(ERROR_CODES.OWNER_TRANSFER_REQUIRED); expect(activeInvites).toHaveLength(0).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-lifecycle.service.test.ts; xác nhận FAIL đúng hành vi.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_require_owner_transfer_before_leave; should_revoke_invites_on_close; should_deny_download_after_leave. Assertions cốt lõi: expect(error.code).toBe(ERROR_CODES.OWNER_TRANSFER_REQUIRED); expect(activeInvites).toHaveLength(0).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-lifecycle.service.test.ts; xác nhận FAIL đúng hành vi.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 

@@ -1,5 +1,6 @@
 import {
     ERROR_CODES,
+    CONVERSATION_STATUS,
     GROUP_FIELDS,
     GROUP_LIMITS,
     ROLE,
@@ -167,6 +168,9 @@ export class ConversationService {
     }
 
     private assertCanManageGroup(group: GroupRecord, actorId: ObjectId): void {
+        if (group.status !== CONVERSATION_STATUS.ACTIVE) {
+            throw new ConflictException(ERROR_CODES.GROUP_CLOSED, GROUP_MESSAGES.CLOSED)
+        }
         const participant = group.participants.find(({ userId }) => userId.toString() === actorId.toString())
         if (!participant || (participant.role !== ROLE.OWNER && participant.role !== ROLE.ADMIN)) {
             throw new ForbiddenException(GROUP_MESSAGES.FORBIDDEN)

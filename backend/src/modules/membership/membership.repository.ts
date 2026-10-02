@@ -1,4 +1,11 @@
-import { CONVERSATION_TYPE, GROUP_FIELDS, GROUP_LIMITS, ROLE, type GroupMemberRole } from "@linko/contracts"
+import {
+    CONVERSATION_STATUS,
+    CONVERSATION_TYPE,
+    GROUP_FIELDS,
+    GROUP_LIMITS,
+    ROLE,
+    type GroupMemberRole,
+} from "@linko/contracts"
 import type { HydratedDocument } from "mongoose"
 
 import Conversation, { type ConversationType } from "../../models/Conversation"
@@ -45,8 +52,12 @@ export class MongooseMembershipRepository implements MembershipRepository {
     async addMember(input: AddMemberRecordInput, transaction: TransactionContext): Promise<AddMemberResult> {
         const document = await this.findGroupDocument(input.conversationId, transaction)
         if (!document) return { outcome: MEMBERSHIP_ADD_OUTCOMES.MISSING }
+        if (document[CONVERSATION_FIELDS.STATUS] === CONVERSATION_STATUS.CLOSED) {
+            return { outcome: MEMBERSHIP_ADD_OUTCOMES.CLOSED }
+        }
         const existing = document[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.userId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.userId),
         )
         if (existing) {
             const group = await this.toGroupRecord(document, transaction)
@@ -55,7 +66,9 @@ export class MongooseMembershipRepository implements MembershipRepository {
                 ? { outcome: MEMBERSHIP_ADD_OUTCOMES.EXISTING, member }
                 : { outcome: MEMBERSHIP_ADD_OUTCOMES.STALE }
         }
-        if (document[CONVERSATION_FIELDS.PARTICIPANTS].length >= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP) {
+        const activeMemberCount = document[CONVERSATION_FIELDS.PARTICIPANTS]
+            .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true).length
+        if (activeMemberCount >= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP) {
             return { outcome: MEMBERSHIP_ADD_OUTCOMES.LIMIT }
         }
 
@@ -77,10 +90,12 @@ export class MongooseMembershipRepository implements MembershipRepository {
         const document = await this.findGroupDocument(input.conversationId, transaction)
         if (!document) return null
         const actor = document[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.actorId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.actorId),
         )
         const target = document[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.targetUserId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.targetUserId),
         )
         if (!actor || !target || actor[PARTICIPANT_FIELDS.ROLE] !== input.actorRole || target[PARTICIPANT_FIELDS.ROLE] !== input.targetRole) {
             return null
@@ -96,16 +111,19 @@ export class MongooseMembershipRepository implements MembershipRepository {
         const document = await this.findGroupDocument(input.conversationId, transaction)
         if (!document) return false
         const actor = document[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.actorId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.actorId),
         )
         const targetIndex = document[CONVERSATION_FIELDS.PARTICIPANTS].findIndex((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.targetUserId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.targetUserId),
         )
         const target = targetIndex >= 0 ? document[CONVERSATION_FIELDS.PARTICIPANTS][targetIndex] : undefined
         if (!actor || !target || actor[PARTICIPANT_FIELDS.ROLE] !== input.actorRole || target[PARTICIPANT_FIELDS.ROLE] !== input.targetRole) {
             return false
         }
-        document[CONVERSATION_FIELDS.PARTICIPANTS].splice(targetIndex, 1)
+        target[PARTICIPANT_FIELDS.LEFT_AT] = input.leftAt
+        target[PARTICIPANT_FIELDS.DEL_FLAG] = true
         await document.save({ session: transaction.session })
         return true
     }
@@ -116,10 +134,12 @@ export class MongooseMembershipRepository implements MembershipRepository {
         if (!document) return false
         const group = document[CONVERSATION_FIELDS.GROUP]
         const oldOwner = document[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.actorId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.actorId),
         )
         const newOwner = document[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
-            participant[PARTICIPANT_FIELDS.USER_ID].equals(input.newOwnerId),
+            participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && participant[PARTICIPANT_FIELDS.USER_ID].equals(input.newOwnerId),
         )
         if (
             !group?.[GROUP_FIELDS.OWNER_ID]?.equals(input.actorId)
@@ -168,7 +188,10 @@ export class MongooseMembershipRepository implements MembershipRepository {
         return {
             conversationId: document[CONVERSATION_FIELDS.ID],
             ownerId,
-            members: document[CONVERSATION_FIELDS.PARTICIPANTS].map((participant) => this.toMemberRecord(participant, profiles)),
+            status: document[CONVERSATION_FIELDS.STATUS] ?? CONVERSATION_STATUS.ACTIVE,
+            members: document[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true)
+                .map((participant) => this.toMemberRecord(participant, profiles)),
         }
     }
 

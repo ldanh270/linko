@@ -1,4 +1,4 @@
-import type { Role } from "./constants"
+import { CONVERSATION_DTO_FIELDS, type ConversationStatus, type Role } from "./constants"
 import type { EntityId } from "./envelope"
 
 /** Public group membership data; identifiers use the shared API string form. */
@@ -14,6 +14,7 @@ export interface GroupDto {
     readonly name: string
     readonly description: string | null
     readonly avatarUrl: string | null
+    readonly [CONVERSATION_DTO_FIELDS.STATUS]: ConversationStatus
     readonly participants: readonly GroupParticipantDto[]
     readonly createdAt: string
     readonly updatedAt: string
@@ -26,6 +27,7 @@ export interface GroupSummaryDto {
     readonly name: string
     readonly description: string | null
     readonly avatarUrl: string | null
+    readonly [CONVERSATION_DTO_FIELDS.STATUS]: ConversationStatus
     readonly memberCount: number
     readonly lastMessageAt: string | null
     readonly updatedAt: string

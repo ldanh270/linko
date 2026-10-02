@@ -3,6 +3,7 @@ import type {
     ConversationLastMessageSummaryDto,
     ConversationParticipantSummaryDto,
     ConversationSummaryDto,
+    ConversationStatus,
     ConversationType,
     GroupDto,
     GroupSummaryDto,
@@ -40,6 +41,7 @@ export interface GroupRecord {
     readonly name: string
     readonly description: string | null
     readonly avatar: GroupAvatarRecord | null
+    readonly status: ConversationStatus
     readonly participants: readonly GroupParticipantRecord[]
     readonly createdAt: Date
     readonly updatedAt: Date
@@ -82,6 +84,7 @@ export interface ConversationGroupSummaryRecord {
 export interface ConversationSummaryRecord {
     readonly id: ObjectId
     readonly type: ConversationType
+    readonly status: ConversationStatus
     readonly participants: readonly ConversationParticipantSummaryRecord[]
     readonly unreadCount: Readonly<Record<string, number>>
     readonly lastMessage: ConversationLastMessageSummaryRecord | null

@@ -1,4 +1,10 @@
-import { GROUP_FIELDS, type ConversationSummaryDto, type GroupDto, type GroupSummaryDto } from "@linko/contracts"
+import {
+    CONVERSATION_DTO_FIELDS,
+    GROUP_FIELDS,
+    type ConversationSummaryDto,
+    type GroupDto,
+    type GroupSummaryDto,
+} from "@linko/contracts"
 
 import { CONVERSATION_FIELDS } from "./conversation.constants"
 import type { ConversationSummaryRecord, GroupRecord, GroupSummaryRecord } from "./conversation.types"
@@ -11,6 +17,7 @@ export function toGroupDto(group: GroupRecord): GroupDto {
         [GROUP_FIELDS.NAME]: group.name,
         [GROUP_FIELDS.DESCRIPTION]: group.description,
         [GROUP_FIELDS.AVATAR_URL]: group.avatar?.url ?? null,
+        [CONVERSATION_DTO_FIELDS.STATUS]: group.status,
         [GROUP_FIELDS.PARTICIPANTS]: group.participants.map((participant) => ({
             [GROUP_FIELDS.USER_ID]: participant.userId.toString(),
             [GROUP_FIELDS.ROLE]: participant.role,
@@ -28,6 +35,7 @@ export function toGroupSummaryDto(group: GroupSummaryRecord): GroupSummaryDto {
         [GROUP_FIELDS.NAME]: group.name,
         [GROUP_FIELDS.DESCRIPTION]: group.description,
         [GROUP_FIELDS.AVATAR_URL]: group.avatar?.url ?? null,
+        [CONVERSATION_DTO_FIELDS.STATUS]: group.status,
         [GROUP_FIELDS.MEMBER_COUNT]: group.memberCount,
         [GROUP_FIELDS.LAST_MESSAGE_AT]: group.lastMessageAt?.toISOString() ?? null,
         [GROUP_FIELDS.UPDATED_AT]: group.updatedAt.toISOString(),
@@ -39,6 +47,7 @@ export function toConversationSummaryDto(conversation: ConversationSummaryRecord
     return {
         id: conversation.id.toString(),
         type: conversation.type,
+        [CONVERSATION_DTO_FIELDS.STATUS]: conversation.status,
         participants: conversation.participants.map((participant) => ({
             id: participant.userId.toString(),
             displayName: participant.displayName,

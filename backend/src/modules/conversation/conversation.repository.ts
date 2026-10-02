@@ -1,4 +1,4 @@
-import { CONVERSATION_TYPE, GROUP_FIELDS, ROLE } from "@linko/contracts"
+import { CONVERSATION_STATUS, CONVERSATION_TYPE, GROUP_FIELDS, ROLE } from "@linko/contracts"
 import type { HydratedDocument, UpdateQuery } from "mongoose"
 
 import Conversation, { type ConversationType } from "../../models/Conversation"
@@ -96,7 +96,12 @@ export class MongooseConversationRepository implements ConversationRepository {
     async findGroupsByParticipant(userId: ObjectId): Promise<readonly GroupSummaryRecord[]> {
         const conversations = await Conversation.find({
             [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
-            [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: userId,
+            [CONVERSATION_FIELDS.PARTICIPANTS]: {
+                $elemMatch: {
+                    [PARTICIPANT_FIELDS.USER_ID]: userId,
+                    [PARTICIPANT_FIELDS.DEL_FLAG]: { $ne: true },
+                },
+            },
         }).sort({
             [`${CONVERSATION_FIELDS.LAST_MESSAGE}.${CONVERSATION_FIELDS.CREATED_AT}`]: -1,
             [CONVERSATION_FIELDS.UPDATED_AT]: -1,
@@ -104,21 +109,29 @@ export class MongooseConversationRepository implements ConversationRepository {
 
         return conversations.map((conversation) => ({
             ...this.toGroupRecord(conversation),
-            memberCount: conversation[CONVERSATION_FIELDS.PARTICIPANTS].length,
+            memberCount: conversation[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true).length,
         }))
     }
 
     /** Find active direct and group conversations visible to one inbox owner. */
     async findConversationsByParticipant(userId: ObjectId): Promise<readonly ConversationSummaryRecord[]> {
         const conversations = await Conversation.find({
-            [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: userId,
+            [CONVERSATION_FIELDS.PARTICIPANTS]: {
+                $elemMatch: {
+                    [PARTICIPANT_FIELDS.USER_ID]: userId,
+                    [PARTICIPANT_FIELDS.DEL_FLAG]: { $ne: true },
+                },
+            },
         }).sort({
             [`${CONVERSATION_FIELDS.LAST_MESSAGE}.${LAST_MESSAGE_FIELDS.CREATED_AT}`]: -1,
             [CONVERSATION_FIELDS.UPDATED_AT]: -1,
         })
 
         const userIds = conversations.flatMap((conversation) => {
-            const participantIds = conversation[CONVERSATION_FIELDS.PARTICIPANTS].flatMap((participant) => {
+            const participantIds = conversation[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true)
+                .flatMap((participant) => {
                 const participantId = participant[PARTICIPANT_FIELDS.USER_ID]
                 return participantId ? [participantId] : []
             })
@@ -199,7 +212,10 @@ export class MongooseConversationRepository implements ConversationRepository {
             name: group[GROUP_FIELDS.NAME] ?? "",
             description: group[GROUP_FIELDS.DESCRIPTION] ?? null,
             avatar,
-            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS].map((participant) => ({
+            status: conversation[CONVERSATION_FIELDS.STATUS] ?? CONVERSATION_STATUS.ACTIVE,
+            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true)
+                .map((participant) => ({
                 userId: participant[PARTICIPANT_FIELDS.USER_ID],
                 role: participant[PARTICIPANT_FIELDS.ROLE] as GroupRecord["participants"][number]["role"],
             })),
@@ -221,7 +237,8 @@ export class MongooseConversationRepository implements ConversationRepository {
             ? userProfiles.get(lastMessageSenderId.toString()) ?? null
             : null
         const requestingParticipant = conversation[CONVERSATION_FIELDS.PARTICIPANTS].find(
-            (participant) => participant[PARTICIPANT_FIELDS.USER_ID]?.equals(requestingUserId) ?? false,
+            (participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+                && (participant[PARTICIPANT_FIELDS.USER_ID]?.equals(requestingUserId) ?? false),
         )
         const lastMessageCreatedAt = lastMessage?.[LAST_MESSAGE_FIELDS.CREATED_AT]
         const requesterJoinedAt = requestingParticipant?.[PARTICIPANT_FIELDS.JOINED_AT]
@@ -234,7 +251,10 @@ export class MongooseConversationRepository implements ConversationRepository {
         return {
             id: conversation[CONVERSATION_FIELDS.ID],
             type: conversation[CONVERSATION_FIELDS.TYPE],
-            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS].flatMap((participant) => {
+            status: conversation[CONVERSATION_FIELDS.STATUS] ?? CONVERSATION_STATUS.ACTIVE,
+            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true)
+                .flatMap((participant) => {
                 const participantId = participant[PARTICIPANT_FIELDS.USER_ID]
                 if (!participantId) return []
                 const user = userProfiles.get(participantId.toString())

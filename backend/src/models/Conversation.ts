@@ -1,5 +1,5 @@
 import mongoose, { InferSchemaType } from "mongoose"
-import { CONVERSATION_TYPE, GROUP_FIELDS, GROUP_LIMITS, ROLE } from "@linko/contracts"
+import { CONVERSATION_STATUS, CONVERSATION_TYPE, GROUP_FIELDS, GROUP_LIMITS, ROLE } from "@linko/contracts"
 import {
     CONVERSATION_FIELDS,
     GROUP_AVATAR_FIELDS,
@@ -71,6 +71,14 @@ const participantSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        [PARTICIPANT_FIELDS.LEFT_AT]: {
+            type: Date,
+            default: null,
+        },
+        [PARTICIPANT_FIELDS.DEL_FLAG]: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         _id: false,
@@ -124,12 +132,20 @@ const conversationSchema = new mongoose.Schema(
             enum: Object.values(CONVERSATION_TYPE),
             required: true,
         },
+        [CONVERSATION_FIELDS.STATUS]: {
+            type: String,
+            enum: Object.values(CONVERSATION_STATUS),
+            default: CONVERSATION_STATUS.ACTIVE,
+            required: true,
+        },
 
         [CONVERSATION_FIELDS.PARTICIPANTS]: {
             type: [participantSchema],
             required: true,
             validate: {
-                validator: (participants: readonly unknown[]) => participants.length <= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP,
+                validator: (participants: readonly unknown[]) =>
+                    participants.filter((participant) => !isDeletedParticipant(participant)).length
+                    <= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP,
                 message: GROUP_MESSAGES.MEMBER_LIMIT,
             },
         },
@@ -183,5 +199,12 @@ conversationSchema.pre("save", function () {
 export type ConversationType = InferSchemaType<typeof conversationSchema>
 
 const Conversation = mongoose.model<ConversationType>("Conversation", conversationSchema)
+
+/** Treat historical participants without a soft-delete marker as currently active. */
+function isDeletedParticipant(participant: unknown): boolean {
+    return typeof participant === "object" && participant !== null
+        && PARTICIPANT_FIELDS.DEL_FLAG in participant
+        && participant[PARTICIPANT_FIELDS.DEL_FLAG] === true
+}
 
 export default Conversation

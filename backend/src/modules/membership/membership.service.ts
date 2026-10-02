@@ -1,9 +1,17 @@
-import { ERROR_CODES, GROUP_LIMITS, ROLE, type GroupMemberRole, type MemberDto } from "@linko/contracts"
+import {
+    CONVERSATION_STATUS,
+    ERROR_CODES,
+    GROUP_LIMITS,
+    ROLE,
+    type GroupMemberRole,
+    type MemberDto,
+} from "@linko/contracts"
 
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import { NotFoundException } from "../../shared/errors/NotFoundException"
 import { ValidationException } from "../../shared/errors/ValidationException"
+import { GROUP_MESSAGES } from "../conversation/conversation.constants"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import { MEMBERSHIP_ADD_OUTCOMES, MEMBERSHIP_MESSAGES, MEMBERSHIP_OPERATION_FIELDS } from "./membership.constants"
 import { toMemberDto } from "./membership.mapper"
@@ -42,6 +50,7 @@ export class MembershipService {
         transaction: TransactionContext,
     ): Promise<AddMemberFromInvitationResult> {
         const group = await this.getGroup(input[MEMBERSHIP_OPERATION_FIELDS.CONVERSATION_ID], transaction)
+        this.assertGroupOpen(group)
         const existingMember = group.members.find(({ userId }) => userId.equals(input.userId))
         if (existingMember) return { member: toMemberDto(existingMember), wasAdded: false }
         if (group.members.length >= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP) {
@@ -64,6 +73,9 @@ export class MembershipService {
         if (result.outcome === MEMBERSHIP_ADD_OUTCOMES.MISSING) {
             throw new NotFoundException(MEMBERSHIP_MESSAGES.NOT_FOUND)
         }
+        if (result.outcome === MEMBERSHIP_ADD_OUTCOMES.CLOSED) {
+            throw new ConflictException(ERROR_CODES.GROUP_CLOSED, GROUP_MESSAGES.CLOSED)
+        }
         throw new ConflictException(ERROR_CODES.CONFLICT, MEMBERSHIP_MESSAGES.MEMBERSHIP_CHANGED)
     }
 
@@ -71,6 +83,7 @@ export class MembershipService {
     async changeRole(input: ChangeRoleInput): Promise<MemberDto> {
         return this.dependencies.transactionRunner.run(async (transaction) => {
             const group = await this.getGroup(input.conversationId, transaction)
+            this.assertGroupOpen(group)
             const actor = this.getMember(group, input.actorId)
             const target = this.getMember(group, input.targetUserId)
             this.assertCanChangeRole(actor.role, target, input)
@@ -88,6 +101,7 @@ export class MembershipService {
     async remove(input: RemoveMemberInput): Promise<void> {
         await this.dependencies.transactionRunner.run(async (transaction) => {
             const group = await this.getGroup(input.conversationId, transaction)
+            this.assertGroupOpen(group)
             const actor = this.getMember(group, input.actorId)
             const target = this.getMember(group, input.targetUserId)
             this.assertCanRemove(actor.role, target)
@@ -95,6 +109,7 @@ export class MembershipService {
                 ...input,
                 actorRole: actor.role,
                 targetRole: target.role,
+                leftAt: this.dependencies.clock.now(),
             }, transaction)
             if (!removed) throw new ConflictException(ERROR_CODES.CONFLICT, MEMBERSHIP_MESSAGES.MEMBERSHIP_CHANGED)
         })
@@ -104,6 +119,7 @@ export class MembershipService {
     async transferOwner(input: TransferOwnerInput): Promise<void> {
         await this.dependencies.transactionRunner.run(async (transaction) => {
             const group = await this.getGroup(input.conversationId, transaction)
+            this.assertGroupOpen(group)
             const actor = this.getMember(group, input.actorId)
             const target = this.getMember(group, input.newOwnerId)
             if (actor.role !== ROLE.OWNER || !group.ownerId.equals(input.actorId) || target.role === ROLE.OWNER) {
@@ -129,6 +145,12 @@ export class MembershipService {
         const member = group.members.find(({ userId: memberId }) => memberId.equals(userId))
         if (!member) throw new NotFoundException(MEMBERSHIP_MESSAGES.NOT_FOUND)
         return member
+    }
+
+    private assertGroupOpen(group: MembershipGroupRecord): void {
+        if (group.status === CONVERSATION_STATUS.CLOSED) {
+            throw new ConflictException(ERROR_CODES.GROUP_CLOSED, GROUP_MESSAGES.CLOSED)
+        }
     }
 
     private assertCanChangeRole(actorRole: GroupMemberRole, target: MembershipMemberRecord, input: ChangeRoleInput): void {

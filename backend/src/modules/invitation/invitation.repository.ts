@@ -1,4 +1,4 @@
-import { CONVERSATION_TYPE, GROUP_FIELDS } from "@linko/contracts"
+import { CONVERSATION_STATUS, CONVERSATION_TYPE, GROUP_FIELDS } from "@linko/contracts"
 
 import Conversation from "../../models/Conversation"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
@@ -34,6 +34,7 @@ export class MongooseInvitationRepository implements InvitationRepository {
             [CONVERSATION_FIELDS.ID]: conversationId,
             [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
         }).select({
+            [CONVERSATION_FIELDS.STATUS]: 1,
             [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: 1,
             [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.ROLE}`]: 1,
         })
@@ -42,10 +43,13 @@ export class MongooseInvitationRepository implements InvitationRepository {
         const conversation = await query.exec()
         if (!conversation) return null
         return {
-            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS].map((participant) => ({
-                userId: participant[PARTICIPANT_FIELDS.USER_ID],
-                role: participant[PARTICIPANT_FIELDS.ROLE],
-            })),
+            status: conversation[CONVERSATION_FIELDS.STATUS] ?? CONVERSATION_STATUS.ACTIVE,
+            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true)
+                .map((participant) => ({
+                    userId: participant[PARTICIPANT_FIELDS.USER_ID],
+                    role: participant[PARTICIPANT_FIELDS.ROLE],
+                })),
         }
     }
 
@@ -145,6 +149,7 @@ export class MongooseInvitationRepository implements InvitationRepository {
         const conversation = await Conversation.findOne({
             [CONVERSATION_FIELDS.ID]: conversationId,
             [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
+            [CONVERSATION_FIELDS.STATUS]: { $ne: CONVERSATION_STATUS.CLOSED },
         }).select({
             [`${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.NAME}`]: 1,
             [`${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.DESCRIPTION}`]: 1,
@@ -158,7 +163,8 @@ export class MongooseInvitationRepository implements InvitationRepository {
             name: group[GROUP_FIELDS.NAME],
             description: group[GROUP_FIELDS.DESCRIPTION] ?? null,
             avatarUrl: group[GROUP_FIELDS.AVATAR]?.[GROUP_AVATAR_FIELDS.URL] ?? null,
-            memberCount: conversation[CONVERSATION_FIELDS.PARTICIPANTS].length,
+            memberCount: conversation[CONVERSATION_FIELDS.PARTICIPANTS]
+                .filter((participant) => participant[PARTICIPANT_FIELDS.DEL_FLAG] !== true).length,
         }
     }
 

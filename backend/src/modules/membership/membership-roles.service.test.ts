@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import { ERROR_CODES, ROLE } from "@linko/contracts"
+import { CONVERSATION_STATUS, ERROR_CODES, ROLE } from "@linko/contracts"
 import { describe, expect, it, vi } from "vitest"
 
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
@@ -15,6 +15,7 @@ const JOINED_AT = new Date("2026-10-01T00:00:00.000Z")
 const GROUP: MembershipGroupRecord = {
     conversationId: CONVERSATION_ID,
     ownerId: OWNER_ID,
+    status: CONVERSATION_STATUS.ACTIVE,
     members: [
         { userId: OWNER_ID, role: ROLE.OWNER, displayName: "Owner", avatarUrl: null, joinedAt: JOINED_AT },
         { userId: ADMIN_ID, role: ROLE.ADMIN, displayName: "Admin", avatarUrl: null, joinedAt: JOINED_AT },

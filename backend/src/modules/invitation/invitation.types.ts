@@ -1,4 +1,4 @@
-import type { GroupDto, InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto, Role } from "@linko/contracts"
+import type { ConversationStatus, GroupDto, InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto, Role } from "@linko/contracts"
 import type { Types } from "mongoose"
 
 import type { GroupRecord } from "../conversation/conversation.types"
@@ -16,6 +16,7 @@ export interface InvitationParticipantRecord {
 
 /** Group membership data the service needs before exposing invitation metadata. */
 export interface InvitationGroupAccessRecord {
+    readonly status: ConversationStatus
     readonly participants: readonly InvitationParticipantRecord[]
 }
 

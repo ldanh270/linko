@@ -35,12 +35,20 @@ export const ERROR_CODES = {
     INVITATION_REQUEST_REPLAYED: "INVITATION_REQUEST_REPLAYED",
     INVITATION_RATE_LIMITED: "INVITATION_RATE_LIMITED",
     INSUFFICIENT_ROLE: "INSUFFICIENT_ROLE",
+    OWNER_TRANSFER_REQUIRED: "OWNER_TRANSFER_REQUIRED",
+    GROUP_CLOSED: "GROUP_CLOSED",
 } as const
 
 /** Conversation types stored by the persistence layer. */
 export const CONVERSATION_TYPE = {
     DIRECT: "DIRECT",
     GROUP: "GROUP",
+} as const
+
+/** Lifecycle states shared by group and conversation APIs. */
+export const CONVERSATION_STATUS = {
+    ACTIVE: "ACTIVE",
+    CLOSED: "CLOSED",
 } as const
 
 /** Conversation filter values accepted by list APIs. */
@@ -75,6 +83,11 @@ export const GROUP_FIELDS = {
     UPDATED_AT: "updatedAt",
 } as const
 
+/** DTO field names shared by conversation and group lifecycle responses. */
+export const CONVERSATION_DTO_FIELDS = {
+    STATUS: "status",
+} as const
+
 /** Group size and metadata limits defined by the Linko product contract. */
 export const GROUP_LIMITS = {
     MAX_GROUPS_PER_USER: 100,
@@ -88,6 +101,8 @@ export const GROUP_LIMITS = {
 export const CONVERSATION_ROUTE_PATHS = {
     ROOT: "/",
     BY_ID: `/:${CONVERSATION_PARAMS.ID}`,
+    LEAVE: `/:${CONVERSATION_PARAMS.ID}/leave`,
+    CLOSE: `/:${CONVERSATION_PARAMS.ID}/close`,
 } as const
 
 /** Invitation request paths shared by conversation routes and API adapters. */
@@ -183,3 +198,4 @@ export type GroupMemberRole = Exclude<Role, typeof ROLE.DIRECT>
 
 /** One persisted conversation type. */
 export type ConversationType = (typeof CONVERSATION_TYPE)[keyof typeof CONVERSATION_TYPE]
+export type ConversationStatus = (typeof CONVERSATION_STATUS)[keyof typeof CONVERSATION_STATUS]

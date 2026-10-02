@@ -1,4 +1,11 @@
-import { ERROR_CODES, ROLE, type GroupDto, type GroupSummaryDto } from "@linko/contracts"
+import {
+    CONVERSATION_DTO_FIELDS,
+    CONVERSATION_STATUS,
+    ERROR_CODES,
+    ROLE,
+    type GroupDto,
+    type GroupSummaryDto,
+} from "@linko/contracts"
 import mongoose from "mongoose"
 import { describe, expect, it, vi } from "vitest"
 
@@ -28,6 +35,7 @@ const OWNER_GROUP_RECORD: GroupRecord = {
     name: "Weekend readers",
     description: "Books and tea",
     avatar: null,
+    status: CONVERSATION_STATUS.ACTIVE,
     participants: [{ userId: OWNER_ID, role: ROLE.OWNER }],
     createdAt: TEST_DATE,
     updatedAt: TEST_DATE,
@@ -39,6 +47,7 @@ const OWNER_GROUP_DTO: GroupDto = {
     name: OWNER_GROUP_RECORD.name,
     description: OWNER_GROUP_RECORD.description,
     avatarUrl: null,
+    [CONVERSATION_DTO_FIELDS.STATUS]: CONVERSATION_STATUS.ACTIVE,
     participants: [{ userId: OWNER_ID.toString(), role: ROLE.OWNER }],
     createdAt: TEST_DATE.toISOString(),
     updatedAt: TEST_DATE.toISOString(),
@@ -55,6 +64,7 @@ const OWNER_GROUP_SUMMARY_DTO: GroupSummaryDto = {
     name: OWNER_GROUP_DTO.name,
     description: OWNER_GROUP_DTO.description,
     avatarUrl: null,
+    [CONVERSATION_DTO_FIELDS.STATUS]: CONVERSATION_STATUS.ACTIVE,
     memberCount: 1,
     lastMessageAt: null,
     updatedAt: TEST_DATE.toISOString(),

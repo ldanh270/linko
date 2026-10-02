@@ -4,6 +4,7 @@ import { GROUP_LIMITS } from "@linko/contracts"
 export const CONVERSATION_FIELDS = {
     ID: "_id",
     TYPE: "conversationType",
+    STATUS: "status",
     PARTICIPANTS: "participants",
     GROUP: "group",
     LAST_MESSAGE: "lastMessage",
@@ -22,6 +23,8 @@ export const PARTICIPANT_FIELDS = {
     MUTED_UNTIL: "mutedUntil",
     CLEARED_HISTORY_AT: "clearedHistoryAt",
     JOINED_AT: "joinedAt",
+    LEFT_AT: "leftAt",
+    DEL_FLAG: "delFlag",
 } as const
 
 /** MongoDB fields stored in the last-message summary subdocument. */
@@ -71,7 +74,9 @@ export const GROUP_MESSAGES = {
     AVATAR_TOO_LARGE: "Group avatar exceeds the upload size limit",
     AVATAR_CLEANUP_FAILED: "Failed to remove a group avatar after a database error",
     INVALID_RECORD: "Stored group conversation is missing required group details",
+    CLOSED: "This group has been closed",
 } as const
+
 
 /** Event identifiers for safe operational group logs. */
 export const GROUP_LOG_EVENTS = {

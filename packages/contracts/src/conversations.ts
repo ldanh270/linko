@@ -1,4 +1,4 @@
-import type { ConversationType } from "./constants"
+import { CONVERSATION_DTO_FIELDS, type ConversationStatus, type ConversationType } from "./constants"
 import type { EntityId } from "./envelope"
 
 /** Safe participant details used by the authenticated conversation inbox. */
@@ -32,6 +32,7 @@ export interface ConversationGroupSummaryDto {
 export interface ConversationSummaryDto {
     readonly id: EntityId
     readonly type: ConversationType
+    readonly [CONVERSATION_DTO_FIELDS.STATUS]: ConversationStatus
     readonly participants: readonly ConversationParticipantSummaryDto[]
     readonly unreadCount: Readonly<Record<string, number>>
     readonly lastMessage: ConversationLastMessageSummaryDto | null

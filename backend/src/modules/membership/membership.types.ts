@@ -1,4 +1,4 @@
-import type { GroupMemberRole, MemberDto } from "@linko/contracts"
+import type { ConversationStatus, GroupMemberRole, MemberDto } from "@linko/contracts"
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
@@ -20,6 +20,7 @@ export interface MembershipMemberRecord {
 export interface MembershipGroupRecord {
     readonly conversationId: ObjectId
     readonly ownerId: ObjectId
+    readonly status: ConversationStatus
     readonly members: readonly MembershipMemberRecord[]
 }
 
@@ -68,6 +69,7 @@ export type AddMemberResult =
     | { readonly outcome: typeof MEMBERSHIP_ADD_OUTCOMES.EXISTING; readonly member: MembershipMemberRecord }
     | { readonly outcome: typeof MEMBERSHIP_ADD_OUTCOMES.LIMIT }
     | { readonly outcome: typeof MEMBERSHIP_ADD_OUTCOMES.MISSING }
+    | { readonly outcome: typeof MEMBERSHIP_ADD_OUTCOMES.CLOSED }
     | { readonly outcome: typeof MEMBERSHIP_ADD_OUTCOMES.STALE }
 
 /** Expected roles used to guard one conditional group role update. */
@@ -80,6 +82,7 @@ export interface ChangeRoleRecordInput extends ChangeRoleInput {
 export interface RemoveMemberRecordInput extends RemoveMemberInput {
     readonly actorRole: GroupMemberRole
     readonly targetRole: GroupMemberRole
+    readonly leftAt: Date
 }
 
 /** Expected old and target roles used for atomic ownership transfer. */
