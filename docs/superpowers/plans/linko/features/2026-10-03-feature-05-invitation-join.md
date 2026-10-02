@@ -52,10 +52,10 @@
 
 **Files:** Route/controller/dto/schema/mapper trong module; test backend/src/modules/invitation/invitation-join.route.test.ts.
 
-- [ ] Step 1: Viết test route/integration thất bại: public preview contains name/avatar/description/count only; invalid/expired/revoked 410; unauthenticated accept 401; full group 409. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-join.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
-- [ ] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route/integration thất bại: public preview contains name/avatar/description/count only; invalid/expired/revoked 410; unauthenticated accept 401; full group 409. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-join.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
+- [x] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
 
 ### Task 3: Client contract
 

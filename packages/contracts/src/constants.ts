@@ -108,9 +108,10 @@ export const INVITATION_ROUTE_PATHS = {
     BY_ID: `/:${INVITATION_PARAMS.CONVERSATION_ID}/invitations/:${INVITATION_PARAMS.INVITATION_ID}`,
 } as const
 
-/** Public, unauthenticated invitation preview path. */
+/** Token-scoped invitation preview and acceptance paths. */
 export const INVITATION_PREVIEW_ROUTE_PATHS = {
     PREVIEW: `/:${INVITATION_PARAMS.TOKEN}/preview`,
+    ACCEPT: `/:${INVITATION_PARAMS.TOKEN}/accept`,
 } as const
 
 /** Browser route prefix for a one-time invitation URL. */

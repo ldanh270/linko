@@ -3,6 +3,7 @@ import {
     INVITATION_HEADERS,
     INVITATION_PARAMS,
     type ApiEnvelope,
+    type GroupDto,
     type InvitationPreviewDto,
     type InvitationSummaryDto,
     type IssuedInvitationDto,
@@ -60,6 +61,15 @@ export class InvitationController {
     readonly preview: InvitationRequestHandler<EmptyRequestBody, InvitationPreviewDto> = async (request, response) => {
         const preview = await this.service.preview(request.params[INVITATION_PARAMS.TOKEN])
         response.status(HttpStatusCode.OK).json(ApiResponse.ok(preview))
+    }
+
+    /** Accept a public link for the authenticated account and return its destination group. */
+    readonly accept: InvitationRequestHandler<EmptyRequestBody, GroupDto> = async (request, response) => {
+        const group = await this.service.accept({
+            rawToken: request.params[INVITATION_PARAMS.TOKEN],
+            userId: request.user._id,
+        })
+        response.status(HttpStatusCode.OK).json(ApiResponse.ok(group))
     }
 
     private createManageInput(conversationId: string, actorId: mongoose.Types.ObjectId): ManageInvitationsInput {

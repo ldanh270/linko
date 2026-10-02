@@ -8,6 +8,7 @@ import validate from "../../middlewares/validate.middleware"
 import { InvitationController } from "./invitation.controller"
 import {
     issueInvitationSchema,
+    acceptInvitationSchema,
     listInvitationsSchema,
     previewInvitationSchema,
     revokeInvitationSchema,
@@ -31,11 +32,24 @@ export function createInvitationRouter(controller: InvitationController): Router
 /** Register the public, read-only invitation preview endpoint before authentication. */
 export function createInvitationPreviewRouter(controller: InvitationController): Router {
     const router = express.Router()
+    addSecretTokenHeaders(router)
+    router.get(INVITATION_PREVIEW_ROUTE_PATHS.PREVIEW, validate(previewInvitationSchema), controller.preview)
+    return router
+}
+
+/** Register authenticated invitation acceptance after the global authentication middleware. */
+export function createInvitationAcceptRouter(controller: InvitationController): Router {
+    const router = express.Router()
+    addSecretTokenHeaders(router)
+    router.post(INVITATION_PREVIEW_ROUTE_PATHS.ACCEPT, validate(acceptInvitationSchema), controller.accept)
+    return router
+}
+
+/** Prevent browser caches and referrers from retaining token-bearing invitation URLs. */
+function addSecretTokenHeaders(router: Router): void {
     router.use((_request, response, next) => {
         response.setHeader("Referrer-Policy", "no-referrer")
         response.setHeader("Cache-Control", "no-store")
         next()
     })
-    router.get(INVITATION_PREVIEW_ROUTE_PATHS.PREVIEW, validate(previewInvitationSchema), controller.preview)
-    return router
 }

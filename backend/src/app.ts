@@ -23,7 +23,11 @@ import { R2ProfileImageStorage } from "./modules/user/profile.image-storage"
 import { ProfileService } from "./modules/user/profile.service"
 import { InvitationController } from "./modules/invitation/invitation.controller"
 import { MongooseInvitationRepository } from "./modules/invitation/invitation.repository"
-import { createInvitationPreviewRouter, createInvitationRouter } from "./modules/invitation/invitation.route"
+import {
+    createInvitationAcceptRouter,
+    createInvitationPreviewRouter,
+    createInvitationRouter,
+} from "./modules/invitation/invitation.route"
 import { InvitationService } from "./modules/invitation/invitation.service"
 import { AuthTokenService, BcryptPasswordHasher } from "./modules/auth/auth.security"
 import { AuthService } from "./modules/auth/auth.service"
@@ -92,6 +96,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.AUTH, createAuthRouter(authController))
     app.use(API_ROUTES.INVITATIONS, createInvitationPreviewRouter(invitationController))
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
+    app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
     app.use(dependencies.privateRoutes)
     app.use(API_ROUTES.USERS, createProfileRouter(profileController))
     app.use(API_ROUTES.CONVERSATIONS, createMembershipRouter(membershipController))
