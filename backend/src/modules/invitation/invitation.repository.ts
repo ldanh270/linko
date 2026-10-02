@@ -1,13 +1,18 @@
-import { CONVERSATION_TYPE } from "@linko/contracts"
+import { CONVERSATION_TYPE, GROUP_FIELDS } from "@linko/contracts"
 
 import Conversation from "../../models/Conversation"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
-import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "../conversation/conversation.constants"
+import {
+    CONVERSATION_FIELDS,
+    GROUP_AVATAR_FIELDS,
+    PARTICIPANT_FIELDS,
+} from "../conversation/conversation.constants"
 import Invitation, { type InvitationType } from "./Invitation"
 import { INVITATION_MESSAGES, INVITATION_MODEL_FIELDS } from "./invitation.constants"
 import type {
     CreateInvitationRecord,
     InvitationGroupAccessRecord,
+    InvitationPublicGroupPreviewRecord,
     InvitationRepository,
     InvitationRecord,
     InvitationSummaryRecord,
@@ -85,6 +90,38 @@ export class MongooseInvitationRepository implements InvitationRepository {
         if (transaction) query.session(transaction.session)
         const invitation = await query.exec()
         return invitation ? this.toInvitationRecord(invitation) : null
+    }
+
+    /** Resolve an invitation only by its persisted one-way token digest. */
+    async findInvitationByTokenHash(tokenHash: string): Promise<InvitationRecord | null> {
+        const invitation = await Invitation.findOne({
+            [INVITATION_MODEL_FIELDS.TOKEN_HASH]: tokenHash,
+        }).exec()
+        return invitation ? this.toInvitationRecord(invitation) : null
+    }
+
+    /** Return only public group metadata and the current participant count. */
+    async findPublicGroupPreview(
+        conversationId: ObjectId,
+    ): Promise<InvitationPublicGroupPreviewRecord | null> {
+        const conversation = await Conversation.findOne({
+            [CONVERSATION_FIELDS.ID]: conversationId,
+            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
+        }).select({
+            [`${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.NAME}`]: 1,
+            [`${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.DESCRIPTION}`]: 1,
+            [`${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.AVATAR}.${GROUP_AVATAR_FIELDS.URL}`]: 1,
+            [CONVERSATION_FIELDS.PARTICIPANTS]: 1,
+        }).exec()
+        const group = conversation?.[CONVERSATION_FIELDS.GROUP]
+        if (!conversation || !group) return null
+
+        return {
+            name: group[GROUP_FIELDS.NAME],
+            description: group[GROUP_FIELDS.DESCRIPTION] ?? null,
+            avatarUrl: group[GROUP_FIELDS.AVATAR]?.[GROUP_AVATAR_FIELDS.URL] ?? null,
+            memberCount: conversation[CONVERSATION_FIELDS.PARTICIPANTS].length,
+        }
     }
 
     /** Return invitation list fields without selecting the token hash. */

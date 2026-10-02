@@ -1,3 +1,5 @@
+import { INVITATION_LIMITS } from "@linko/contracts"
+
 /** Structured technical error record written by the server logger. */
 export interface LogRecord {
     level: "error"
@@ -25,9 +27,15 @@ export interface ServerLogger {
     error(error: Error, context: ErrorLogContext): void
 }
 
+const INVITATION_TOKEN_LOG_PATTERN = new RegExp(
+    `(^|[^A-Za-z0-9_-])([A-Za-z0-9_-]{${INVITATION_LIMITS.TOKEN_LENGTH}})(?=$|[^A-Za-z0-9_-])`,
+    "g",
+)
+
 const redact = (value: string): string => value
     .replace(/\bBearer\s+[^\s"']+/gi, "Bearer [REDACTED]")
     .replace(/(\b(?:password|token|authorization|cookie|inviteToken|refreshToken|accessToken)\b["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}]+)/gi, "$1[REDACTED]")
+    .replace(INVITATION_TOKEN_LOG_PATTERN, "$1[REDACTED]")
 
 /** Create a logger whose sink can be replaced in tests. */
 export function createLogger(write: (record: LogRecord) => void): ServerLogger {
@@ -39,7 +47,7 @@ export function createLogger(write: (record: LogRecord) => void): ServerLogger {
                 stack: redact(error.stack ?? `${error.name}: ${error.message}`),
                 requestId: context.requestId,
                 method: context.method,
-                path: context.path,
+                path: redact(context.path),
                 ...(context.userId ? { userId: context.userId } : {}),
                 ...(context.metadata ? { metadata: context.metadata } : {}),
             })

@@ -1,11 +1,18 @@
 import { createHash, randomBytes } from "node:crypto"
-import { ERROR_CODES, INVITATION_LINK_PATH, INVITATION_LIMITS, ROLE } from "@linko/contracts"
+import {
+    ERROR_CODES,
+    INVITATION_LINK_PATH,
+    INVITATION_LIMITS,
+    ROLE,
+    type InvitationPreviewDto,
+} from "@linko/contracts"
 
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import { NotFoundException } from "../../shared/errors/NotFoundException"
+import { InvitationUnavailableException } from "./InvitationUnavailableException"
 import { INVITATION_MESSAGES } from "./invitation.constants"
-import { toInvitationSummaryDto, toIssuedInvitationDto } from "./invitation.mapper"
+import { toInvitationPreviewDto, toInvitationSummaryDto, toIssuedInvitationDto } from "./invitation.mapper"
 import type {
     InvitationGroupAccessRecord,
     InvitationRepository,
@@ -67,6 +74,19 @@ export class InvitationService {
         return invitations.map(toInvitationSummaryDto)
     }
 
+    /** Return limited public group details for a valid, unexpired invitation token. */
+    async preview(rawToken: string): Promise<InvitationPreviewDto> {
+        const tokenHash = createHash("sha256").update(rawToken).digest("hex")
+        const invitation = await this.dependencies.repository.findInvitationByTokenHash(tokenHash)
+        if (!invitation || !this.isInvitationAvailable(invitation)) {
+            throw new InvitationUnavailableException()
+        }
+
+        const group = await this.dependencies.repository.findPublicGroupPreview(invitation.conversationId)
+        if (!group) throw new InvitationUnavailableException()
+        return toInvitationPreviewDto(group, invitation.expiresAt)
+    }
+
     /** Revoke one link immediately while retaining its audit record. */
     async revoke(input: RevokeInvitationInput): Promise<void> {
         await this.dependencies.transactionRunner.run(async (transaction) => {
@@ -101,5 +121,16 @@ export class InvitationService {
 
     private isDuplicateKeyError(error: unknown): boolean {
         return typeof error === "object" && error !== null && "code" in error && error.code === 11000
+    }
+
+    private isInvitationAvailable(invitation: {
+        readonly expiresAt: Date
+        readonly maxUses: number
+        readonly useCount: number
+        readonly revokedAt: Date | null
+    }): boolean {
+        return invitation.revokedAt === null &&
+            invitation.expiresAt.getTime() > Date.now() &&
+            invitation.useCount < invitation.maxUses
     }
 }

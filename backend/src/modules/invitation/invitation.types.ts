@@ -1,4 +1,4 @@
-import type { InvitationSummaryDto, IssuedInvitationDto, Role } from "@linko/contracts"
+import type { InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto, Role } from "@linko/contracts"
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
@@ -17,7 +17,7 @@ export interface InvitationGroupAccessRecord {
     readonly participants: readonly InvitationParticipantRecord[]
 }
 
-/** Secret-free invitation fields needed by the service and API mapper. */
+/** Internal invitation fields used by the service; tokenHash never crosses the API boundary. */
 export interface InvitationRecord {
     readonly id: ObjectId
     readonly conversationId: ObjectId
@@ -37,6 +37,14 @@ export interface InvitationSummaryRecord {
     readonly useCount: number
     readonly revokedAt: Date | null
     readonly createdAt: Date
+}
+
+/** Public group details safe to show before a user accepts an invitation. */
+export interface InvitationPublicGroupPreviewRecord {
+    readonly name: string
+    readonly description: string | null
+    readonly avatarUrl: string | null
+    readonly memberCount: number
 }
 
 /** New persisted values accepted after service validation. */
@@ -77,6 +85,10 @@ export interface InvitationRepository {
         conversationId: ObjectId,
         transaction?: TransactionContext,
     ): Promise<InvitationRecord | null>
+    /** Resolve one invitation using only the digest of its raw URL token. */
+    findInvitationByTokenHash(tokenHash: string): Promise<InvitationRecord | null>
+    /** Load the limited group fields allowed on a public invitation preview. */
+    findPublicGroupPreview(conversationId: ObjectId): Promise<InvitationPublicGroupPreviewRecord | null>
     /** List safe invitation metadata in creation order. */
     listInvitations(conversationId: ObjectId): Promise<readonly InvitationSummaryRecord[]>
     /** Set the revocation timestamp on an invitation within its group. */
@@ -102,4 +114,4 @@ export interface InvitationServiceDependencies {
 }
 
 /** Shared API result shapes returned by invitation service operations. */
-export type { InvitationSummaryDto, IssuedInvitationDto }
+export type { InvitationPreviewDto, InvitationSummaryDto, IssuedInvitationDto }

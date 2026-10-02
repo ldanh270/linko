@@ -11,6 +11,10 @@ import { R2GroupAvatarStorage } from "./modules/conversation/group-avatar.storag
 import { ConversationService } from "./modules/conversation/conversation.service"
 import { LoggerGroupAvatarCleanupFailureRecorder } from "./modules/conversation/group-avatar-cleanup.recorder"
 import { MongooseAuthRepository } from "./modules/auth/auth.repository"
+import { InvitationController } from "./modules/invitation/invitation.controller"
+import { MongooseInvitationRepository } from "./modules/invitation/invitation.repository"
+import { createInvitationPreviewRouter, createInvitationRouter } from "./modules/invitation/invitation.route"
+import { InvitationService } from "./modules/invitation/invitation.service"
 import { AuthTokenService, BcryptPasswordHasher } from "./modules/auth/auth.security"
 import { AuthService } from "./modules/auth/auth.service"
 import { AuthController } from "./modules/auth/auth.controller"
@@ -45,8 +49,14 @@ export function createApp(dependencies: AppDependencies): Express {
         avatarStorage: new R2GroupAvatarStorage(),
         avatarCleanupFailureRecorder: new LoggerGroupAvatarCleanupFailureRecorder(dependencies.logger),
     })
+    const invitationService = new InvitationService({
+        repository: new MongooseInvitationRepository(),
+        transactionRunner: { run: withTransaction },
+        clientOrigin: dependencies.authConfig.clientOrigin,
+    })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const conversationController = new ConversationController(conversationService)
+    const invitationController = new InvitationController(invitationService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -54,8 +64,10 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(cookieParser())
     app.use(dependencies.publicRoutes)
     app.use(API_ROUTES.AUTH, createAuthRouter(authController))
+    app.use(API_ROUTES.INVITATIONS, createInvitationPreviewRouter(invitationController))
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(API_ROUTES.CONVERSATIONS, createConversationRouter(conversationController))
+    app.use(API_ROUTES.CONVERSATIONS, createInvitationRouter(invitationController))
     app.use(dependencies.privateRoutes)
     app.use(() => {
         throw new BusinessException(ERROR_CODES.NOT_FOUND, 404, "Route not found")

@@ -3,7 +3,11 @@ import { INVITATION_LIMITS } from "@linko/contracts"
 
 import { auditPlugin } from "../../shared/persistence/auditPlugin"
 import { softDeletePlugin } from "../../shared/persistence/softDeletePlugin"
-import { INVITATION_MODEL_FIELDS, INVITATION_PATTERNS } from "./invitation.constants"
+import {
+    INVITATION_MODEL_FIELDS,
+    INVITATION_PERSISTENCE_LIMITS,
+    INVITATION_PERSISTENCE_PATTERNS,
+} from "./invitation.constants"
 
 const invitationSchema = new mongoose.Schema(
     {
@@ -17,7 +21,7 @@ const invitationSchema = new mongoose.Schema(
             required: true,
             minlength: INVITATION_LIMITS.TOKEN_HASH_LENGTH,
             maxlength: INVITATION_LIMITS.TOKEN_HASH_LENGTH,
-            match: INVITATION_PATTERNS.TOKEN_HASH,
+            match: INVITATION_PERSISTENCE_PATTERNS.TOKEN_HASH,
         },
         [INVITATION_MODEL_FIELDS.EXPIRES_AT]: {
             type: Date,
@@ -53,7 +57,7 @@ const invitationSchema = new mongoose.Schema(
 invitationSchema.pre("validate", function () {
     if (this.isNew) {
         this[INVITATION_MODEL_FIELDS.EXPIRES_AT] = new Date(
-            this[INVITATION_MODEL_FIELDS.CREATED_AT].getTime() + INVITATION_LIMITS.LIFETIME_MS,
+            this[INVITATION_MODEL_FIELDS.CREATED_AT].getTime() + INVITATION_PERSISTENCE_LIMITS.EXPIRATION_MS,
         )
     }
 })

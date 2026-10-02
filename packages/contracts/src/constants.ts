@@ -2,6 +2,7 @@
 export const API_ROUTES = {
     AUTH: "/api/auth",
     CONVERSATIONS: "/api/conversations",
+    INVITATIONS: "/api/invitations",
     MESSAGES: "/api/messages",
     USERS: "/api/users",
     FRIENDS: "/api/friends",
@@ -30,6 +31,7 @@ export const ERROR_CODES = {
     INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
     INVALID_SESSION: "INVALID_SESSION",
     GROUP_LIMIT: "GROUP_LIMIT",
+    INVITATION_UNAVAILABLE: "INVITATION_UNAVAILABLE",
 } as const
 
 /** Conversation types stored by the persistence layer. */
@@ -89,6 +91,7 @@ export const CONVERSATION_ROUTE_PATHS = {
 export const INVITATION_PARAMS = {
     CONVERSATION_ID: CONVERSATION_PARAMS.ID,
     INVITATION_ID: "invitationId",
+    TOKEN: "token",
 } as const
 
 /** Invitation route suffixes mounted below the conversation API prefix. */
@@ -97,15 +100,28 @@ export const INVITATION_ROUTE_PATHS = {
     BY_ID: `/:${INVITATION_PARAMS.CONVERSATION_ID}/invitations/:${INVITATION_PARAMS.INVITATION_ID}`,
 } as const
 
+/** Public, unauthenticated invitation preview path. */
+export const INVITATION_PREVIEW_ROUTE_PATHS = {
+    PREVIEW: `/:${INVITATION_PARAMS.TOKEN}/preview`,
+} as const
+
 /** Browser route prefix for a one-time invitation URL. */
 export const INVITATION_LINK_PATH = "/invite"
 
+const INVITATION_TOKEN_BYTES = 32
+
 /** Invitation limits shared by issuance, persistence, and API clients. */
 export const INVITATION_LIMITS = {
-    TOKEN_BYTES: 32,
+    TOKEN_BYTES: INVITATION_TOKEN_BYTES,
+    TOKEN_LENGTH: Math.ceil((INVITATION_TOKEN_BYTES * 8) / 6),
     TOKEN_HASH_LENGTH: 64,
     LIFETIME_MS: 7 * 24 * 60 * 60 * 1000,
     MAX_USES: 25,
+} as const
+
+/** Invitation token syntax shared by public route validation and log redaction. */
+export const INVITATION_PATTERNS = {
+    TOKEN: new RegExp(`^[A-Za-z0-9_-]{${INVITATION_LIMITS.TOKEN_LENGTH}}$`),
 } as const
 
 /** Public invitation DTO field names shared by backend mappers and clients. */
@@ -117,6 +133,15 @@ export const INVITATION_FIELDS = {
     USE_COUNT: "useCount",
     REVOKED_AT: "revokedAt",
     CREATED_AT: "createdAt",
+} as const
+
+/** Minimal public fields rendered by the unauthenticated invitation preview. */
+export const INVITATION_PREVIEW_FIELDS = {
+    GROUP_NAME: "groupName",
+    GROUP_DESCRIPTION: "groupDescription",
+    GROUP_AVATAR_URL: "groupAvatarUrl",
+    MEMBER_COUNT: "memberCount",
+    EXPIRES_AT: INVITATION_FIELDS.EXPIRES_AT,
 } as const
 
 /** Group and direct conversation roles stored as text. */

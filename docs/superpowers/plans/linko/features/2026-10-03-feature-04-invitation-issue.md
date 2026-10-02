@@ -43,19 +43,19 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/invitation/invitation-issue.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_store_only_sha256_token_hash; should_expire_after_7_days; should_revoke_immediately. Assertions cốt lõi: expect(saved.tokenHash).toHaveLength(64); expect(saved).not.toHaveProperty('token'); expect(revoked.revokedAt).not.toBeNull().
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-issue.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_store_only_sha256_token_hash; should_expire_after_7_days; should_revoke_immediately. Assertions cốt lõi: expect(saved.tokenHash).toHaveLength(64); expect(saved).not.toHaveProperty('token'); expect(revoked.revokedAt).not.toBeNull().
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-issue.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 
 **Files:** Route/controller/dto/schema/mapper trong module; test backend/src/modules/invitation/invitation-issue.route.test.ts.
 
-- [ ] Step 1: Viết test route/integration thất bại: owner/admin 201, member 403; list omits raw token; revoke 200; expired link 410 via preview. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-issue.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
-- [ ] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route/integration thất bại: owner/admin 201, member 403; list omits raw token; revoke 200; expired link 410 via preview. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/invitation/invitation-issue.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
+- [x] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
 
 ### Task 3: Client contract
 
