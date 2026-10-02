@@ -11,6 +11,12 @@ import { R2GroupAvatarStorage } from "./modules/conversation/group-avatar.storag
 import { ConversationService } from "./modules/conversation/conversation.service"
 import { LoggerGroupAvatarCleanupFailureRecorder } from "./modules/conversation/group-avatar-cleanup.recorder"
 import { MongooseAuthRepository } from "./modules/auth/auth.repository"
+import { LoggerProfileImageCleanupFailureRecorder } from "./modules/user/profile.cleanup-recorder"
+import { ProfileController } from "./modules/user/profile.controller"
+import { MongooseProfileRepository } from "./modules/user/profile.repository"
+import { createProfileRouter } from "./modules/user/profile.route"
+import { R2ProfileImageStorage } from "./modules/user/profile.image-storage"
+import { ProfileService } from "./modules/user/profile.service"
 import { InvitationController } from "./modules/invitation/invitation.controller"
 import { MongooseInvitationRepository } from "./modules/invitation/invitation.repository"
 import { createInvitationPreviewRouter, createInvitationRouter } from "./modules/invitation/invitation.route"
@@ -55,6 +61,12 @@ export function createApp(dependencies: AppDependencies): Express {
         clientOrigin: dependencies.authConfig.clientOrigin,
     })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
+    const profileService = new ProfileService({
+        repository: new MongooseProfileRepository(),
+        imageStorage: new R2ProfileImageStorage(),
+        cleanupFailureRecorder: new LoggerProfileImageCleanupFailureRecorder(dependencies.logger),
+    })
+    const profileController = new ProfileController(profileService)
     const conversationController = new ConversationController(conversationService)
     const invitationController = new InvitationController(invitationService)
     const app = express()
@@ -66,9 +78,10 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.AUTH, createAuthRouter(authController))
     app.use(API_ROUTES.INVITATIONS, createInvitationPreviewRouter(invitationController))
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
+    app.use(dependencies.privateRoutes)
+    app.use(API_ROUTES.USERS, createProfileRouter(profileController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationRouter(conversationController))
     app.use(API_ROUTES.CONVERSATIONS, createInvitationRouter(invitationController))
-    app.use(dependencies.privateRoutes)
     app.use(() => {
         throw new BusinessException(ERROR_CODES.NOT_FOUND, 404, "Route not found")
     })

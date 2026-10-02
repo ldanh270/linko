@@ -1,3 +1,4 @@
+import { USER_ROUTE_PARAMS, USER_ROUTE_PATHS } from "@linko/contracts"
 
 /** Profile database, DTO, and media field names shared within the user module. */
 export const PROFILE_FIELDS = {
@@ -32,6 +33,17 @@ export const PROFILE_IMAGE_FIELDS = {
     BACKGROUND: PROFILE_FIELDS.BACKGROUND,
 } as const
 
+/** Exact multipart boolean values accepted by the profile upload form. */
+export const PROFILE_FORM_VALUES = {
+    TRUE: "true",
+    FALSE: "false",
+} as const
+
+/** Validation patterns used at the profile HTTP boundary. */
+export const PROFILE_PATTERNS = {
+    OBJECT_ID: /^[a-f\d]{24}$/i,
+} as const
+
 /** Stable messages used for expected profile validation and lookup failures. */
 export const PROFILE_MESSAGES = {
     NOT_FOUND: "User profile not found",
@@ -41,6 +53,11 @@ export const PROFILE_MESSAGES = {
     EMPTY_UPDATE: "At least one profile field must be changed",
 } as const
 
+/** Structured event names for retryable profile image cleanup failures. */
+export const PROFILE_LOG_EVENTS = {
+    IMAGE_CLEANUP_FAILED: "profile.image_cleanup_failed",
+} as const
+
 /** MongoDB duplicate-key value translated by the profile repository. */
 export const PROFILE_DATABASE_CODES = {
     DUPLICATE_KEY: 11000,
@@ -48,3 +65,5 @@ export const PROFILE_DATABASE_CODES = {
 
 /** Profile media slot accepted by the image storage port. */
 export type ProfileImageField = (typeof PROFILE_IMAGE_FIELDS)[keyof typeof PROFILE_IMAGE_FIELDS]
+
+export { USER_ROUTE_PARAMS as PROFILE_ROUTE_PARAMS, USER_ROUTE_PATHS as PROFILE_ROUTE_PATHS }
