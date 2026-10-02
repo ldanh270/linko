@@ -86,7 +86,7 @@ export interface ConversationSummaryRecord {
     readonly type: ConversationType
     readonly status: ConversationStatus
     readonly participants: readonly ConversationParticipantSummaryRecord[]
-    readonly unreadCount: Readonly<Record<string, number>>
+    readonly unreadCount: number
     readonly lastMessage: ConversationLastMessageSummaryRecord | null
     readonly group: ConversationGroupSummaryRecord | null
     readonly createdAt: Date

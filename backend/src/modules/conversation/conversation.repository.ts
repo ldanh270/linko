@@ -265,7 +265,7 @@ export class MongooseConversationRepository implements ConversationRepository {
                     joinedAt: participant[PARTICIPANT_FIELDS.JOINED_AT] ?? null,
                 }]
             }),
-            unreadCount: Object.fromEntries(conversation[CONVERSATION_FIELDS.UNREAD_COUNT].entries()),
+            unreadCount: conversation[CONVERSATION_FIELDS.UNREAD_COUNT].get(requestingUserId.toString()) ?? 0,
             lastMessage: lastMessage && isLastMessageVisible
                 ? {
                     id: lastMessage[LAST_MESSAGE_FIELDS.MESSAGE_ID] ?? null,

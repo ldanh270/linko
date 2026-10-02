@@ -54,12 +54,51 @@ export const CONVERSATION_STATUS = {
 
 /** Conversation filter values accepted by list APIs. */
 export const CONVERSATION_KIND = {
+    ALL: "all",
     GROUP: "group",
+    DIRECT: "direct",
 } as const
+
+/** Conversation kind values accepted by the inbox filter. */
+export type ConversationKind = (typeof CONVERSATION_KIND)[keyof typeof CONVERSATION_KIND]
 
 /** Query parameter names shared by conversation routes and clients. */
 export const CONVERSATION_QUERY_PARAMS = {
     KIND: "kind",
+    CURSOR: "cursor",
+    LIMIT: "limit",
+} as const
+
+/** Inbox fields shared by cursor-page DTOs and feature adapters. */
+export const INBOX_FIELDS = {
+    ID: "id",
+    TYPE: "type",
+    PARTICIPANTS: "participants",
+    UNREAD_COUNT: "unreadCount",
+    LAST_MESSAGE: "lastMessage",
+    GROUP: "group",
+    CREATED_AT: "createdAt",
+    UPDATED_AT: "updatedAt",
+} as const
+
+/** Participant profile fields returned in an inbox row. */
+export const INBOX_PARTICIPANT_FIELDS = {
+    ID: INBOX_FIELDS.ID,
+    DISPLAY_NAME: "displayName",
+    AVATAR_URL: "avatarUrl",
+    JOINED_AT: "joinedAt",
+} as const
+
+/** Last-message preview fields returned in an inbox row. */
+export const INBOX_MESSAGE_FIELDS = {
+    SENDER: "sender",
+} as const
+
+/** Bounds applied by the inbox cursor API and service. */
+export const INBOX_LIMITS = {
+    DEFAULT_PAGE_SIZE: 20,
+    MAX_PAGE_SIZE: 50,
+    MAX_CURSOR_LENGTH: 256,
 } as const
 
 /** Route parameter names shared by conversation handlers and schemas. */

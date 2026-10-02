@@ -43,10 +43,10 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/inbox/inbox.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_hide_group_after_leave; should_hide_pre_join_last_message; should_sort_by_last_visible_activity. Assertions cốt lõi: expect(items).not.toContainEqual(expect.objectContaining({id: leftGroupId})); expect(newMemberPreview.content).toBeNull().
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/inbox/inbox.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Added tests for departed membership, pre-join preview hiding, visible-activity ordering with empty conversations, requester-only unread counts, closed groups, and same-timestamp cursor ties.
+- [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/inbox/inbox.service.test.ts`; the initial run failed because the inbox repository and service were not implemented.
+- [x] Step 3: Added inbox repository interface, aggregate-backed Mongoose repository, service, mapper, cursor/limit constants, and shared inbox DTO contract. The service has no transaction because listing is read-only.
+- [x] Step 4: Inbox domain tests (6) and backend typecheck pass. Domain task commit pending.
 
 ### Task 2: API boundary and integration
 
