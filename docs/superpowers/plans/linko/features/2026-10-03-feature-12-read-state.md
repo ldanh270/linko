@@ -52,10 +52,10 @@
 
 **Files:** route/controller/dto/schema/mapper trong module; test backend/src/modules/read/read-state.route.test.ts.
 
-- [ ] Step 1: Viết test route thất bại: nonmember 403/404; invalid messageId 400; rejoin starts new read state; 200 envelope. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/read/read-state.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
-- [ ] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Added isolated MongoDB route tests for auth/current membership, malformed IDs, cross-conversation messages, invitation rejoin reset, and the success envelope.
+- [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/read/read-state.route.test.ts`; requests reached the global 404 while the route was absent. Corrected the rejoin fixture timestamps to past values after the first run.
+- [x] Step 3: Added Zod validation, authenticated HTTP-only controller, and route registration through the composition root. No previous read route existed to remove.
+- [x] Step 4: Route integration tests (5) and backend typecheck pass. API task commit pending.
 
 ### Task 3: Client contract
 
