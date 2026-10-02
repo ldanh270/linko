@@ -43,10 +43,10 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/message/messaging.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_return_same_message_for_same_clientMessageId; should_hide_messages_before_joinedAt; should_reject_nonmember. Assertions cốt lõi: expect(retried.id).toBe(first.id); expect(page.items.every(m => m.createdAt >= joinedAt)).toBe(true).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/message/messaging.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_return_same_message_for_same_clientMessageId; should_hide_messages_before_joinedAt; should_reject_nonmember. Assertions cốt lõi: expect(retried.id).toBe(first.id); expect(page.items.every(m => m.createdAt >= joinedAt)).toBe(true).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/message/messaging.service.test.ts; xác nhận FAIL do module/repository chưa tồn tại.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 

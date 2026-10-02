@@ -37,6 +37,7 @@ export const ERROR_CODES = {
     INSUFFICIENT_ROLE: "INSUFFICIENT_ROLE",
     OWNER_TRANSFER_REQUIRED: "OWNER_TRANSFER_REQUIRED",
     GROUP_CLOSED: "GROUP_CLOSED",
+    FRIENDSHIP_REQUIRED: "FRIENDSHIP_REQUIRED",
 } as const
 
 /** Conversation types stored by the persistence layer. */
@@ -103,6 +104,43 @@ export const CONVERSATION_ROUTE_PATHS = {
     BY_ID: `/:${CONVERSATION_PARAMS.ID}`,
     LEAVE: `/:${CONVERSATION_PARAMS.ID}/leave`,
     CLOSE: `/:${CONVERSATION_PARAMS.ID}/close`,
+} as const
+
+/** Message route parameter names shared by validation, controllers, and clients. */
+export const MESSAGE_PARAMS = {
+    CONVERSATION_ID: "conversationId",
+} as const
+
+/** Message list query parameters shared by validation and API adapters. */
+export const MESSAGE_QUERY_PARAMS = {
+    CURSOR: "cursor",
+    LIMIT: "limit",
+} as const
+
+/** Public message DTO and request field names shared across API boundaries. */
+export const MESSAGE_FIELDS = {
+    ID: "id",
+    CONVERSATION_ID: "conversationId",
+    SENDER_ID: "senderId",
+    CLIENT_MESSAGE_ID: "clientMessageId",
+    CONTENT: "content",
+    CREATED_AT: "createdAt",
+    UPDATED_AT: "updatedAt",
+} as const
+
+/** Message API route suffixes mounted below `/api/messages`. */
+export const MESSAGE_ROUTE_PATHS = {
+    ROOT: "/",
+    BY_CONVERSATION: `/:${MESSAGE_PARAMS.CONVERSATION_ID}`,
+} as const
+
+/** Message validation and pagination limits shared by server and clients. */
+export const MESSAGE_LIMITS = {
+    MAX_CONTENT_LENGTH: 4000,
+    CLIENT_MESSAGE_ID_LENGTH: 128,
+    DEFAULT_PAGE_SIZE: 30,
+    MAX_PAGE_SIZE: 100,
+    MAX_CURSOR_LENGTH: 256,
 } as const
 
 /** Invitation request paths shared by conversation routes and API adapters. */

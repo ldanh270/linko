@@ -1,25 +1,33 @@
 import mongoose, { InferSchemaType } from "mongoose"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
+import { MESSAGE_INDEX_NAMES, MESSAGE_MODEL_FIELDS } from "#/modules/message/message.constants"
+import { MESSAGE_LIMITS } from "@linko/contracts"
 
 const messageSchema = new mongoose.Schema(
     {
-        conversationId: {
+        [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Conversation",
             required: true,
             index: true,
         },
-        senderId: {
+        [MESSAGE_MODEL_FIELDS.SENDER_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
             index: true,
         },
 
-        content: {
+        [MESSAGE_MODEL_FIELDS.CONTENT]: {
             type: String,
             trim: true,
+        },
+
+        [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: {
+            type: String,
+            required: true,
+            maxlength: MESSAGE_LIMITS.CLIENT_MESSAGE_ID_LENGTH,
         },
 
         // Metadata
@@ -82,7 +90,27 @@ const messageSchema = new mongoose.Schema(
 
 messageSchema.plugin(auditPlugin)
 messageSchema.plugin(softDeletePlugin)
-messageSchema.index({ conversationId: 1, createdAt: -1 })
+messageSchema.index(
+    {
+        [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: 1,
+        [MESSAGE_MODEL_FIELDS.SENDER_ID]: 1,
+        [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: 1,
+    },
+    {
+        unique: true,
+        name: MESSAGE_INDEX_NAMES.IDEMPOTENCY,
+        // Historical records predate the key; new service writes always provide it.
+        partialFilterExpression: { [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: { $type: "string" } },
+    },
+)
+messageSchema.index(
+    {
+        [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: 1,
+        [MESSAGE_MODEL_FIELDS.CREATED_AT]: -1,
+        [MESSAGE_MODEL_FIELDS.ID]: -1,
+    },
+    { name: MESSAGE_INDEX_NAMES.CURSOR },
+)
 
 const Message = mongoose.model("Message", messageSchema)
 
