@@ -43,10 +43,10 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/user/profile.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_reject_duplicate_email_without_changing_profile; should_reject_unsupported_avatar; should_replace_image_after_save. Assertions cốt lõi: expect(conflict.code).toBe(ERROR_CODES.EMAIL_TAKEN); expect(profile.avatar.url).toBe(previousUrl).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/user/profile.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_reject_duplicate_email_without_changing_profile; should_reject_unsupported_avatar; should_replace_image_after_save. Assertions cốt lõi: expect(conflict.code).toBe(ERROR_CODES.EMAIL_TAKEN); expect(profile.avatar.url).toBe(previousUrl).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/user/profile.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 
