@@ -21,10 +21,12 @@ import { createApp } from "../../app"
 import Conversation from "../../models/Conversation"
 import Friendship from "../../models/Friendship"
 import Message from "../../models/Message"
+import { FRIENDSHIP_FIELDS } from "../../models/Friendship"
 import User from "../../models/User"
 import { AuthTokenService } from "../auth/auth.security"
 import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "../conversation/conversation.constants"
 import { createLogger } from "../../shared/logger/logger"
+import { softDelete } from "../../shared/persistence/softDeletePlugin"
 import { MESSAGE_MODEL_FIELDS } from "./message.constants"
 
 const TEST_TOKEN_SECRET = "messaging-route-tests-use-a-sufficiently-long-secret"
@@ -133,6 +135,17 @@ describe("message HTTP routes", () => {
         const sender = await createAccount("direct-sender")
         const peer = await createAccount("direct-peer")
         const conversationId = await createDirectConversation(sender._id, peer._id)
+        const [firstUserId, secondUserId] = [sender._id, peer._id].sort((left, right) =>
+            left.toString().localeCompare(right.toString()),
+        )
+        await Friendship.create({
+            [FRIENDSHIP_FIELDS.USER_A]: firstUserId,
+            [FRIENDSHIP_FIELDS.USER_B]: secondUserId,
+        })
+        await softDelete(Friendship, {
+            [FRIENDSHIP_FIELDS.USER_A]: firstUserId,
+            [FRIENDSHIP_FIELDS.USER_B]: secondUserId,
+        })
 
         const response = await request(createTestApp())
             .post(API_ROUTES.MESSAGES)
@@ -141,6 +154,33 @@ describe("message HTTP routes", () => {
 
         expect(response.status).toBe(403)
         expect(response.body.error.code).toBe(ERROR_CODES.FRIENDSHIP_REQUIRED)
+        expect(await Message.countDocuments({})).toBe(0)
+    })
+
+    it("should_deny_send_immediately_after_a_member_leaves", async () => {
+        const owner = await createAccount("departed-owner")
+        const formerMember = await createAccount("departed-member")
+        const conversationId = await createGroup(owner._id, CONVERSATION_STATUS.ACTIVE, [formerMember._id])
+        await Conversation.updateOne(
+            {
+                [CONVERSATION_FIELDS.ID]: conversationId,
+                [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: formerMember._id,
+            },
+            {
+                $set: {
+                    [`${CONVERSATION_FIELDS.PARTICIPANTS}.$.${PARTICIPANT_FIELDS.DEL_FLAG}`]: true,
+                    [`${CONVERSATION_FIELDS.PARTICIPANTS}.$.${PARTICIPANT_FIELDS.LEFT_AT}`]: SAME_MESSAGE_TIME,
+                },
+            },
+        )
+
+        const response = await request(createTestApp())
+            .post(API_ROUTES.MESSAGES)
+            .set("Authorization", `Bearer ${formerMember.token}`)
+            .send(sendBody(conversationId, "departed-member-message", "Access should be revoked"))
+
+        expect(response.status).toBe(403)
+        expect(response.body.error.code).toBe(ERROR_CODES.FORBIDDEN)
         expect(await Message.countDocuments({})).toBe(0)
     })
 
@@ -194,15 +234,23 @@ async function createAccount(suffix: string): Promise<{
 async function createGroup(
     ownerId: mongoose.Types.ObjectId,
     status: (typeof CONVERSATION_STATUS)[keyof typeof CONVERSATION_STATUS] = CONVERSATION_STATUS.ACTIVE,
+    memberIds: readonly mongoose.Types.ObjectId[] = [],
 ): Promise<mongoose.Types.ObjectId> {
     const conversation = await Conversation.create({
         [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
         [CONVERSATION_FIELDS.STATUS]: status,
-        [CONVERSATION_FIELDS.PARTICIPANTS]: [{
-            [PARTICIPANT_FIELDS.USER_ID]: ownerId,
-            [PARTICIPANT_FIELDS.ROLE]: ROLE.OWNER,
-            [PARTICIPANT_FIELDS.JOINED_AT]: MEMBERSHIP_START_TIME,
-        }],
+        [CONVERSATION_FIELDS.PARTICIPANTS]: [
+            {
+                [PARTICIPANT_FIELDS.USER_ID]: ownerId,
+                [PARTICIPANT_FIELDS.ROLE]: ROLE.OWNER,
+                [PARTICIPANT_FIELDS.JOINED_AT]: MEMBERSHIP_START_TIME,
+            },
+            ...memberIds.map((userId) => ({
+                [PARTICIPANT_FIELDS.USER_ID]: userId,
+                [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER,
+                [PARTICIPANT_FIELDS.JOINED_AT]: MEMBERSHIP_START_TIME,
+            })),
+        ],
         [CONVERSATION_FIELDS.GROUP]: {
             [GROUP_FIELDS.NAME]: "Messaging route test",
             [GROUP_FIELDS.OWNER_ID]: ownerId,

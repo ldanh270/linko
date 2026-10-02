@@ -5,7 +5,7 @@ import {
 import type { HydratedDocument, QueryFilter } from "mongoose"
 
 import Conversation, { type ConversationType } from "../../models/Conversation"
-import Friendship from "../../models/Friendship"
+import Friendship, { FRIENDSHIP_FIELDS } from "../../models/Friendship"
 import Message, { type MessageType } from "../../models/Message"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import {
@@ -74,7 +74,10 @@ export class MongooseMessageRepository implements MessageRepository {
         const [firstUserId, secondUserId] = [userA, userB].sort((left, right) =>
             left.toString().localeCompare(right.toString()),
         )
-        const query = Friendship.exists({ userA: firstUserId, userB: secondUserId })
+        const query = Friendship.exists({
+            [FRIENDSHIP_FIELDS.USER_A]: firstUserId,
+            [FRIENDSHIP_FIELDS.USER_B]: secondUserId,
+        })
         if (transaction) query.session(transaction.session)
         return (await query.exec()) !== null
     }
