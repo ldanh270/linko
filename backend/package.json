@@ -8,7 +8,8 @@
         "#/*": "./src/*"
     },
     "scripts": {
-        "dev": "tsx watch src/index.ts"
+        "dev": "tsx watch src/index.ts",
+        "seed": "tsx scripts/seed.ts"
     },
     "type": "module",
     "author": "ldanh270",

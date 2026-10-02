@@ -2,6 +2,28 @@
 
 A simple way to stay connected with seamless chat and smooth calls.
 
+## Local demo data
+
+From the repository root, run:
+
+```sh
+pnpm run seed
+```
+
+The command connects using `MONGODB_CONNECTION_STRING`, refuses to run when
+`NODE_ENV=production`, and asks you to type the connected database name before
+writing. It only inserts the reserved demo records and does not clear existing
+collections. Re-running it leaves existing demo records unchanged.
+
+New demo accounts use the initial local-only login `LinkoDemo123!`:
+
+- `demo_an` — An Nguyễn (`demo.an@example.test`)
+- `demo_binh` — Bình Trần (`demo.binh@example.test`)
+- `demo_chi` — Chi Lê (`demo.chi@example.test`)
+- `demo_duong` — Dương Phạm (`demo.duong@example.test`)
+
+Use these accounts only in local development.
+
 ## Cloudflare R2 uploads
 
 New avatar and background images use the public media bucket. New message

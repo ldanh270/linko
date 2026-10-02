@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -k -n backend,frontend \"nr dev:backend\" \"nr dev:frontend\"",
+    "seed": "nr -C backend seed",
     "dev:backend": "nr -C backend dev",
     "dev:frontend": "nr -C frontend dev",
     "i:all": "ni && nr i:backend && nr i:frontend",
