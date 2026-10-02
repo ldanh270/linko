@@ -1,13 +1,9 @@
 import {
-    CONVERSATION_KIND,
     CONVERSATION_PARAMS,
-    CONVERSATION_QUERY_PARAMS,
     GROUP_FIELDS,
     type ApiEnvelope,
-    type ConversationSummaryDto,
     type CreateGroupRequest,
     type GroupDto,
-    type GroupSummaryDto,
     type UpdateGroupRequest,
 } from "@linko/contracts"
 import type { RequestHandler } from "express"
@@ -19,8 +15,6 @@ import { CONVERSATION_OPERATION_FIELDS } from "./conversation.constants"
 import { ConversationService } from "./conversation.service"
 
 type ConversationRequestHandler<Body, Data> = RequestHandler<Record<string, string>, ApiEnvelope<Data>, Body>
-type EmptyRequestBody = Record<string, never>
-type ConversationListResponse = GroupSummaryDto[] | { readonly conversations: ConversationSummaryDto[] }
 
 /** Translate authenticated group HTTP requests into one conversation service operation.
  *
@@ -39,15 +33,6 @@ export class ConversationController {
             ...(request.file ? { [GROUP_FIELDS.AVATAR]: request.file } : {}),
         })
         response.status(HttpStatusCode.CREATED).json(ApiResponse.ok(group))
-    }
-
-    /** Return either the requested group list or the existing mixed conversation inbox. */
-    readonly listConversations: ConversationRequestHandler<EmptyRequestBody, ConversationListResponse> = async (request, response) => {
-        const kind = request.query[CONVERSATION_QUERY_PARAMS.KIND]
-        const data = kind === CONVERSATION_KIND.GROUP
-            ? await this.service.listMyGroups(request.user._id)
-            : { conversations: await this.service.listMyConversations(request.user._id) }
-        response.status(HttpStatusCode.OK).json(ApiResponse.ok(data))
     }
 
     /** Update group metadata using the authenticated account as the actor. */

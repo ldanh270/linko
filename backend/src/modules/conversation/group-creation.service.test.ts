@@ -4,7 +4,6 @@ import {
     ERROR_CODES,
     ROLE,
     type GroupDto,
-    type GroupSummaryDto,
 } from "@linko/contracts"
 import mongoose from "mongoose"
 import { describe, expect, it, vi } from "vitest"
@@ -18,7 +17,6 @@ import type {
     GroupAvatarRecord,
     GroupAvatarStorage,
     GroupRecord,
-    GroupSummaryRecord,
 } from "./conversation.types"
 
 const OWNER_ID = new mongoose.Types.ObjectId("64b000000000000000000001")
@@ -53,23 +51,6 @@ const OWNER_GROUP_DTO: GroupDto = {
     updatedAt: TEST_DATE.toISOString(),
 }
 
-const OWNER_GROUP_SUMMARY: GroupSummaryRecord = {
-    ...OWNER_GROUP_RECORD,
-    memberCount: 1,
-}
-
-const OWNER_GROUP_SUMMARY_DTO: GroupSummaryDto = {
-    id: OWNER_GROUP_DTO.id,
-    ownerId: OWNER_GROUP_DTO.ownerId,
-    name: OWNER_GROUP_DTO.name,
-    description: OWNER_GROUP_DTO.description,
-    avatarUrl: null,
-    [CONVERSATION_DTO_FIELDS.STATUS]: CONVERSATION_STATUS.ACTIVE,
-    memberCount: 1,
-    lastMessageAt: null,
-    updatedAt: TEST_DATE.toISOString(),
-}
-
 /** Build service collaborators so each test exercises one group rule. */
 function createService(
     repositoryOverrides: Partial<ConversationRepository> = {},
@@ -78,8 +59,6 @@ function createService(
     const repository: ConversationRepository = {
         reserveGroupSlot: vi.fn().mockResolvedValue("reserved"),
         createGroup: vi.fn().mockResolvedValue(OWNER_GROUP_RECORD),
-        findGroupsByParticipant: vi.fn().mockResolvedValue([OWNER_GROUP_SUMMARY]),
-        findConversationsByParticipant: vi.fn().mockResolvedValue([]),
         findGroupById: vi.fn().mockResolvedValue(OWNER_GROUP_RECORD),
         updateGroup: vi.fn().mockResolvedValue(OWNER_GROUP_RECORD),
         ...repositoryOverrides,
@@ -147,13 +126,6 @@ describe("ConversationService group rules", () => {
         await expect(service.createGroup({ ownerId: OWNER_ID, name: "Readers", description: "d".repeat(501) }))
             .rejects.toMatchObject({ code: ERROR_CODES.VALIDATION })
         expect(repository.reserveGroupSlot).not.toHaveBeenCalled()
-    })
-
-    it("should_list_only_my_groups", async () => {
-        const { service, repository } = createService()
-
-        await expect(service.listMyGroups(OWNER_ID)).resolves.toEqual([OWNER_GROUP_SUMMARY_DTO])
-        expect(repository.findGroupsByParticipant).toHaveBeenCalledWith(OWNER_ID)
     })
 
     it("should_allow_admin_to_update_group", async () => {

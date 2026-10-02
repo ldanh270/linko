@@ -1,7 +1,5 @@
 import {
-    CONVERSATION_KIND,
     CONVERSATION_PARAMS,
-    CONVERSATION_QUERY_PARAMS,
     GROUP_FIELDS,
     GROUP_LIMITS,
 } from "@linko/contracts"
@@ -24,13 +22,6 @@ export const createGroupSchema = zod.object({
         [GROUP_FIELDS.NAME]: groupNameSchema,
         [GROUP_FIELDS.DESCRIPTION]: groupDescriptionSchema.optional(),
     }).strict(),
-})
-
-/** Validate the only group listing filter accepted by the conversation module. */
-export const listConversationsSchema = zod.object({
-    query: zod.object({
-        [CONVERSATION_QUERY_PARAMS.KIND]: zod.literal(CONVERSATION_KIND.GROUP).optional(),
-    }),
 })
 
 /** Validate one partial metadata patch and its MongoDB ObjectId route parameter. */

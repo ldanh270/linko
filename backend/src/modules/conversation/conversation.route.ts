@@ -4,14 +4,13 @@ import express, { type Router } from "express"
 import validate from "../../middlewares/validate.middleware"
 import { ConversationController } from "./conversation.controller"
 import { parseGroupAvatar } from "./group-avatar.middleware"
-import { createGroupSchema, listConversationsSchema, updateGroupSchema } from "./conversation.schema"
+import { createGroupSchema, updateGroupSchema } from "./conversation.schema"
 import { ConversationLifecycleController } from "./conversationLifecycle.controller"
 import { closeGroupSchema, leaveGroupSchema } from "./conversationLifecycle.schema"
 
 /** Register the authenticated group HTTP boundary without constructing its controller. */
 export function createConversationRouter(controller: ConversationController): Router {
     const router = express.Router()
-    router.get(CONVERSATION_ROUTE_PATHS.ROOT, validate(listConversationsSchema), controller.listConversations)
     router.post(
         CONVERSATION_ROUTE_PATHS.ROOT,
         parseGroupAvatar,

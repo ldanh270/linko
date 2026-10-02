@@ -46,16 +46,16 @@
 - [x] Step 1: Added tests for departed membership, pre-join preview hiding, visible-activity ordering with empty conversations, requester-only unread counts, closed groups, and same-timestamp cursor ties.
 - [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/inbox/inbox.service.test.ts`; the initial run failed because the inbox repository and service were not implemented.
 - [x] Step 3: Added inbox repository interface, aggregate-backed Mongoose repository, service, mapper, cursor/limit constants, and shared inbox DTO contract. The service has no transaction because listing is read-only.
-- [x] Step 4: Inbox domain tests (6) and backend typecheck pass. Domain task commit pending.
+- [x] Step 4: Inbox domain tests (6) and backend typecheck pass. Domain task committed as `1804064`.
 
 ### Task 2: API boundary and integration
 
 **Files:** Route/controller/dto/schema/mapper trong module; test backend/src/modules/inbox/inbox.route.test.ts.
 
-- [ ] Step 1: Viết test route/integration thất bại: invalid kind/cursor 400; nonmember data absent; response includes nextCursor and unreadCount; limit max 50. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/inbox/inbox.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
-- [ ] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Added isolated route tests for invalid kind/cursor/limit, absent nonmember data, cursor/unread response, and `group`/`direct` filtering with closed-group visibility.
+- [x] Step 2: Ran `pnpm -C backend exec vitest run src/modules/inbox/inbox.route.test.ts`; the old route accepted invalid cursor/limit and returned the old response shape.
+- [x] Step 3: Added Zod validation, authenticated HTTP-only controller, and composition-root wiring. Removed the legacy GET/listing implementation from the conversation module so only one GET handler remains.
+- [x] Step 4: Inbox route tests (5), affected group/lifecycle regressions (30), and backend lint/typecheck pass. API task commit pending.
 
 ### Task 3: Client contract
 

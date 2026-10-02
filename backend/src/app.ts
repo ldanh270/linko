@@ -46,6 +46,10 @@ import { MessageController } from "./modules/message/message.controller"
 import { MongooseMessageRepository } from "./modules/message/message.repository"
 import { createMessageRouter } from "./modules/message/message.route"
 import { MessageService } from "./modules/message/message.service"
+import { InboxController } from "./modules/inbox/inbox.controller"
+import { MongooseInboxRepository } from "./modules/inbox/inbox.repository"
+import { createInboxRouter } from "./modules/inbox/inbox.route"
+import { InboxService } from "./modules/inbox/inbox.service"
 import { ReadStateController } from "./modules/read/read.controller"
 import { MongooseReadStateRepository } from "./modules/read/read.repository"
 import { createReadStateRouter } from "./modules/read/read.route"
@@ -106,6 +110,7 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
+    const inboxService = new InboxService({ repository: new MongooseInboxRepository() })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const profileService = new ProfileService({
         repository: new MongooseProfileRepository(),
@@ -119,6 +124,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const invitationController = new InvitationController(invitationService)
     const messageController = new MessageController(messageService)
     const readStateController = new ReadStateController(readStateService)
+    const inboxController = new InboxController(inboxService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -131,6 +137,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
     app.use(API_ROUTES.MESSAGES, createMessageRouter(messageController))
     app.use(API_ROUTES.CONVERSATIONS, createReadStateRouter(readStateController))
+    app.use(API_ROUTES.CONVERSATIONS, createInboxRouter(inboxController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationLifecycleRouter(conversationLifecycleController))
     app.use(dependencies.privateRoutes)
     app.use(API_ROUTES.USERS, createProfileRouter(profileController))

@@ -30,6 +30,10 @@ import { ConversationController } from "./conversation.controller"
 import { LoggerGroupAvatarCleanupFailureRecorder } from "./group-avatar-cleanup.recorder"
 import { MongooseConversationRepository } from "./conversation.repository"
 import { createConversationRouter } from "./conversation.route"
+import { InboxController } from "../inbox/inbox.controller"
+import { MongooseInboxRepository } from "../inbox/inbox.repository"
+import { createInboxRouter } from "../inbox/inbox.route"
+import { InboxService } from "../inbox/inbox.service"
 import { ConversationService } from "./conversation.service"
 import type { ConversationRepository, GroupAvatarRecord, GroupAvatarStorage } from "./conversation.types"
 import { GROUP_USER_FIELDS, CONVERSATION_FIELDS, LAST_MESSAGE_FIELDS, PARTICIPANT_FIELDS } from "./conversation.constants"
@@ -90,6 +94,9 @@ function createTestApp(options: {
     app.use(express.json())
     app.use(cookieParser())
     app.use(createAuthenticate(TEST_TOKEN_SECRET))
+    app.use(API_ROUTES.CONVERSATIONS, createInboxRouter(
+        new InboxController(new InboxService({ repository: new MongooseInboxRepository() })),
+    ))
     app.use(API_ROUTES.CONVERSATIONS, createConversationRouter(new ConversationController(service)))
     app.use(createGlobalErrorHandler(logger))
     return { app, avatarStorage }
@@ -162,7 +169,7 @@ describe("conversation group HTTP routes", () => {
             .set("Authorization", `Bearer ${owner.token}`)
 
         expect(response.status).toBe(200)
-        expect(response.body.data.map((group: { readonly id: string }) => group.id))
+        expect(response.body.data.items.map((group: { readonly id: string }) => group.id))
             .toEqual([ownGroup.body.data.id])
     })
 
@@ -185,7 +192,7 @@ describe("conversation group HTTP routes", () => {
 
         expect(response.status).toBe(200)
         expect(response.body.success).toBe(true)
-        const conversations = response.body.data.conversations as Array<{ readonly type: string; readonly id: string }>
+        const conversations = response.body.data.items as Array<{ readonly type: string; readonly id: string }>
         expect(conversations).toHaveLength(2)
         expect(conversations.map((conversation) => conversation.type))
             .toEqual(expect.arrayContaining([CONVERSATION_TYPE.DIRECT, CONVERSATION_TYPE.GROUP]))
@@ -213,7 +220,7 @@ describe("conversation group HTTP routes", () => {
             .set("Authorization", `Bearer ${owner.token}`)
 
         expect(response.status).toBe(200)
-        expect(response.body.data.conversations[0].participants).toContainEqual({
+        expect(response.body.data.items[0].participants).toContainEqual({
             id: deletedPeer.id,
             displayName: null,
             avatarUrl: null,
@@ -251,7 +258,7 @@ describe("conversation group HTTP routes", () => {
             .set("Authorization", `Bearer ${member.token}`)
 
         expect(response.status).toBe(200)
-        expect(response.body.data.conversations).toContainEqual(expect.objectContaining({
+        expect(response.body.data.items).toContainEqual(expect.objectContaining({
             id: conversation?._id.toString(),
             lastMessage: null,
         }))
@@ -465,8 +472,6 @@ function createRepository(overrides: Partial<ConversationRepository> = {}): Conv
     return {
         reserveGroupSlot: vi.fn().mockResolvedValue("reserved"),
         createGroup: vi.fn(),
-        findGroupsByParticipant: vi.fn().mockResolvedValue([]),
-        findConversationsByParticipant: vi.fn().mockResolvedValue([]),
         findGroupById: vi.fn().mockResolvedValue(null),
         updateGroup: vi.fn().mockResolvedValue(null),
         ...overrides,

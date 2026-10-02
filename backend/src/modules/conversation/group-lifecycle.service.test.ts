@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto"
 
 import {
     CONVERSATION_STATUS,
+    CONVERSATION_KIND,
     CONVERSATION_DTO_FIELDS,
     CONVERSATION_TYPE,
     ERROR_CODES,
@@ -16,6 +17,8 @@ import Conversation from "../../models/Conversation"
 import User from "../../models/User"
 import { withTransaction } from "../../shared/persistence/withTransaction"
 import { MongooseConversationRepository } from "./conversation.repository"
+import { MongooseInboxRepository } from "../inbox/inbox.repository"
+import { InboxService } from "../inbox/inbox.service"
 import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "./conversation.constants"
 import { MongooseConversationLifecycleRepository } from "./conversationLifecycle.repository"
 import { ConversationLifecycleService } from "./conversationLifecycle.service"
@@ -111,12 +114,16 @@ describe("ConversationLifecycleService", () => {
         await service.leave({ conversationId, actorId: member._id })
 
         await expect(membershipService.list(conversationId, member._id)).rejects.toBeInstanceOf(NotFoundException)
-        const conversations = await new MongooseConversationRepository().findConversationsByParticipant(member._id)
+        const inbox = await new InboxService({ repository: new MongooseInboxRepository() }).list({
+            userId: member._id,
+            kind: CONVERSATION_KIND.ALL,
+            limit: 20,
+        })
         const group = await Conversation.findById(conversationId)
         const departed = group?.[CONVERSATION_FIELDS.PARTICIPANTS].find((participant) =>
             participant[PARTICIPANT_FIELDS.USER_ID].equals(member._id),
         )
-        expect(conversations).toHaveLength(0)
+        expect(inbox.items).toHaveLength(0)
         expect(departed?.[PARTICIPANT_FIELDS.DEL_FLAG]).toBe(true)
         expect(departed?.[PARTICIPANT_FIELDS.LEFT_AT]?.toISOString()).toBe(DEPARTED_AT.toISOString())
     })

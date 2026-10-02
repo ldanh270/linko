@@ -4,7 +4,6 @@ import {
     GROUP_FIELDS,
     GROUP_LIMITS,
     ROLE,
-    type ConversationSummaryDto,
     type GroupDto,
 } from "@linko/contracts"
 
@@ -14,14 +13,13 @@ import { NotFoundException } from "../../shared/errors/NotFoundException"
 import { ValidationException } from "../../shared/errors/ValidationException"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import { CONVERSATION_OPERATION_FIELDS, GROUP_MESSAGES } from "./conversation.constants"
-import { toConversationSummaryDto, toGroupDto, toGroupSummaryDto } from "./conversation.mapper"
+import { toGroupDto } from "./conversation.mapper"
 import type {
     ConversationServiceDependencies,
     CreateGroupInput,
     GroupAvatarRecord,
     GroupRecord,
     GroupSlotReservation,
-    GroupSummaryDto,
     ObjectId,
     UpdateGroupInput,
     UpdateGroupRecord,
@@ -77,23 +75,6 @@ export class ConversationService {
             if (avatar) return this.removeUploadedAvatarAfterFailure(avatar, error)
             throw error
         }
-    }
-
-    /**
-     * List only active group conversations in which the requested user participates.
-     *
-     * @param userId - Authenticated MongoDB account identifier.
-     * @returns The user's group summaries ordered by recent activity.
-     */
-    async listMyGroups(userId: ObjectId): Promise<GroupSummaryDto[]> {
-        const groups = await this.dependencies.repository.findGroupsByParticipant(userId)
-        return groups.map(toGroupSummaryDto)
-    }
-
-    /** List the current user's safe group and direct inbox rows. */
-    async listMyConversations(userId: ObjectId): Promise<ConversationSummaryDto[]> {
-        const conversations = await this.dependencies.repository.findConversationsByParticipant(userId)
-        return conversations.map(toConversationSummaryDto)
     }
 
     /**
