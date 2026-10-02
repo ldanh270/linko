@@ -34,6 +34,7 @@ export const ERROR_CODES = {
     INVITATION_UNAVAILABLE: "INVITATION_UNAVAILABLE",
     INVITATION_REQUEST_REPLAYED: "INVITATION_REQUEST_REPLAYED",
     INVITATION_RATE_LIMITED: "INVITATION_RATE_LIMITED",
+    INSUFFICIENT_ROLE: "INSUFFICIENT_ROLE",
 } as const
 
 /** Conversation types stored by the persistence layer. */
@@ -175,6 +176,9 @@ export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]
 
 /** One persisted conversation role. */
 export type Role = (typeof ROLE)[keyof typeof ROLE]
+
+/** Group roles allowed on a membership record. */
+export type GroupMemberRole = Exclude<Role, typeof ROLE.DIRECT>
 
 /** One persisted conversation type. */
 export type ConversationType = (typeof CONVERSATION_TYPE)[keyof typeof CONVERSATION_TYPE]

@@ -43,10 +43,10 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/membership/membership-roles.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_forbid_admin_removing_owner; should_forbid_member_promoting_self; should_transfer_owner_atomically. Assertions cốt lõi: expect(forbidden.code).toBe(ERROR_CODES.INSUFFICIENT_ROLE); expect(ownerCount).toBe(1).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/membership/membership-roles.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_forbid_admin_removing_owner; should_forbid_member_promoting_self; should_transfer_owner_atomically. Assertions cốt lõi: expect(forbidden.code).toBe(ERROR_CODES.INSUFFICIENT_ROLE); expect(ownerCount).toBe(1).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/membership/membership-roles.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 
