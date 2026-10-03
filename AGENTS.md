@@ -651,6 +651,9 @@ export const ORDER_STATUS = { … } as const;
 5. New code MUST follow this document even if surrounding legacy code does not. Flag the discrepancy instead of copying the bad pattern.
 6. Add/modify doc-comments using the templates in Section 8.
 
+### After completing a coding task
+7. Review the diff, stage only files belonging to the task, and create a local Conventional Commit without asking for confirmation. Leave unrelated changes unstaged. Do not push unless the user explicitly requests it.
+
 ### Definition of Done: self-review checklist
 - [ ] Layers respected: no logic in controllers/routes/UI components; no DB access outside repositories
 - [ ] Business errors thrown as `BusinessException` subclasses; no try/catch noise; nothing leaks to the client
