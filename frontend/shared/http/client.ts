@@ -28,7 +28,9 @@ export class ApiClient {
   private async requestOnce<T>(options: RequestOptions, hasRetried: boolean): Promise<T> {
     const { path, body, headers, ...requestOptions } = options
     const requestHeaders = new Headers(headers)
-    if (body !== undefined) requestHeaders.set("Content-Type", "application/json")
+    const multipartBody = isFormDataBody(body)
+    if (multipartBody) requestHeaders.delete("Content-Type")
+    else if (body !== undefined) requestHeaders.set("Content-Type", "application/json")
     const authHeaders = await this.getAuthHeaders?.()
     new Headers(authHeaders).forEach((value, key) => requestHeaders.set(key, value))
     let response: Response
@@ -37,7 +39,7 @@ export class ApiClient {
         ...requestOptions,
         headers: requestHeaders,
         credentials: requestOptions.credentials ?? "include",
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: body === undefined ? undefined : multipartBody ? body : JSON.stringify(body),
       })
     } catch {
       throw new ApiError(HTTP_ERROR.NETWORK, HTTP_ERROR.GENERIC_MESSAGE, 0)
@@ -61,4 +63,8 @@ export const apiClient = new ApiClient()
 /** Check the envelope before returning feature data. */
 function isSuccessEnvelope<T>(value: unknown): value is { success: true; data: T } {
   return typeof value === "object" && value !== null && "success" in value && value.success === true && "data" in value
+}
+
+function isFormDataBody(value: unknown): value is FormData {
+  return typeof FormData !== "undefined" && value instanceof FormData
 }
