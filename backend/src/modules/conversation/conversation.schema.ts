@@ -27,9 +27,9 @@ export const createGroupSchema = zod.object({
 })
 
 /** Validate the only group listing filter accepted by the conversation module. */
-export const listMyGroupsSchema = zod.object({
+export const listConversationsSchema = zod.object({
     query: zod.object({
-        [CONVERSATION_QUERY_PARAMS.KIND]: zod.literal(CONVERSATION_KIND.GROUP),
+        [CONVERSATION_QUERY_PARAMS.KIND]: zod.literal(CONVERSATION_KIND.GROUP).optional(),
     }),
 })
 

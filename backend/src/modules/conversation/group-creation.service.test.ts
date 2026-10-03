@@ -6,12 +6,21 @@ import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import { ConversationService } from "./conversation.service"
-import type { ConversationRepository, GroupRecord, GroupSummaryRecord } from "./conversation.types"
+import type {
+    ConversationRepository,
+    GroupAvatarRecord,
+    GroupAvatarStorage,
+    GroupRecord,
+    GroupSummaryRecord,
+} from "./conversation.types"
 
 const OWNER_ID = new mongoose.Types.ObjectId("64b000000000000000000001")
 const ADMIN_ID = new mongoose.Types.ObjectId("64b000000000000000000002")
 const GROUP_ID = new mongoose.Types.ObjectId("64b000000000000000000003")
 const TEST_DATE = new Date("2026-10-03T00:00:00.000Z")
+const PRE_TRANSACTION_AVATAR: GroupAvatarRecord = { url: "https://media.example/old.jpg", id: "r2:groups/old.jpg" }
+const TRANSACTION_AVATAR: GroupAvatarRecord = { url: "https://media.example/current.jpg", id: "r2:groups/current.jpg" }
+const UPDATED_AVATAR: GroupAvatarRecord = { url: "https://media.example/new.jpg", id: "r2:groups/new.jpg" }
 
 const OWNER_GROUP_RECORD: GroupRecord = {
     id: GROUP_ID,
@@ -52,11 +61,15 @@ const OWNER_GROUP_SUMMARY_DTO: GroupSummaryDto = {
 }
 
 /** Build service collaborators so each test exercises one group rule. */
-function createService(repositoryOverrides: Partial<ConversationRepository> = {}) {
+function createService(
+    repositoryOverrides: Partial<ConversationRepository> = {},
+    avatarStorageOverrides: Partial<GroupAvatarStorage> = {},
+) {
     const repository: ConversationRepository = {
         reserveGroupSlot: vi.fn().mockResolvedValue("reserved"),
         createGroup: vi.fn().mockResolvedValue(OWNER_GROUP_RECORD),
         findGroupsByParticipant: vi.fn().mockResolvedValue([OWNER_GROUP_SUMMARY]),
+        findConversationsByParticipant: vi.fn().mockResolvedValue([]),
         findGroupById: vi.fn().mockResolvedValue(OWNER_GROUP_RECORD),
         updateGroup: vi.fn().mockResolvedValue(OWNER_GROUP_RECORD),
         ...repositoryOverrides,
@@ -68,12 +81,15 @@ function createService(repositoryOverrides: Partial<ConversationRepository> = {}
     const avatarStorage = {
         upload: vi.fn().mockResolvedValue({ url: "https://media.example/group.jpg", id: "r2:groups/group.jpg" }),
         delete: vi.fn().mockResolvedValue(undefined),
+        ...avatarStorageOverrides,
     }
+    const avatarCleanupFailureRecorder = { recordFailure: vi.fn() }
 
     return {
-        service: new ConversationService({ repository, transactionRunner, avatarStorage }),
+        service: new ConversationService({ repository, transactionRunner, avatarStorage, avatarCleanupFailureRecorder }),
         repository,
         avatarStorage,
+        avatarCleanupFailureRecorder,
     }
 }
 
@@ -174,5 +190,56 @@ describe("ConversationService group rules", () => {
             name: "Unauthorized title",
         })).rejects.toBeInstanceOf(ForbiddenException)
         expect(repository.updateGroup).not.toHaveBeenCalled()
+    })
+
+    it("should_delete_the_avatar_read_inside_the_successful_transaction_attempt", async () => {
+        const priorGroup: GroupRecord = { ...OWNER_GROUP_RECORD, avatar: PRE_TRANSACTION_AVATAR }
+        const currentGroup: GroupRecord = { ...OWNER_GROUP_RECORD, avatar: TRANSACTION_AVATAR }
+        const updatedGroup: GroupRecord = { ...OWNER_GROUP_RECORD, avatar: UPDATED_AVATAR }
+        const { service, repository, avatarStorage } = createService({
+            findGroupById: vi.fn()
+                .mockResolvedValueOnce(priorGroup)
+                .mockResolvedValueOnce(currentGroup),
+            updateGroup: vi.fn().mockResolvedValue(updatedGroup),
+        }, {
+            upload: vi.fn().mockResolvedValue(UPDATED_AVATAR),
+        })
+
+        await service.updateGroup({
+            conversationId: GROUP_ID,
+            actorId: OWNER_ID,
+            avatar: { buffer: Buffer.from("image"), mimetype: "image/png" },
+        })
+
+        expect(repository.updateGroup).toHaveBeenCalled()
+        expect(avatarStorage.delete).toHaveBeenCalledWith(TRANSACTION_AVATAR)
+        expect(avatarStorage.delete).not.toHaveBeenCalledWith(PRE_TRANSACTION_AVATAR)
+    })
+
+    it("should_return_the_committed_group_when_replaced_avatar_cleanup_fails", async () => {
+        const priorGroup: GroupRecord = { ...OWNER_GROUP_RECORD, avatar: PRE_TRANSACTION_AVATAR }
+        const updatedGroup: GroupRecord = { ...OWNER_GROUP_RECORD, avatar: UPDATED_AVATAR }
+        const cleanupError = new Error("R2 delete unavailable")
+        const { service, avatarStorage, avatarCleanupFailureRecorder } = createService({
+            findGroupById: vi.fn().mockResolvedValue(priorGroup),
+            updateGroup: vi.fn().mockResolvedValue(updatedGroup),
+        }, {
+            upload: vi.fn().mockResolvedValue(UPDATED_AVATAR),
+            delete: vi.fn().mockRejectedValue(cleanupError),
+        })
+
+        await expect(service.updateGroup({
+            conversationId: GROUP_ID,
+            actorId: OWNER_ID,
+            avatar: { buffer: Buffer.from("image"), mimetype: "image/png" },
+        })).resolves.toMatchObject({ avatarUrl: UPDATED_AVATAR.url })
+
+        expect(avatarStorage.delete).toHaveBeenCalledWith(PRE_TRANSACTION_AVATAR)
+        expect(avatarCleanupFailureRecorder.recordFailure).toHaveBeenCalledWith(
+            PRE_TRANSACTION_AVATAR,
+            GROUP_ID,
+            cleanupError,
+            OWNER_ID,
+        )
     })
 })

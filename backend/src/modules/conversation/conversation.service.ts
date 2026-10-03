@@ -1,4 +1,11 @@
-import { ERROR_CODES, GROUP_FIELDS, GROUP_LIMITS, ROLE, type GroupDto } from "@linko/contracts"
+import {
+    ERROR_CODES,
+    GROUP_FIELDS,
+    GROUP_LIMITS,
+    ROLE,
+    type ConversationSummaryDto,
+    type GroupDto,
+} from "@linko/contracts"
 
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
@@ -6,7 +13,7 @@ import { NotFoundException } from "../../shared/errors/NotFoundException"
 import { ValidationException } from "../../shared/errors/ValidationException"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import { CONVERSATION_OPERATION_FIELDS, GROUP_MESSAGES } from "./conversation.constants"
-import { toGroupDto, toGroupSummaryDto } from "./conversation.mapper"
+import { toConversationSummaryDto, toGroupDto, toGroupSummaryDto } from "./conversation.mapper"
 import type {
     ConversationServiceDependencies,
     CreateGroupInput,
@@ -82,6 +89,12 @@ export class ConversationService {
         return groups.map(toGroupSummaryDto)
     }
 
+    /** List the current user's safe group and direct inbox rows. */
+    async listMyConversations(userId: ObjectId): Promise<ConversationSummaryDto[]> {
+        const conversations = await this.dependencies.repository.findConversationsByParticipant(userId)
+        return conversations.map(toConversationSummaryDto)
+    }
+
     /**
      * Update group metadata after confirming the actor is its owner or an admin.
      *
@@ -100,9 +113,10 @@ export class ConversationService {
             ? await this.dependencies.avatarStorage.upload(existingGroup.ownerId, avatarFile)
             : undefined
         let updatedGroup: GroupRecord
+        let replacedAvatar: GroupAvatarRecord | null = null
 
         try {
-            updatedGroup = await this.dependencies.transactionRunner.run(async (transaction) => {
+            const result = await this.dependencies.transactionRunner.run(async (transaction) => {
                 const currentGroup = await this.getGroup(
                     input[CONVERSATION_OPERATION_FIELDS.CONVERSATION_ID],
                     transaction,
@@ -115,15 +129,26 @@ export class ConversationService {
                     transaction,
                 )
                 if (!result) throw new NotFoundException(GROUP_MESSAGES.NOT_FOUND)
-                return result
+                return { group: result, replacedAvatar: currentGroup.avatar }
             })
+            updatedGroup = result.group
+            replacedAvatar = result.replacedAvatar
         } catch (error) {
             if (newAvatar) return this.removeUploadedAvatarAfterFailure(newAvatar, error)
             throw error
         }
 
-        if (newAvatar && existingGroup.avatar) {
-            await this.dependencies.avatarStorage.delete(existingGroup.avatar)
+        if (newAvatar && replacedAvatar) {
+            try {
+                await this.dependencies.avatarStorage.delete(replacedAvatar)
+            } catch (error) {
+                this.dependencies.avatarCleanupFailureRecorder.recordFailure(
+                    replacedAvatar,
+                    input[CONVERSATION_OPERATION_FIELDS.CONVERSATION_ID],
+                    error,
+                    input[CONVERSATION_OPERATION_FIELDS.ACTOR_ID],
+                )
+            }
         }
         return toGroupDto(updatedGroup)
     }

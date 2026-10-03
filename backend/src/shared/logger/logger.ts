@@ -7,6 +7,7 @@ export interface LogRecord {
     method: string
     path: string
     userId?: string
+    metadata?: Readonly<Record<string, string>>
 }
 
 /** Request fields safe to include in a technical error log. */
@@ -15,6 +16,8 @@ export interface ErrorLogContext {
     method: string
     path: string
     userId?: string
+    /** Safe identifiers only; never include credentials, request bodies, or personal content. */
+    metadata?: Readonly<Record<string, string>>
 }
 
 /** Logs unexpected failures with redacted, structured context. */
@@ -38,6 +41,7 @@ export function createLogger(write: (record: LogRecord) => void): ServerLogger {
                 method: context.method,
                 path: context.path,
                 ...(context.userId ? { userId: context.userId } : {}),
+                ...(context.metadata ? { metadata: context.metadata } : {}),
             })
         },
     }

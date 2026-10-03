@@ -1,4 +1,13 @@
-import type { GroupDto, GroupSummaryDto, Role } from "@linko/contracts"
+import type {
+    ConversationGroupSummaryDto,
+    ConversationLastMessageSummaryDto,
+    ConversationParticipantSummaryDto,
+    ConversationSummaryDto,
+    ConversationType,
+    GroupDto,
+    GroupSummaryDto,
+    Role,
+} from "@linko/contracts"
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
@@ -40,6 +49,45 @@ export interface GroupRecord {
 /** Domain data for a group list row, including its visible member count. */
 export interface GroupSummaryRecord extends GroupRecord {
     readonly memberCount: number
+}
+
+/** Conversation participant fields required to render one inbox row. */
+export interface ConversationParticipantSummaryRecord {
+    readonly userId: ObjectId
+    readonly displayName: string | null
+    readonly avatarUrl: string | null
+    readonly joinedAt: Date | null
+}
+
+/** Safe last-message fields required to render one inbox preview. */
+export interface ConversationLastMessageSummaryRecord {
+    readonly id: ObjectId | null
+    readonly sender: {
+        readonly id: ObjectId
+        readonly displayName: string | null
+        readonly avatarUrl: string | null
+    } | null
+    readonly content: string | null
+    readonly createdAt: Date | null
+}
+
+/** Group metadata visible inside an inbox conversation row. */
+export interface ConversationGroupSummaryRecord {
+    readonly name: string
+    readonly description: string | null
+    readonly avatarUrl: string | null
+}
+
+/** Safe persistence-independent data needed by the existing inbox route. */
+export interface ConversationSummaryRecord {
+    readonly id: ObjectId
+    readonly type: ConversationType
+    readonly participants: readonly ConversationParticipantSummaryRecord[]
+    readonly unreadCount: Readonly<Record<string, number>>
+    readonly lastMessage: ConversationLastMessageSummaryRecord | null
+    readonly group: ConversationGroupSummaryRecord | null
+    readonly createdAt: Date
+    readonly updatedAt: Date
 }
 
 /** Input to the repository after service validation and avatar upload. */
@@ -85,6 +133,8 @@ export interface ConversationRepository {
     createGroup(input: CreateGroupRecord, transaction: TransactionContext): Promise<GroupRecord>
     /** Find active groups the user currently participates in. */
     findGroupsByParticipant(userId: ObjectId): Promise<readonly GroupSummaryRecord[]>
+    /** Find every active group or direct conversation where the user participates. */
+    findConversationsByParticipant(userId: ObjectId): Promise<readonly ConversationSummaryRecord[]>
     /** Load one group record, optionally using the caller's transaction. */
     findGroupById(conversationId: ObjectId, transaction?: TransactionContext): Promise<GroupRecord | null>
     /** Apply validated group fields and return the updated record. */
@@ -99,6 +149,12 @@ export interface GroupAvatarStorage {
     delete(avatar: GroupAvatarRecord): Promise<void>
 }
 
+/** Record a committed avatar replacement whose old public object still needs deletion. */
+export interface GroupAvatarCleanupFailureRecorder {
+    /** Record safe object identifiers and error context for later cleanup retry. */
+    recordFailure(avatar: GroupAvatarRecord, groupId: ObjectId, error: unknown, actorId: ObjectId): void
+}
+
 /** Execute group changes atomically with MongoDB transactions. */
 export interface ConversationTransactionRunner {
     /** Run one service operation in a transaction and return its result. */
@@ -110,7 +166,15 @@ export interface ConversationServiceDependencies {
     readonly repository: ConversationRepository
     readonly transactionRunner: ConversationTransactionRunner
     readonly avatarStorage: GroupAvatarStorage
+    readonly avatarCleanupFailureRecorder: GroupAvatarCleanupFailureRecorder
 }
 
 /** Public response DTOs shared with the HTTP adapter. */
-export type { GroupDto, GroupSummaryDto }
+export type {
+    ConversationGroupSummaryDto,
+    ConversationLastMessageSummaryDto,
+    ConversationParticipantSummaryDto,
+    ConversationSummaryDto,
+    GroupDto,
+    GroupSummaryDto,
+}

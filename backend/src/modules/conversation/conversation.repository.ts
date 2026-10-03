@@ -8,6 +8,7 @@ import {
     GROUP_AVATAR_FIELDS,
     GROUP_MESSAGES,
     GROUP_USER_FIELDS,
+    LAST_MESSAGE_FIELDS,
     PARTICIPANT_FIELDS,
 } from "./conversation.constants"
 import type {
@@ -18,6 +19,7 @@ import type {
     GroupSlotReservation,
     GroupSummaryRecord,
     ObjectId,
+    ConversationSummaryRecord,
     UpdateGroupRecord,
 } from "./conversation.types"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
@@ -105,6 +107,24 @@ export class MongooseConversationRepository implements ConversationRepository {
         }))
     }
 
+    /** Find active direct and group conversations visible to one inbox owner. */
+    async findConversationsByParticipant(userId: ObjectId): Promise<readonly ConversationSummaryRecord[]> {
+        const conversations = await Conversation.find({
+            [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: userId,
+        }).sort({
+            [`${CONVERSATION_FIELDS.LAST_MESSAGE}.${LAST_MESSAGE_FIELDS.CREATED_AT}`]: -1,
+            [CONVERSATION_FIELDS.UPDATED_AT]: -1,
+        }).populate({
+            path: `${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`,
+            select: "displayName avatar.url",
+        }).populate({
+            path: `${CONVERSATION_FIELDS.LAST_MESSAGE}.${LAST_MESSAGE_FIELDS.SENDER_ID}`,
+            select: "displayName avatar.url",
+        })
+
+        return conversations.map((conversation) => this.toConversationSummaryRecord(conversation))
+    }
+
     /** Load a group by ID, optionally within the caller's transaction. */
     async findGroupById(conversationId: ObjectId, transaction?: TransactionContext): Promise<GroupRecord | null> {
         const query = Conversation.findOne({
@@ -174,4 +194,63 @@ export class MongooseConversationRepository implements ConversationRepository {
             lastMessageAt: conversation[CONVERSATION_FIELDS.LAST_MESSAGE]?.[CONVERSATION_FIELDS.CREATED_AT] ?? null,
         }
     }
+
+    private toConversationSummaryRecord(conversation: HydratedDocument<ConversationType>): ConversationSummaryRecord {
+        const group = conversation[CONVERSATION_FIELDS.GROUP]
+        const lastMessage = conversation[CONVERSATION_FIELDS.LAST_MESSAGE]
+        const sender = lastMessage
+            ? getPopulatedUserSummary(lastMessage[LAST_MESSAGE_FIELDS.SENDER_ID])
+            : null
+        const avatar = group?.[GROUP_FIELDS.AVATAR]
+        return {
+            id: conversation[CONVERSATION_FIELDS.ID],
+            type: conversation[CONVERSATION_FIELDS.TYPE],
+            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS].map((participant) => {
+                const user = getPopulatedUserSummary(participant[PARTICIPANT_FIELDS.USER_ID])
+                return {
+                    userId: user?._id ?? participant[PARTICIPANT_FIELDS.USER_ID],
+                    displayName: user?.displayName ?? null,
+                    avatarUrl: user?.avatar?.url ?? null,
+                    joinedAt: participant[PARTICIPANT_FIELDS.JOINED_AT] ?? null,
+                }
+            }),
+            unreadCount: Object.fromEntries(conversation[CONVERSATION_FIELDS.UNREAD_COUNT].entries()),
+            lastMessage: lastMessage
+                ? {
+                    id: lastMessage[LAST_MESSAGE_FIELDS.MESSAGE_ID] ?? null,
+                    sender: sender
+                        ? {
+                            id: sender._id,
+                            displayName: sender.displayName ?? null,
+                            avatarUrl: sender.avatar?.url ?? null,
+                        }
+                        : null,
+                    content: lastMessage[LAST_MESSAGE_FIELDS.CONTENT] ?? null,
+                    createdAt: lastMessage[LAST_MESSAGE_FIELDS.CREATED_AT] ?? null,
+                }
+                : null,
+            group: group
+                ? {
+                    name: group[GROUP_FIELDS.NAME],
+                    description: group[GROUP_FIELDS.DESCRIPTION] ?? null,
+                    avatarUrl: avatar?.[GROUP_AVATAR_FIELDS.URL] ?? null,
+                }
+                : null,
+            createdAt: conversation[CONVERSATION_FIELDS.CREATED_AT],
+            updatedAt: conversation[CONVERSATION_FIELDS.UPDATED_AT],
+        }
+    }
+}
+
+interface PopulatedUserSummary {
+    readonly _id: ObjectId
+    readonly displayName?: string
+    readonly avatar?: { readonly url?: string | null } | null
+}
+
+function getPopulatedUserSummary(value: unknown): PopulatedUserSummary | null {
+    if (typeof value !== "object" || value === null || !("_id" in value) || !("displayName" in value)) {
+        return null
+    }
+    return value as PopulatedUserSummary
 }

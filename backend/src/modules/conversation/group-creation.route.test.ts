@@ -26,6 +26,7 @@ import { createLogger } from "../../shared/logger/logger"
 import { withTransaction } from "../../shared/persistence/withTransaction"
 import { R2GroupAvatarStorage } from "./group-avatar.storage"
 import { ConversationController } from "./conversation.controller"
+import { LoggerGroupAvatarCleanupFailureRecorder } from "./group-avatar-cleanup.recorder"
 import { MongooseConversationRepository } from "./conversation.repository"
 import { createConversationRouter } from "./conversation.route"
 import { ConversationService } from "./conversation.service"
@@ -77,17 +78,19 @@ function createTestApp(options: {
     readonly avatarStorage?: GroupAvatarStorage
 } = {}): { readonly app: Express; readonly avatarStorage: GroupAvatarStorage } {
     const avatarStorage = options.avatarStorage ?? createAvatarStorage()
+    const logger = createLogger(() => undefined)
     const service = new ConversationService({
         repository: options.repository ?? new MongooseConversationRepository(),
         transactionRunner: { run: withTransaction },
         avatarStorage,
+        avatarCleanupFailureRecorder: new LoggerGroupAvatarCleanupFailureRecorder(logger),
     })
     const app = express()
     app.use(express.json())
     app.use(cookieParser())
     app.use(createAuthenticate(TEST_TOKEN_SECRET))
     app.use(API_ROUTES.CONVERSATIONS, createConversationRouter(new ConversationController(service)))
-    app.use(createGlobalErrorHandler(createLogger(() => undefined)))
+    app.use(createGlobalErrorHandler(logger))
     return { app, avatarStorage }
 }
 
@@ -160,6 +163,32 @@ describe("conversation group HTTP routes", () => {
         expect(response.status).toBe(200)
         expect(response.body.data.map((group: { readonly id: string }) => group.id))
             .toEqual([ownGroup.body.data.id])
+    })
+
+    it("should_preserve_the_unfiltered_inbox_listing_for_direct_and_group_conversations", async () => {
+        const owner = await createAccount("inbox-owner")
+        const directPeer = await createAccount("inbox-peer")
+        const { app } = createTestApp()
+        await postGroup(app, owner.token, "Owner group")
+        await Conversation.create({
+            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT,
+            [CONVERSATION_FIELDS.PARTICIPANTS]: [
+                { [PARTICIPANT_FIELDS.USER_ID]: new mongoose.Types.ObjectId(owner.id), [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
+                { [PARTICIPANT_FIELDS.USER_ID]: new mongoose.Types.ObjectId(directPeer.id), [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
+            ],
+        })
+
+        const response = await request(app)
+            .get(API_ROUTES.CONVERSATIONS)
+            .set("Authorization", `Bearer ${owner.token}`)
+
+        expect(response.status).toBe(200)
+        expect(response.body.success).toBe(true)
+        const conversations = response.body.data.conversations as Array<{ readonly type: string; readonly id: string }>
+        expect(conversations).toHaveLength(2)
+        expect(conversations.map((conversation) => conversation.type))
+            .toEqual(expect.arrayContaining([CONVERSATION_TYPE.DIRECT, CONVERSATION_TYPE.GROUP]))
+        expect(conversations.every((conversation) => !("delFlag" in conversation))).toBe(true)
     })
 
     it("should_allow_an_admin_to_update_group_details", async () => {
@@ -285,6 +314,53 @@ describe("conversation group HTTP routes", () => {
         expect(storage.delete).toHaveBeenCalledWith(OWNER_AVATAR)
     })
 
+    it("should_delete_the_avatar_replaced_by_each_serialized_concurrent_update", async () => {
+        const account = await createAccount("concurrent-avatar-update")
+        const secondAvatar: GroupAvatarRecord = {
+            url: "https://media.example/groups/second-avatar.jpg",
+            id: "r2:groups/second-avatar.jpg",
+        }
+        const thirdAvatar: GroupAvatarRecord = {
+            url: "https://media.example/groups/third-avatar.jpg",
+            id: "r2:groups/third-avatar.jpg",
+        }
+        const deleteAvatar = vi.fn().mockResolvedValue(undefined)
+        const storage = createAvatarStorage({
+            upload: vi.fn()
+                .mockResolvedValueOnce(OWNER_AVATAR)
+                .mockResolvedValueOnce(secondAvatar)
+                .mockResolvedValueOnce(thirdAvatar),
+            delete: deleteAvatar,
+        })
+        const { app } = createTestApp({ avatarStorage: storage })
+        const created = await request(app)
+            .post(API_ROUTES.CONVERSATIONS)
+            .set("Authorization", `Bearer ${account.token}`)
+            .field(GROUP_FIELDS.NAME, "Avatar replacement")
+            .attach(GROUP_FIELDS.AVATAR, Buffer.from("valid image bytes"), {
+                filename: "owner.png",
+                contentType: "image/png",
+            })
+        const updateAvatar = (filename: string) => request(app)
+            .patch(groupPath(created.body.data.id))
+            .set("Authorization", `Bearer ${account.token}`)
+            .attach(GROUP_FIELDS.AVATAR, Buffer.from("valid image bytes"), {
+                filename,
+                contentType: "image/png",
+            })
+
+        const responses = await Promise.all([updateAvatar("second.png"), updateAvatar("third.png")])
+        const deletedAvatarIds = deleteAvatar.mock.calls.map(([avatar]) => avatar.id)
+
+        expect(responses.map((response) => response.status)).toEqual([200, 200])
+        expect(storage.upload).toHaveBeenCalledTimes(3)
+        expect(responses.map((response) => response.body.data[GROUP_FIELDS.AVATAR_URL]))
+            .toEqual(expect.arrayContaining([secondAvatar.url, thirdAvatar.url]))
+        expect(deletedAvatarIds).toHaveLength(2)
+        expect(new Set(deletedAvatarIds).size).toBe(2)
+        expect(deletedAvatarIds).toContain(OWNER_AVATAR.id)
+    })
+
     it("should_allow_the_100th_group_and_reject_the_concurrent_101st", async () => {
         const account = await createAccount("concurrent-limit")
         const existingGroups = Array.from({ length: GROUP_LIMITS.MAX_GROUPS_PER_USER - 1 }, (_, index) => ({
@@ -324,6 +400,7 @@ function createRepository(overrides: Partial<ConversationRepository> = {}): Conv
         reserveGroupSlot: vi.fn().mockResolvedValue("reserved"),
         createGroup: vi.fn(),
         findGroupsByParticipant: vi.fn().mockResolvedValue([]),
+        findConversationsByParticipant: vi.fn().mockResolvedValue([]),
         findGroupById: vi.fn().mockResolvedValue(null),
         updateGroup: vi.fn().mockResolvedValue(null),
         ...overrides,

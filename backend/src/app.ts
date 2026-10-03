@@ -9,6 +9,7 @@ import { createConversationRouter } from "./modules/conversation/conversation.ro
 import { MongooseConversationRepository } from "./modules/conversation/conversation.repository"
 import { R2GroupAvatarStorage } from "./modules/conversation/group-avatar.storage"
 import { ConversationService } from "./modules/conversation/conversation.service"
+import { LoggerGroupAvatarCleanupFailureRecorder } from "./modules/conversation/group-avatar-cleanup.recorder"
 import { MongooseAuthRepository } from "./modules/auth/auth.repository"
 import { AuthTokenService, BcryptPasswordHasher } from "./modules/auth/auth.security"
 import { AuthService } from "./modules/auth/auth.service"
@@ -42,6 +43,7 @@ export function createApp(dependencies: AppDependencies): Express {
         repository: new MongooseConversationRepository(),
         transactionRunner: { run: withTransaction },
         avatarStorage: new R2GroupAvatarStorage(),
+        avatarCleanupFailureRecorder: new LoggerGroupAvatarCleanupFailureRecorder(dependencies.logger),
     })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const conversationController = new ConversationController(conversationService)

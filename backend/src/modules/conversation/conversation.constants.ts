@@ -64,3 +64,8 @@ export const GROUP_MESSAGES = {
     AVATAR_CLEANUP_FAILED: "Failed to remove a group avatar after a database error",
     INVALID_RECORD: "Stored group conversation is missing required group details",
 } as const
+
+/** Event identifiers for safe operational group logs. */
+export const GROUP_LOG_EVENTS = {
+    AVATAR_CLEANUP_PENDING: "GROUP_AVATAR_CLEANUP_PENDING",
+} as const
