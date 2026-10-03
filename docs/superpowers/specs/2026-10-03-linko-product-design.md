@@ -205,7 +205,7 @@ Các khối giao tiếp qua API/sự kiện có hợp đồng rõ. Frontend khô
 | `User` | Giữ username, email, displayName, avatar, background, bio. | Username/email duy nhất; không trả hashedPassword ra client. |
 | `Session` | Giữ phiên làm mới. | Đăng xuất vô hiệu hóa phiên và xóa cookie đúng tên. |
 | `Conversation` | `conversationType`, `participants`, `group`, `lastMessage`; thêm `status=ACTIVE/CLOSED`, `group.pinnedMessageIds` tối đa 3. | DIRECT đúng 2 người; GROUP tối đa 100 thành viên; danh sách hội thoại chỉ truy xuất theo thành viên. |
-| `Participant` trong `Conversation` | `userId`, `role`, `joinedAt`, `mutedUntil`, `lastReadAt`. | Một user chỉ có một participant đang hoạt động mỗi conversation. Rời nhóm thì xóa participant; tham gia lại tạo participant mới với `joinedAt` mới. |
+| `Participant` trong `Conversation` | `userId`, `role`, `joinedAt`, `leftAt`, `isMuted`, `lastReadAt`, `lastReadMessageId`. | Một user chỉ có một participant đang hoạt động mỗi conversation. Rời nhóm đặt `leftAt`; tham gia lại tạo participant mới với `joinedAt` mới, giữ mốc cũ để audit. |
 | `Message` | `conversationId`, `senderId`, `content`, `replyTo`, `mentions`, `attachments`, timestamps; thêm `clientMessageId` để chống trùng. | Index `(conversationId, createdAt, _id)` phục vụ cursor; `clientMessageId` duy nhất theo người gửi và hội thoại. |
 | `Invitation` mới | `conversationId`, `createdBy`, `tokenHash`, `expiresAt`, `maxUses=25`, `useCount`, `revokedAt`. | Token gốc chỉ hiện lúc tạo; xác nhận tham gia kiểm tra hiệu lực và tăng lượt dùng an toàn khi có yêu cầu đồng thời. |
 
