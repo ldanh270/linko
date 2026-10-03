@@ -9,6 +9,7 @@ import Message from "../src/models/Message"
 import Session from "../src/models/Session"
 import User from "../src/models/User"
 import { SYSTEM_ACTOR_ID } from "../src/shared/persistence/auditPlugin"
+import { AUTH_FIELDS, AUTH_INDEX_NAMES } from "../src/modules/auth/auth.constants"
 
 /** Collections created by the six existing Mongoose models. */
 export const AUDITED_COLLECTIONS = [
@@ -74,11 +75,16 @@ export async function backfillAudit(database: AuditDatabase, options: BackfillOp
 type MongoDatabase = NonNullable<typeof mongoose.connection.db>
 
 const UNIQUE_INDEXES = [
-    { collection: User.collection.name, key: { username: 1 }, name: "active_username_unique", oldName: "username_1" },
-    { collection: User.collection.name, key: { email: 1 }, name: "active_email_unique", oldName: "email_1" },
-    { collection: Session.collection.name, key: { refreshToken: 1 }, name: "active_refresh_token_unique", oldName: "refreshToken_1" },
-    { collection: Friendship.collection.name, key: { userA: 1, userB: 1 }, name: "active_friendship_unique", oldName: "userA_1_UserB_1" },
-    { collection: FriendRequest.collection.name, key: { from: 1, to: 1 }, name: "active_friend_request_unique", oldName: "from_1_to_1" },
+    { collection: User.collection.name, key: { username: 1 }, name: "active_username_unique", oldNames: ["username_1"] },
+    { collection: User.collection.name, key: { email: 1 }, name: "active_email_unique", oldNames: ["email_1"] },
+    {
+        collection: Session.collection.name,
+        key: { [AUTH_FIELDS.REFRESH_TOKEN_HASH]: 1 },
+        name: AUTH_INDEX_NAMES.REFRESH_TOKEN_HASH,
+        oldNames: ["refreshToken_1", "active_refresh_token_unique"],
+    },
+    { collection: Friendship.collection.name, key: { userA: 1, userB: 1 }, name: "active_friendship_unique", oldNames: ["userA_1_UserB_1"] },
+    { collection: FriendRequest.collection.name, key: { from: 1, to: 1 }, name: "active_friend_request_unique", oldNames: ["from_1_to_1"] },
 ] as const
 
 /** Preview or apply the index transition after a backup and reviewed dry-run. */
@@ -96,6 +102,24 @@ export async function migrateIndexes(
             throw new Error(`Backfill ${name} before changing indexes`)
         }
         const indexes = await collection.listIndexes().toArray()
+        if (name === Session.collection.name) {
+            const legacySessionFilter = { [AUTH_FIELDS.REFRESH_TOKEN_HASH]: { $exists: false } }
+            const legacySessionCount = await collection.countDocuments(legacySessionFilter)
+            if (legacySessionCount > 0) {
+                actions[name].push(`invalidate:legacy-refresh-sessions:${legacySessionCount}`)
+                if (options.apply) {
+                    await collection.updateMany(legacySessionFilter, {
+                        $unset: { [AUTH_FIELDS.REFRESH_TOKEN]: "" },
+                        $set: {
+                            [AUTH_FIELDS.DELETED]: true,
+                            [AUTH_FIELDS.UPDATED_AT]: new Date(),
+                            [AUTH_FIELDS.UPDATED_BY]: SYSTEM_ACTOR_ID,
+                            [AUTH_FIELDS.UPDATED_IP]: null,
+                        },
+                    })
+                }
+            }
+        }
         for (const index of UNIQUE_INDEXES.filter((candidate) => candidate.collection === name)) {
             if (!indexes.some((current) => current.name === index.name)) {
                 actions[name].push(`create:${index.name}`)
@@ -103,9 +127,11 @@ export async function migrateIndexes(
                     name: index.name, unique: true, partialFilterExpression: { delFlag: false },
                 })
             }
-            if (indexes.some((current) => current.name === index.oldName)) {
-                actions[name].push(`drop:${index.oldName}`)
-                if (options.apply) await collection.dropIndex(index.oldName)
+            for (const oldName of index.oldNames) {
+                if (indexes.some((current) => current.name === oldName)) {
+                    actions[name].push(`drop:${oldName}`)
+                    if (options.apply) await collection.dropIndex(oldName)
+                }
             }
         }
         if (name === Session.collection.name) {

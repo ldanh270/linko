@@ -5,10 +5,16 @@ import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
 import { createApp } from "../../app"
-import protectRoutes from "../../middlewares/route.middleware"
 import validate from "../../middlewares/validate.middleware"
+import type { AuthRuntimeConfig } from "../../configs/auth.config"
 import { BusinessException } from "../errors/BusinessException"
 import { createLogger, type LogRecord } from "../logger/logger"
+
+const TEST_AUTH_CONFIG: AuthRuntimeConfig = {
+    accessTokenSecret: "test-secret-with-enough-entropy-for-linko-auth",
+    clientOrigin: "http://localhost:3000",
+    refreshCookie: { path: "/", secure: false, sameSite: "lax" },
+}
 
 const createTestApp = () => {
     const records: LogRecord[] = []
@@ -17,13 +23,29 @@ const createTestApp = () => {
     const app = createApp({
         publicRoutes,
         privateRoutes,
-        authenticate: (_request, _response, next) => next(),
         logger: createLogger((record) => records.push(record)),
+        authConfig: TEST_AUTH_CONFIG,
     })
     return { app, publicRoutes, records }
 }
 
 describe("HTTP boundary", () => {
+    it("allows only the configured credentialed browser origin", async () => {
+        const { app, publicRoutes } = createTestApp()
+        publicRoutes.get("/cors", (_request, response) => response.sendStatus(204))
+
+        const configuredOriginResponse = await request(app)
+            .get("/cors")
+            .set("Origin", TEST_AUTH_CONFIG.clientOrigin)
+        const unconfiguredOriginResponse = await request(app)
+            .get("/cors")
+            .set("Origin", "https://attacker.example")
+
+        expect(configuredOriginResponse.headers["access-control-allow-origin"]).toBe(TEST_AUTH_CONFIG.clientOrigin)
+        expect(configuredOriginResponse.headers["access-control-allow-credentials"]).toBe("true")
+        expect(unconfiguredOriginResponse.headers["access-control-allow-origin"]).toBe(TEST_AUTH_CONFIG.clientOrigin)
+    })
+
     it("returns a business error without logging it", async () => {
         const { app, publicRoutes, records } = createTestApp()
         publicRoutes.get("/business", () => {
@@ -114,8 +136,8 @@ describe("HTTP boundary", () => {
         const app = createApp({
             publicRoutes: express.Router(),
             privateRoutes,
-            authenticate: protectRoutes,
             logger: createLogger((record) => records.push(record)),
+            authConfig: TEST_AUTH_CONFIG,
         })
 
         const response = await request(app)

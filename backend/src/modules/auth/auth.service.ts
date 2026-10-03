@@ -10,6 +10,7 @@ import type {
     SignupInput,
     UserDto,
 } from "./auth.types"
+import { toUserDto } from "./auth.mapper"
 
 /** Apply authentication rules while keeping persistence and transport at the boundaries.
  *
@@ -37,7 +38,7 @@ export class AuthService {
             hashedPassword: await this.dependencies.passwordHasher.hash(input[AUTH_FIELDS.PASSWORD]),
         })
 
-        return this.toUserDto(user)
+        return toUserDto(user)
     }
 
     /** Verify a password and issue one access token plus a persisted refresh session. */
@@ -106,15 +107,6 @@ export class AuthService {
             return new ConflictException(ERROR_CODES.USERNAME_TAKEN, AUTH_MESSAGES.USERNAME_TAKEN)
         }
         return new ConflictException(ERROR_CODES.EMAIL_TAKEN, AUTH_MESSAGES.EMAIL_TAKEN)
-    }
-
-    private toUserDto(user: { readonly id: string; readonly username: string; readonly displayName: string; readonly email: string }): UserDto {
-        return {
-            [AUTH_FIELDS.ID]: user[AUTH_FIELDS.ID],
-            [AUTH_FIELDS.USERNAME]: user[AUTH_FIELDS.USERNAME],
-            [AUTH_FIELDS.DISPLAY_NAME]: user[AUTH_FIELDS.DISPLAY_NAME],
-            [AUTH_FIELDS.EMAIL]: user[AUTH_FIELDS.EMAIL],
-        }
     }
 
     private addRefreshTokenLifetime(now: Date): Date {

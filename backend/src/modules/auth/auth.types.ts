@@ -92,6 +92,13 @@ export interface AuthClock {
     now(): Date
 }
 
+/** SameSite and transport options shared by refresh cookie set and clear responses. */
+export interface AuthCookieConfiguration {
+    readonly path: "/"
+    readonly secure: boolean
+    readonly sameSite: "lax" | "strict" | "none"
+}
+
 /** Constructor-injected collaborators for the auth use-case service. */
 export interface AuthServiceDependencies {
     readonly repository: AuthRepository

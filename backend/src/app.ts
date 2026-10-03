@@ -1,7 +1,16 @@
-import { ERROR_CODES } from "@linko/contracts"
+import { API_ROUTES, ERROR_CODES } from "@linko/contracts"
 import cookieParser from "cookie-parser"
-import express, { type Express, type RequestHandler, type Router } from "express"
+import cors from "cors"
+import express, { type Express, type Router } from "express"
 
+import type { AuthRuntimeConfig } from "./configs/auth.config"
+import { MongooseAuthRepository } from "./modules/auth/auth.repository"
+import { AuthTokenService, BcryptPasswordHasher } from "./modules/auth/auth.security"
+import { AuthService } from "./modules/auth/auth.service"
+import { AuthController } from "./modules/auth/auth.controller"
+import { createAuthRouter } from "./modules/auth/auth.route"
+import { createAuthenticate } from "./middlewares/route.middleware"
+import { withTransaction } from "./shared/persistence/withTransaction"
 import { BusinessException } from "./shared/errors/BusinessException"
 import type { ServerLogger } from "./shared/logger/logger"
 import { createGlobalErrorHandler } from "./shared/middlewares/globalErrorHandler"
@@ -11,18 +20,28 @@ import { withRequestContext } from "./shared/middlewares/requestContext"
 export interface AppDependencies {
     publicRoutes: Router
     privateRoutes: Router
-    authenticate: RequestHandler
     logger: ServerLogger
+    authConfig: AuthRuntimeConfig
 }
 
 /** Compose the Express middleware boundary and existing route groups once. */
 export function createApp(dependencies: AppDependencies): Express {
+    const authService = new AuthService({
+        repository: new MongooseAuthRepository(),
+        passwordHasher: new BcryptPasswordHasher(),
+        tokenProvider: new AuthTokenService(dependencies.authConfig.accessTokenSecret),
+        transactionRunner: { run: withTransaction },
+        clock: { now: () => new Date() },
+    })
+    const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const app = express()
     app.use(withRequestContext)
+    app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
     app.use(express.json())
     app.use(cookieParser())
     app.use(dependencies.publicRoutes)
-    app.use(dependencies.authenticate)
+    app.use(API_ROUTES.AUTH, createAuthRouter(authController))
+    app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(dependencies.privateRoutes)
     app.use(() => {
         throw new BusinessException(ERROR_CODES.NOT_FOUND, 404, "Route not found")

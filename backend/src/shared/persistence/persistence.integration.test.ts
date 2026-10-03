@@ -10,7 +10,7 @@ import Message from "../../models/Message"
 import Session from "../../models/Session"
 import User from "../../models/User"
 import { requestContext } from "../middlewares/requestContext"
-import { auditPlugin } from "./auditPlugin"
+import { auditPlugin, SYSTEM_ACTOR_ID } from "./auditPlugin"
 import { softDelete, softDeletePlugin } from "./softDeletePlugin"
 import { withTransaction } from "./withTransaction"
 
@@ -28,7 +28,7 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-    await Record.collection.deleteMany({})
+    await Promise.all([Record.collection.deleteMany({}), Session.collection.deleteMany({})])
 })
 
 afterAll(async () => {
@@ -189,5 +189,42 @@ describe("Mongoose persistence aspects", () => {
         const finalIndexes = await collection.listIndexes().toArray()
         expect(finalIndexes.some((index) => index.expireAfterSeconds === 0)).toBe(false)
         expect(finalIndexes.some((index) => index.name === "active_session_expiry")).toBe(true)
+    })
+
+    it("invalidates legacy raw refresh sessions before enabling hash-only sessions", async () => {
+        const database = mongoose.connection.db
+        if (!database) throw new Error("Test database is unavailable")
+        await Session.init()
+        const collection = database.collection(Session.collection.name)
+        const indexes = await collection.listIndexes().toArray()
+        if (indexes.some((index) => index.name === "active_refresh_token_hash_unique")) {
+            await collection.dropIndex("active_refresh_token_hash_unique")
+        }
+        const legacyToken = "legacy-refresh-token"
+        const legacySession = await collection.insertOne({
+            userId: new mongoose.Types.ObjectId(),
+            refreshToken: legacyToken,
+            expiresAt: new Date(Date.now() + 60 * 1000),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: SYSTEM_ACTOR_ID,
+            updatedBy: SYSTEM_ACTOR_ID,
+            createdIp: null,
+            updatedIp: null,
+            delFlag: false,
+        })
+
+        const preview = await migrateIndexes(database, { apply: false, collections: [Session.collection.name] })
+        expect(preview[Session.collection.name]).toContain("invalidate:legacy-refresh-sessions:1")
+        expect(await collection.findOne({ _id: legacySession.insertedId })).toHaveProperty("refreshToken", legacyToken)
+
+        await migrateIndexes(database, { apply: true, collections: [Session.collection.name] })
+
+        const migrated = await collection.findOne({ _id: legacySession.insertedId })
+        const finalIndexes = await collection.listIndexes().toArray()
+        expect(migrated?.refreshToken).toBeUndefined()
+        expect(migrated?.delFlag).toBe(true)
+        expect(String(migrated?.updatedBy)).toBe(SYSTEM_ACTOR_ID.toString())
+        expect(finalIndexes.some((index) => index.name === "active_refresh_token_hash_unique")).toBe(true)
     })
 })

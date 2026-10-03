@@ -93,7 +93,7 @@ export class MongooseAuthRepository implements AuthRepository {
                 [AUTH_FIELDS.EXPIRES_AT]: { $gt: now },
             },
             { $set: { [AUTH_FIELDS.DELETED]: true } },
-            { new: true, session: transaction.session },
+            { returnDocument: "after", session: transaction.session },
         ).select({ [AUTH_FIELDS.USER_ID]: 1 })
 
         return session ? { userId: session.userId.toString() } : null
