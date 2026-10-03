@@ -1,6 +1,7 @@
 # Audit and soft-delete migration
 
 `backfillAudit.ts` is dry-run by default. It reports legacy documents missing audit fields and previews index changes. It does not write to MongoDB without `--apply`.
+The CLI uses the backend's `DNS_SERVERS` setting for MongoDB SRV resolution. Configure a trusted resolver in `backend/.env` when the system resolver cannot answer SRV queries.
 
 ## Runbook
 

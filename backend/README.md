@@ -7,10 +7,11 @@ A simple way to stay connected with seamless chat and smooth calls.
 If startup fails with `querySrv ECONNREFUSED` for a `mongodb+srv://` connection,
 check the DNS servers used by Node with
 `node -e "console.log(require('node:dns').getServers())"`.
-If the configured resolver is unavailable, set `DNS_SERVERS=1.1.1.1,8.8.8.8`
-in the backend `.env` and restart the backend. This overrides DNS resolution
-for the backend process. Use reachable DNS servers appropriate for your network;
-leave the setting empty to use the system resolver.
+If the configured resolver is unavailable, set `DNS_SERVERS` in the backend
+`.env` to a trusted resolver that can answer this cluster's SRV query, then
+restart the backend. The migration CLI uses the same setting. Leave it empty
+to use Node's system resolver. The cluster hostname is sent to the selected
+resolver, so use one approved for that metadata.
 
 ## Local demo data
 

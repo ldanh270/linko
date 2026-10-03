@@ -1,5 +1,7 @@
 import { pathToFileURL } from "node:url"
+import mongoose from "mongoose"
 
+import { configureDnsServers } from "../src/libs/database"
 import Conversation from "../src/models/Conversation"
 import FriendRequest from "../src/models/FriendRequest"
 import Friendship from "../src/models/Friendship"
@@ -7,8 +9,6 @@ import Message from "../src/models/Message"
 import Session from "../src/models/Session"
 import User from "../src/models/User"
 import { SYSTEM_ACTOR_ID } from "../src/shared/persistence/auditPlugin"
-
-import mongoose from "mongoose"
 
 /** Collections created by the six existing Mongoose models. */
 export const AUDITED_COLLECTIONS = [
@@ -140,6 +140,7 @@ if (isMain) {
         process.exitCode = 1
     } else {
         try {
+            configureDnsServers()
             await mongoose.connect(connectionString, { autoIndex: false })
             const database = mongoose.connection.db
             if (!database) throw new Error("MongoDB connection is unavailable")
