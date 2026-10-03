@@ -43,6 +43,14 @@ export const GROUP_USER_FIELDS = {
     GROUP_CONVERSATION_COUNT: "groupConversationCount",
 } as const
 
+/** User profile fields included in safe conversation inbox summaries. */
+export const CONVERSATION_USER_PROFILE_FIELDS = {
+    ID: "_id",
+    DISPLAY_NAME: "displayName",
+    AVATAR: "avatar",
+    AVATAR_URL: "url",
+} as const
+
 /** Internal group operation field names carried from controllers into services. */
 export const CONVERSATION_OPERATION_FIELDS = {
     CONVERSATION_ID: "conversationId",

@@ -21,6 +21,7 @@ import { AuthTokenService } from "../../modules/auth/auth.security"
 import { createAuthenticate } from "../../middlewares/route.middleware"
 import Conversation from "../../models/Conversation"
 import User from "../../models/User"
+import { AUTH_FIELDS } from "../auth/auth.constants"
 import { createGlobalErrorHandler } from "../../shared/middlewares/globalErrorHandler"
 import { createLogger } from "../../shared/logger/logger"
 import { withTransaction } from "../../shared/persistence/withTransaction"
@@ -31,7 +32,7 @@ import { MongooseConversationRepository } from "./conversation.repository"
 import { createConversationRouter } from "./conversation.route"
 import { ConversationService } from "./conversation.service"
 import type { ConversationRepository, GroupAvatarRecord, GroupAvatarStorage } from "./conversation.types"
-import { GROUP_USER_FIELDS, CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "./conversation.constants"
+import { GROUP_USER_FIELDS, CONVERSATION_FIELDS, LAST_MESSAGE_FIELDS, PARTICIPANT_FIELDS } from "./conversation.constants"
 
 const TEST_TOKEN_SECRET = "group-route-tests-use-a-sufficiently-long-secret"
 const TEST_WIRED_TIGER_CACHE_SIZE_GB = "0.25"
@@ -189,6 +190,71 @@ describe("conversation group HTTP routes", () => {
         expect(conversations.map((conversation) => conversation.type))
             .toEqual(expect.arrayContaining([CONVERSATION_TYPE.DIRECT, CONVERSATION_TYPE.GROUP]))
         expect(conversations.every((conversation) => !("delFlag" in conversation))).toBe(true)
+    })
+
+    it("should_keep_a_soft_deleted_participant_id_in_the_inbox_without_failing", async () => {
+        const owner = await createAccount("deleted-peer-owner")
+        const deletedPeer = await createAccount("deleted-peer")
+        const { app } = createTestApp()
+        await Conversation.create({
+            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT,
+            [CONVERSATION_FIELDS.PARTICIPANTS]: [
+                { [PARTICIPANT_FIELDS.USER_ID]: new mongoose.Types.ObjectId(owner.id), [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
+                { [PARTICIPANT_FIELDS.USER_ID]: new mongoose.Types.ObjectId(deletedPeer.id), [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
+            ],
+        })
+        await User.collection.updateOne(
+            { _id: new mongoose.Types.ObjectId(deletedPeer.id) },
+            { $set: { [AUTH_FIELDS.DELETED]: true } },
+        )
+
+        const response = await request(app)
+            .get(API_ROUTES.CONVERSATIONS)
+            .set("Authorization", `Bearer ${owner.token}`)
+
+        expect(response.status).toBe(200)
+        expect(response.body.data.conversations[0].participants).toContainEqual({
+            id: deletedPeer.id,
+            displayName: null,
+            avatarUrl: null,
+            joinedAt: expect.any(String),
+        })
+    })
+
+    it("should_hide_a_group_preview_created_before_the_requesting_member_joined", async () => {
+        const member = await createAccount("late-group-member")
+        const { app } = createTestApp()
+        const memberId = new mongoose.Types.ObjectId(member.id)
+        const messageCreatedAt = new Date()
+        const joinedAt = new Date(messageCreatedAt.getTime() + 1)
+        const [conversation] = await Conversation.create([{
+            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
+            [CONVERSATION_FIELDS.PARTICIPANTS]: [{
+                [PARTICIPANT_FIELDS.USER_ID]: memberId,
+                [PARTICIPANT_FIELDS.ROLE]: ROLE.OWNER,
+                [PARTICIPANT_FIELDS.JOINED_AT]: joinedAt,
+            }],
+            [CONVERSATION_FIELDS.GROUP]: {
+                [GROUP_FIELDS.NAME]: "Late arrival",
+                [GROUP_FIELDS.OWNER_ID]: memberId,
+            },
+            [CONVERSATION_FIELDS.LAST_MESSAGE]: {
+                [LAST_MESSAGE_FIELDS.MESSAGE_ID]: new mongoose.Types.ObjectId(),
+                [LAST_MESSAGE_FIELDS.SENDER_ID]: memberId,
+                [LAST_MESSAGE_FIELDS.CONTENT]: "Message from before joining",
+                [LAST_MESSAGE_FIELDS.CREATED_AT]: messageCreatedAt,
+            },
+        }])
+
+        const response = await request(app)
+            .get(API_ROUTES.CONVERSATIONS)
+            .set("Authorization", `Bearer ${member.token}`)
+
+        expect(response.status).toBe(200)
+        expect(response.body.data.conversations).toContainEqual(expect.objectContaining({
+            id: conversation?._id.toString(),
+            lastMessage: null,
+        }))
     })
 
     it("should_allow_an_admin_to_update_group_details", async () => {

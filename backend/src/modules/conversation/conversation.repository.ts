@@ -5,6 +5,7 @@ import Conversation, { type ConversationType } from "../../models/Conversation"
 import User from "../../models/User"
 import {
     CONVERSATION_FIELDS,
+    CONVERSATION_USER_PROFILE_FIELDS,
     GROUP_AVATAR_FIELDS,
     GROUP_MESSAGES,
     GROUP_USER_FIELDS,
@@ -114,15 +115,28 @@ export class MongooseConversationRepository implements ConversationRepository {
         }).sort({
             [`${CONVERSATION_FIELDS.LAST_MESSAGE}.${LAST_MESSAGE_FIELDS.CREATED_AT}`]: -1,
             [CONVERSATION_FIELDS.UPDATED_AT]: -1,
-        }).populate({
-            path: `${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`,
-            select: "displayName avatar.url",
-        }).populate({
-            path: `${CONVERSATION_FIELDS.LAST_MESSAGE}.${LAST_MESSAGE_FIELDS.SENDER_ID}`,
-            select: "displayName avatar.url",
         })
 
-        return conversations.map((conversation) => this.toConversationSummaryRecord(conversation))
+        const userIds = conversations.flatMap((conversation) => {
+            const participantIds = conversation[CONVERSATION_FIELDS.PARTICIPANTS].flatMap((participant) => {
+                const participantId = participant[PARTICIPANT_FIELDS.USER_ID]
+                return participantId ? [participantId] : []
+            })
+            const senderId = conversation[CONVERSATION_FIELDS.LAST_MESSAGE]?.[LAST_MESSAGE_FIELDS.SENDER_ID]
+            return senderId ? [...participantIds, senderId] : participantIds
+        })
+        const uniqueUserIds = Array.from(new Map(userIds.map((id) => [id.toString(), id])).values())
+        const users = await User.find({ [CONVERSATION_USER_PROFILE_FIELDS.ID]: { $in: uniqueUserIds } }).select({
+            [CONVERSATION_USER_PROFILE_FIELDS.DISPLAY_NAME]: 1,
+            [`${CONVERSATION_USER_PROFILE_FIELDS.AVATAR}.${CONVERSATION_USER_PROFILE_FIELDS.AVATAR_URL}`]: 1,
+        })
+        const userProfiles = new Map(users.map((user) => [user._id.toString(), {
+            id: user._id,
+            displayName: user[CONVERSATION_USER_PROFILE_FIELDS.DISPLAY_NAME],
+            avatarUrl: user[CONVERSATION_USER_PROFILE_FIELDS.AVATAR]?.[CONVERSATION_USER_PROFILE_FIELDS.AVATAR_URL] ?? null,
+        }]))
+
+        return conversations.map((conversation) => this.toConversationSummaryRecord(conversation, userProfiles, userId))
     }
 
     /** Load a group by ID, optionally within the caller's transaction. */
@@ -195,34 +209,51 @@ export class MongooseConversationRepository implements ConversationRepository {
         }
     }
 
-    private toConversationSummaryRecord(conversation: HydratedDocument<ConversationType>): ConversationSummaryRecord {
+    private toConversationSummaryRecord(
+        conversation: HydratedDocument<ConversationType>,
+        userProfiles: ReadonlyMap<string, ConversationUserProfile>,
+        requestingUserId: ObjectId,
+    ): ConversationSummaryRecord {
         const group = conversation[CONVERSATION_FIELDS.GROUP]
         const lastMessage = conversation[CONVERSATION_FIELDS.LAST_MESSAGE]
-        const sender = lastMessage
-            ? getPopulatedUserSummary(lastMessage[LAST_MESSAGE_FIELDS.SENDER_ID])
+        const lastMessageSenderId = lastMessage?.[LAST_MESSAGE_FIELDS.SENDER_ID]
+        const sender = lastMessageSenderId
+            ? userProfiles.get(lastMessageSenderId.toString()) ?? null
             : null
+        const requestingParticipant = conversation[CONVERSATION_FIELDS.PARTICIPANTS].find(
+            (participant) => participant[PARTICIPANT_FIELDS.USER_ID]?.equals(requestingUserId) ?? false,
+        )
+        const lastMessageCreatedAt = lastMessage?.[LAST_MESSAGE_FIELDS.CREATED_AT]
+        const requesterJoinedAt = requestingParticipant?.[PARTICIPANT_FIELDS.JOINED_AT]
+        const isLastMessageVisible = isLastMessageVisibleToUser(
+            conversation[CONVERSATION_FIELDS.TYPE],
+            lastMessageCreatedAt,
+            requesterJoinedAt,
+        )
         const avatar = group?.[GROUP_FIELDS.AVATAR]
         return {
             id: conversation[CONVERSATION_FIELDS.ID],
             type: conversation[CONVERSATION_FIELDS.TYPE],
-            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS].map((participant) => {
-                const user = getPopulatedUserSummary(participant[PARTICIPANT_FIELDS.USER_ID])
-                return {
-                    userId: user?._id ?? participant[PARTICIPANT_FIELDS.USER_ID],
+            participants: conversation[CONVERSATION_FIELDS.PARTICIPANTS].flatMap((participant) => {
+                const participantId = participant[PARTICIPANT_FIELDS.USER_ID]
+                if (!participantId) return []
+                const user = userProfiles.get(participantId.toString())
+                return [{
+                    userId: participantId,
                     displayName: user?.displayName ?? null,
-                    avatarUrl: user?.avatar?.url ?? null,
+                    avatarUrl: user?.avatarUrl ?? null,
                     joinedAt: participant[PARTICIPANT_FIELDS.JOINED_AT] ?? null,
-                }
+                }]
             }),
             unreadCount: Object.fromEntries(conversation[CONVERSATION_FIELDS.UNREAD_COUNT].entries()),
-            lastMessage: lastMessage
+            lastMessage: lastMessage && isLastMessageVisible
                 ? {
                     id: lastMessage[LAST_MESSAGE_FIELDS.MESSAGE_ID] ?? null,
                     sender: sender
                         ? {
-                            id: sender._id,
-                            displayName: sender.displayName ?? null,
-                            avatarUrl: sender.avatar?.url ?? null,
+                            id: sender.id,
+                            displayName: sender.displayName,
+                            avatarUrl: sender.avatarUrl,
                         }
                         : null,
                     content: lastMessage[LAST_MESSAGE_FIELDS.CONTENT] ?? null,
@@ -242,15 +273,18 @@ export class MongooseConversationRepository implements ConversationRepository {
     }
 }
 
-interface PopulatedUserSummary {
-    readonly _id: ObjectId
-    readonly displayName?: string
-    readonly avatar?: { readonly url?: string | null } | null
+interface ConversationUserProfile {
+    readonly id: ObjectId
+    readonly displayName: string
+    readonly avatarUrl: string | null
 }
 
-function getPopulatedUserSummary(value: unknown): PopulatedUserSummary | null {
-    if (typeof value !== "object" || value === null || !("_id" in value) || !("displayName" in value)) {
-        return null
-    }
-    return value as PopulatedUserSummary
+/** Hide group previews unless their timestamp proves the member had already joined. */
+function isLastMessageVisibleToUser(
+    conversationType: ConversationSummaryRecord["type"],
+    messageCreatedAt: Date | null | undefined,
+    memberJoinedAt: Date | null | undefined,
+): boolean {
+    if (conversationType !== CONVERSATION_TYPE.GROUP) return true
+    return messageCreatedAt != null && memberJoinedAt != null && messageCreatedAt >= memberJoinedAt
 }
