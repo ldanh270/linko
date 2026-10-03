@@ -1,23 +1,31 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { CONVERSATION_TYPE, GROUP_FIELDS, GROUP_LIMITS, ROLE } from "@linko/contracts"
+import {
+    CONVERSATION_FIELDS,
+    GROUP_AVATAR_FIELDS,
+    GROUP_MESSAGES,
+    LAST_MESSAGE_FIELDS,
+    PARTICIPANT_FIELDS,
+} from "#/modules/conversation/conversation.constants"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const lastMessageSchema = new mongoose.Schema(
     {
-        messageId: {
+        [LAST_MESSAGE_FIELDS.MESSAGE_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Message",
         },
 
-        senderId: {
+        [LAST_MESSAGE_FIELDS.SENDER_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
-        content: {
+        [LAST_MESSAGE_FIELDS.CONTENT]: {
             type: String,
             default: null,
         },
-        createdAt: {
+        [LAST_MESSAGE_FIELDS.CREATED_AT]: {
             type: Date,
             default: null,
         },
@@ -30,36 +38,36 @@ const lastMessageSchema = new mongoose.Schema(
 const participantSchema = new mongoose.Schema(
     {
         // User informations
-        userId: {
+        [PARTICIPANT_FIELDS.USER_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-        nickname: {
+        [PARTICIPANT_FIELDS.NICKNAME]: {
             type: String,
             trim: true,
         },
-        role: {
+        [PARTICIPANT_FIELDS.ROLE]: {
             type: String,
-            enum: ["OWNER", "ADMIN", "MEMBER", "DIRECT"],
+            enum: Object.values(ROLE),
             required: true,
         },
 
         // User settings
-        isArchived: {
+        [PARTICIPANT_FIELDS.IS_ARCHIVED]: {
             type: Boolean,
             default: false,
         },
-        mutedUntil: {
+        [PARTICIPANT_FIELDS.MUTED_UNTIL]: {
             type: Date,
             default: null,
         },
-        clearedHistoryAt: {
+        [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: {
             type: Date,
             default: Date.now,
         },
 
-        joinedAt: {
+        [PARTICIPANT_FIELDS.JOINED_AT]: {
             type: Date,
             default: Date.now,
         },
@@ -72,29 +80,34 @@ const participantSchema = new mongoose.Schema(
 // Group info: Only for group conversation
 const groupSchema = new mongoose.Schema(
     {
-        name: {
+        [GROUP_FIELDS.NAME]: {
             type: String,
             trim: true,
+            required: true,
+            minlength: [GROUP_LIMITS.MIN_NAME_LENGTH, GROUP_MESSAGES.INVALID_NAME],
+            maxlength: [GROUP_LIMITS.MAX_NAME_LENGTH, GROUP_MESSAGES.INVALID_NAME],
         },
 
-        ownerId: {
+        [GROUP_FIELDS.OWNER_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
+            required: true,
         },
 
-        description: {
+        [GROUP_FIELDS.DESCRIPTION]: {
             type: String,
             trim: true,
+            maxlength: [GROUP_LIMITS.MAX_DESCRIPTION_LENGTH, GROUP_MESSAGES.INVALID_DESCRIPTION],
         },
 
-        avatar: {
+        [GROUP_FIELDS.AVATAR]: {
             // Link CDN to display
-            url: {
+            [GROUP_AVATAR_FIELDS.URL]: {
                 type: String,
             },
 
             // Cloundinary public id to delete avatar
-            id: {
+            [GROUP_AVATAR_FIELDS.ID]: {
                 type: String,
             },
         },
@@ -106,34 +119,38 @@ const groupSchema = new mongoose.Schema(
 
 const conversationSchema = new mongoose.Schema(
     {
-        conversationType: {
+        [CONVERSATION_FIELDS.TYPE]: {
             type: String,
-            enum: ["DIRECT", "GROUP"],
+            enum: Object.values(CONVERSATION_TYPE),
             required: true,
         },
 
-        participants: {
+        [CONVERSATION_FIELDS.PARTICIPANTS]: {
             type: [participantSchema],
             required: true,
+            validate: {
+                validator: (participants: readonly unknown[]) => participants.length <= GROUP_LIMITS.MAX_MEMBERS_PER_GROUP,
+                message: GROUP_MESSAGES.MEMBER_LIMIT,
+            },
         },
 
         // Only for group conversations
-        group: {
+        [CONVERSATION_FIELDS.GROUP]: {
             type: groupSchema,
         },
 
-        lastMessage: {
+        [CONVERSATION_FIELDS.LAST_MESSAGE]: {
             type: lastMessageSchema,
             default: null,
         },
 
         // List of { participantId: unreadMessageNumber }
-        unreadCount: {
+        [CONVERSATION_FIELDS.UNREAD_COUNT]: {
             type: Map,
             of: Number,
             default: {},
         },
-        seenBy: [
+        [CONVERSATION_FIELDS.SEEN_BY]: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User",

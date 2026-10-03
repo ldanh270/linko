@@ -4,13 +4,28 @@ import { deleteR2Object, getPublicR2Url, putR2Object } from "#/services/r2Storag
 import { randomUUID } from "node:crypto"
 import sharp from "sharp"
 
+/** Stored public image metadata used to remove replaced R2 or legacy media. */
 export type ImageParams = {
     url?: string
     id?: string
 }
 
-export class InvalidProfileImageError extends Error {}
+/** Uploaded image bytes required by public profile and group avatar storage. */
+export interface ImageUpload {
+    readonly buffer: Buffer
+    readonly mimetype: string
+}
 
+/** Describe an image whose bytes do not match the accepted image contract. */
+export class InvalidProfileImageError extends Error {
+    /** Create a validation error for an image that cannot be stored safely. */
+    constructor(message: string) {
+        super(message)
+        this.name = new.target.name
+    }
+}
+
+/** Validate, normalize, and store a public profile or group avatar image. */
 export const storeProfileImage = async ({
     userId,
     field,
@@ -18,7 +33,7 @@ export const storeProfileImage = async ({
 }: {
     userId: string
     field: "avatar" | "background"
-    file: Express.Multer.File
+    file: ImageUpload
 }): Promise<{ url: string; id: string }> => {
     const format = getProfileImageFormat(normalizeUploadMimeType(file.mimetype))
     if (!format) throw new InvalidProfileImageError("Profile images must be JPEG, PNG, or WebP")
@@ -48,6 +63,7 @@ export const storeProfileImage = async ({
     return { url: getPublicR2Url(key), id: `r2:${key}` }
 }
 
+/** Remove a public R2 image or its legacy Cloudinary equivalent. */
 export const deleteStoredProfileImage = async (image: ImageParams) => {
     if (!image.id) return
 

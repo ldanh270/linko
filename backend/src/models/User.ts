@@ -1,4 +1,5 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { GROUP_USER_FIELDS } from "#/modules/conversation/conversation.constants"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
@@ -63,6 +64,13 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: Date.now(),
             index: true,
+        },
+
+        [GROUP_USER_FIELDS.GROUP_CONVERSATION_COUNT]: {
+            type: Number,
+            min: 0,
+            default: undefined,
+            select: false,
         },
     },
     {
