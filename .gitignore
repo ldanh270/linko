@@ -1,8 +1,10 @@
 # lock files
 package-lock.json
 pnpm-lock.yaml
+!/pnpm-lock.yaml
 !backend/pnpm-lock.yaml
 pnpm-workspace.yaml
+!/pnpm-workspace.yaml
 bun.lockb
 bun.lock
 yarn.lock

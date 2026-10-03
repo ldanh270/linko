@@ -251,6 +251,9 @@ export class MessageController {
     getMessages = async (req: Request, res: Response) => {
         try {
             const { conversationId } = req.params
+            if (typeof conversationId !== "string") {
+                return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Invalid conversation id" })
+            }
             const userId = req.user?._id.toString()
             const { limit = 50, cursor } = req.query
 

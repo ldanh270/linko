@@ -90,7 +90,7 @@ export class FriendController {
 
             // Validate
             if (!userId) return res.status(400).json({ message: "Missing user data" })
-            if (!friendId) return res.status(400).json({ message: "Missing friend id" })
+            if (typeof friendId !== "string") return res.status(400).json({ message: "Missing friend id" })
 
             await this.service.unfriend(userId.toString(), friendId)
 
@@ -109,7 +109,7 @@ export class FriendController {
 
             // Validate
             if (!userId) return res.status(400).json({ message: "Missing user data" })
-            if (!requestId) return res.status(400).json({ message: "Missing friend request id" })
+            if (typeof requestId !== "string") return res.status(400).json({ message: "Missing friend request id" })
 
             // Create friendship & Delete friend request
             const friendship = await this.service.acceptRequest(requestId, userId.toString())
@@ -128,7 +128,7 @@ export class FriendController {
 
             // Validate
             if (!userId) return res.status(400).json({ message: "Missing user data" })
-            if (!requestId) return res.status(400).json({ message: "Missing friend request id" })
+            if (typeof requestId !== "string") return res.status(400).json({ message: "Missing friend request id" })
 
             // Delete friend request
             await this.service.declineRequest(requestId, userId.toString())
