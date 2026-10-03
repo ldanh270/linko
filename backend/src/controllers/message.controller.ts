@@ -218,7 +218,8 @@ export class MessageController {
             } catch (error) {
                 if (createdMessage?._id) {
                     try {
-                        await Message.deleteOne({ _id: createdMessage._id })
+                        // NOTE: Compensate a message creation that never committed to the conversation.
+                        await Message.collection.deleteOne({ _id: createdMessage._id })
                     } catch (cleanupError) {
                         console.error(
                             "Failed to clean up unsaved message after conversation update",

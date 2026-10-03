@@ -1,4 +1,6 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { auditPlugin } from "#/shared/persistence/auditPlugin"
+import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const friendRequestSchema = new mongoose.Schema(
     {
@@ -23,8 +25,9 @@ const friendRequestSchema = new mongoose.Schema(
     },
 )
 
-// To avoid duplicate requests
-friendRequestSchema.index({ from: 1, to: 1 }, { unique: true })
+friendRequestSchema.plugin(auditPlugin)
+friendRequestSchema.plugin(softDeletePlugin)
+friendRequestSchema.index({ from: 1, to: 1 }, { unique: true, name: "active_friend_request_unique", partialFilterExpression: { delFlag: false } })
 
 // To get sent requests
 friendRequestSchema.index({ from: 1 })

@@ -6,6 +6,7 @@ import {
 import { HttpStatusCode } from "#/configs/constants/httpStatusCode"
 import Session from "#/models/Session"
 import User from "#/models/User"
+import { softDelete } from "#/shared/persistence/softDeletePlugin"
 
 import bcrypt from "bcrypt"
 import crypto from "crypto"
@@ -82,7 +83,7 @@ export class AuthService {
 
     logout = async (token: string) => {
         // Delete refresh token in database
-        await Session.deleteOne({ refreshToken: token })
+        await softDelete(Session, { refreshToken: token })
     }
 
     getNewToken = async (token: string) => {

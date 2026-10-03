@@ -1,4 +1,6 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { auditPlugin } from "#/shared/persistence/auditPlugin"
+import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const friendshipSchema = new mongoose.Schema(
     {
@@ -30,7 +32,9 @@ friendshipSchema.pre("save", async function () {
     }
 })
 
-friendshipSchema.index({ userA: 1, UserB: 1 }, { unique: true })
+friendshipSchema.plugin(auditPlugin)
+friendshipSchema.plugin(softDeletePlugin)
+friendshipSchema.index({ userA: 1, userB: 1 }, { unique: true, name: "active_friendship_unique", partialFilterExpression: { delFlag: false } })
 
 const Friendship = mongoose.model("Friendship", friendshipSchema)
 

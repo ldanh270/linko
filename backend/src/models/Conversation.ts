@@ -1,4 +1,6 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { auditPlugin } from "#/shared/persistence/auditPlugin"
+import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const lastMessageSchema = new mongoose.Schema(
     {
@@ -146,7 +148,9 @@ const conversationSchema = new mongoose.Schema(
 )
 
 // To get latest messsages when open app or open specific conversation
-conversationSchema.index({ "participant.userId": 1, "lastMessage.createdAt": -1 }) // participant.userId => ASC, lastMessage.createdAt => DESC
+conversationSchema.plugin(auditPlugin)
+conversationSchema.plugin(softDeletePlugin)
+conversationSchema.index({ "participants.userId": 1, "lastMessage.createdAt": -1 })
 
 // To auto sort participants by id (a < b) for avoid duplicate
 conversationSchema.pre("save", function () {
