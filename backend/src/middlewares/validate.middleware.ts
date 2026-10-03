@@ -1,33 +1,10 @@
-import { HttpStatusCode } from "#/configs/constants/httpStatusCode"
+import type { RequestHandler } from "express"
+import type { ZodType } from "zod"
 
-import { NextFunction, Request, Response } from "express"
-import { ZodError, ZodObject } from "zod"
-
-const validate = (schema: ZodObject) => (req: Request, res: Response, next: NextFunction) => {
-    try {
-        schema.parse({
-            body: req.body,
-            query: req.query,
-            params: req.params,
-        })
-
-        next()
-    } catch (error) {
-        if (error instanceof ZodError) {
-            const formattedErrors = error.issues.map((issue) => ({
-                field: issue.path.join("."),
-                message: issue.message,
-            }))
-
-            return res.status(HttpStatusCode.BAD_REQUEST).json({
-                errors: formattedErrors,
-            })
-        }
-
-        return res.status(HttpStatusCode.INTERNAL_SERVER).json({
-            message: "Internal server error",
-        })
-    }
+/** Validate request input and let the global error handler translate Zod failures. */
+const validate = (schema: ZodType): RequestHandler => (request, _response, next) => {
+    schema.parse({ body: request.body, query: request.query, params: request.params })
+    next()
 }
 
 export default validate
