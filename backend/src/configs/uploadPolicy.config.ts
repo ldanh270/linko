@@ -1,6 +1,12 @@
 export const MAX_UPLOAD_FILE_SIZE_BYTES = 10 * 1024 * 1024
 export const MAX_MESSAGE_ATTACHMENT_COUNT = 5
 
+/** Multer limit codes mapped at HTTP upload boundaries. */
+export const MULTER_ERROR_CODES = {
+    FILE_SIZE_LIMIT: "LIMIT_FILE_SIZE",
+    FILE_COUNT_LIMIT: "LIMIT_FILE_COUNT",
+} as const
+
 export const normalizeUploadMimeType = (mimeType: string) =>
     mimeType.split(";", 1)[0].trim().toLowerCase()
 

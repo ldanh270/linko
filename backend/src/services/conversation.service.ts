@@ -1,23 +1,10 @@
-import { HttpStatusCode } from "#/configs/constants/httpStatusCode"
+import { CONVERSATION_TYPE, ROLE } from "@linko/contracts"
 import Conversation, { ConversationType } from "#/models/Conversation"
 import Friendship from "#/models/Friendship"
-import { MessageService } from "#/services/message.service"
 
 import mongoose, { HydratedDocument } from "mongoose"
 
-type InitConversationParamsType = {
-    senderId: string
-    recipientId: string
-    content?: string
-    attachments?: {
-        url: string
-        id: string
-    }[]
-}
-
 export class ConversationService {
-    constructor(private readonly messageService: MessageService) {}
-
     // Find conversation by id (string)
     findConversationById = async (conversationId?: string) => {
         const conversation = await Conversation.findById(conversationId)
@@ -35,10 +22,8 @@ export class ConversationService {
 
         const conversation = await Conversation.findOne({
             "participants.userId": { $all: members },
-            conversationType: "DIRECT",
+            conversationType: CONVERSATION_TYPE.DIRECT,
         })
-
-        if (conversation) console.error("gm")
 
         return conversation
     }
@@ -77,71 +62,37 @@ export class ConversationService {
             .populate({ path: "seenBy", select: "displayName avatar.url" })
     }
 
-    // Create new conversation
+    // Create a direct conversation for the message flow. Group creation lives in the feature module.
     createConversation = async ({
         conversationId,
         userId,
-        type,
         memberIds,
-        name,
-        description,
     }: {
         conversationId?: string
         userId: string
-        type: "DIRECT" | "GROUP"
+        type: typeof CONVERSATION_TYPE.DIRECT
         memberIds: string[]
-        name?: string
-        description?: string
     }) => {
         let conversation: HydratedDocument<ConversationType> | null = null
         const _id = conversationId ? conversationId : new mongoose.Types.ObjectId()
+        const participantId = [...new Set(memberIds)].find((id) => id !== userId)
+        if (!participantId) throw new Error("A direct conversation requires a recipient")
 
-        const ownerIdStr = userId.toString()
-
-        const uniqueMemberIds = [...new Set(memberIds)].filter((id) => id.toString() !== ownerIdStr)
-
-        if (type === "DIRECT") {
-            const participantId = uniqueMemberIds[0]
-
-            conversation = await Conversation.findOne({
-                type: "DIRECT",
-                "participants.userId": { $all: [userId, participantId] },
-            })
-
-            if (!conversation) {
-                conversation = new Conversation({
-                    _id,
-                    conversationType: "DIRECT",
-                    participants: [
-                        { userId, role: "DIRECT" },
-                        { userId: participantId, role: "DIRECT" },
-                    ],
-                })
-            }
-
-            await conversation.save()
-        }
-
-        if (type === "GROUP") {
+        conversation = await Conversation.findOne({
+            conversationType: CONVERSATION_TYPE.DIRECT,
+            "participants.userId": { $all: [userId, participantId] },
+        })
+        if (!conversation) {
             conversation = new Conversation({
                 _id,
-                conversationType: "GROUP",
-                group: {
-                    name,
-                    ownerId: userId,
-                    description,
-                },
+                conversationType: CONVERSATION_TYPE.DIRECT,
                 participants: [
-                    { userId, role: "OWNER" },
-                    ...memberIds.map((id) => ({ userId: id, role: "MEMBER" })),
+                    { userId, role: ROLE.DIRECT },
+                    { userId: participantId, role: ROLE.DIRECT },
                 ],
             })
-
-            await conversation.save()
         }
-
-        // If type different with 'DIRECT' & 'GROUP'
-        if (!conversation) throw new Error("Conversation type invalid")
+        await conversation.save()
 
         await conversation.populate([
             // Select name & avatar url of participants in conversation

@@ -5,17 +5,18 @@ import {
     isProfileImageMimeType,
     MAX_MESSAGE_ATTACHMENT_COUNT,
     MAX_UPLOAD_FILE_SIZE_BYTES,
+    MULTER_ERROR_CODES,
     normalizeUploadMimeType,
 } from "#/configs/uploadPolicy.config"
 
 const sendUploadError = (error: unknown, res: Response) => {
-    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+    if (error instanceof multer.MulterError && error.code === MULTER_ERROR_CODES.FILE_SIZE_LIMIT) {
         const maxSizeMiB = MAX_UPLOAD_FILE_SIZE_BYTES / 1024 / 1024
         return res
             .status(413)
             .json({ message: `Each uploaded file must be ${maxSizeMiB} MiB or smaller` })
     }
-    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_COUNT") {
+    if (error instanceof multer.MulterError && error.code === MULTER_ERROR_CODES.FILE_COUNT_LIMIT) {
         return res.status(400).json({ message: "Too many files in upload" })
     }
     return res.status(400).json({

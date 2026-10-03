@@ -3,7 +3,6 @@ import { API_ROUTES } from "@linko/contracts"
 import { createServer } from "node:http"
 
 import { loadAuthConfig } from "#/configs/auth.config"
-import conversationRoutes from "#/routes/conversation.route"
 import friendRoutes from "#/routes/friend.route"
 import messageRoutes from "#/routes/message.route"
 import userRoutes from "#/routes/user.route"
@@ -20,7 +19,6 @@ const publicRoutes = express.Router()
 publicRoutes.get("/", (_request, response) => response.json(ApiResponse.ok({ status: "ok" })))
 
 const privateRoutes = express.Router()
-privateRoutes.use(API_ROUTES.CONVERSATIONS, conversationRoutes)
 privateRoutes.use(API_ROUTES.MESSAGES, messageRoutes)
 privateRoutes.use(API_ROUTES.USERS, userRoutes)
 privateRoutes.use(API_ROUTES.FRIENDS, friendRoutes)

@@ -4,6 +4,11 @@ import cors from "cors"
 import express, { type Express, type Router } from "express"
 
 import type { AuthRuntimeConfig } from "./configs/auth.config"
+import { ConversationController } from "./modules/conversation/conversation.controller"
+import { createConversationRouter } from "./modules/conversation/conversation.route"
+import { MongooseConversationRepository } from "./modules/conversation/conversation.repository"
+import { R2GroupAvatarStorage } from "./modules/conversation/group-avatar.storage"
+import { ConversationService } from "./modules/conversation/conversation.service"
 import { MongooseAuthRepository } from "./modules/auth/auth.repository"
 import { AuthTokenService, BcryptPasswordHasher } from "./modules/auth/auth.security"
 import { AuthService } from "./modules/auth/auth.service"
@@ -33,7 +38,13 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
+    const conversationService = new ConversationService({
+        repository: new MongooseConversationRepository(),
+        transactionRunner: { run: withTransaction },
+        avatarStorage: new R2GroupAvatarStorage(),
+    })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
+    const conversationController = new ConversationController(conversationService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -42,6 +53,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(dependencies.publicRoutes)
     app.use(API_ROUTES.AUTH, createAuthRouter(authController))
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
+    app.use(API_ROUTES.CONVERSATIONS, createConversationRouter(conversationController))
     app.use(dependencies.privateRoutes)
     app.use(() => {
         throw new BusinessException(ERROR_CODES.NOT_FOUND, 404, "Route not found")

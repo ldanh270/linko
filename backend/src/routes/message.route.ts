@@ -10,7 +10,7 @@ const messageRoutes = express.Router()
 
 const messageService = new MessageService()
 
-const conversationService = new ConversationService(messageService)
+const conversationService = new ConversationService()
 
 const controller = new MessageController(messageService, conversationService)
 
