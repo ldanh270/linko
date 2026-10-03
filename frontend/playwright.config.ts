@@ -5,7 +5,7 @@ export default defineConfig({
     testDir: "./test/e2e",
     use: { baseURL: "http://127.0.0.1:3100", ...devices["Desktop Chrome"] },
     webServer: {
-        command: "pnpm dev -- -p 3100",
+        command: "pnpm exec next dev -p 3100",
         url: "http://127.0.0.1:3100",
         reuseExistingServer: !process.env.CI,
     },
