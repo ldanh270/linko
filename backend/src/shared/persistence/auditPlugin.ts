@@ -11,6 +11,8 @@ const auditValues = () => {
     return { actor, ip: context?.ip ?? null }
 }
 
+const UNSUPPORTED_WRITE_ERROR = "Replacement and pipeline writes bypass audit fields"
+
 /** Add actor and IP audit fields to every persisted document and update. */
 export function auditPlugin(schema: Schema): void {
     schema.add({
@@ -57,9 +59,14 @@ export function auditPlugin(schema: Schema): void {
         }
     })
 
+    schema.pre(["replaceOne", "findOneAndReplace"], function () {
+        throw new Error(UNSUPPORTED_WRITE_ERROR)
+    })
+
     schema.pre("bulkWrite", function (operations) {
         const { actor, ip } = auditValues()
         for (const operation of operations) {
+            if ("replaceOne" in operation) throw new Error(UNSUPPORTED_WRITE_ERROR)
             if ("insertOne" in operation) {
                 Object.assign(operation.insertOne.document, {
                     createdBy: actor,
@@ -70,20 +77,23 @@ export function auditPlugin(schema: Schema): void {
             }
             if ("updateOne" in operation) {
                 const update = operation.updateOne.update
-                if (!Array.isArray(update)) {
-                    Object.assign(update, {
-                        $set: { ...update.$set, updatedBy: actor, updatedIp: ip },
-                        ...(operation.updateOne.upsert ? {
-                            $setOnInsert: { ...update.$setOnInsert, createdBy: actor, createdIp: ip },
-                        } : {}),
-                    })
-                }
+                if (Array.isArray(update)) throw new Error(UNSUPPORTED_WRITE_ERROR)
+                Object.assign(update, {
+                    $set: { ...update.$set, updatedBy: actor, updatedIp: ip },
+                    ...(operation.updateOne.upsert ? {
+                        $setOnInsert: { ...update.$setOnInsert, createdBy: actor, createdIp: ip },
+                    } : {}),
+                })
             }
             if ("updateMany" in operation) {
                 const update = operation.updateMany.update
-                if (!Array.isArray(update)) {
-                    Object.assign(update, { $set: { ...update.$set, updatedBy: actor, updatedIp: ip } })
-                }
+                if (Array.isArray(update)) throw new Error(UNSUPPORTED_WRITE_ERROR)
+                Object.assign(update, {
+                    $set: { ...update.$set, updatedBy: actor, updatedIp: ip },
+                    ...(operation.updateMany.upsert ? {
+                        $setOnInsert: { ...update.$setOnInsert, createdBy: actor, createdIp: ip },
+                    } : {}),
+                })
             }
         }
     })

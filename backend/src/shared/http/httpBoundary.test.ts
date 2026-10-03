@@ -63,6 +63,21 @@ describe("HTTP boundary", () => {
         expect(JSON.stringify(records[0])).not.toContain("token-value")
     })
 
+    it("redacts quoted and JSON-formatted secrets in technical errors", async () => {
+        const { app, publicRoutes, records } = createTestApp()
+        publicRoutes.get("/quoted-secrets", () => {
+            throw new Error('password: "secret with spaces" {"token":"json-secret"} refreshToken=refresh-secret')
+        })
+
+        const response = await request(app).get("/quoted-secrets")
+
+        expect(response.status).toBe(500)
+        expect(records).toHaveLength(1)
+        expect(JSON.stringify(records[0])).not.toContain("secret with spaces")
+        expect(JSON.stringify(records[0])).not.toContain("json-secret")
+        expect(JSON.stringify(records[0])).not.toContain("refresh-secret")
+    })
+
     it("maps malformed JSON to a safe 400 without technical logging", async () => {
         const { app, publicRoutes, records } = createTestApp()
         publicRoutes.post("/payload", (_request, response) => response.sendStatus(204))

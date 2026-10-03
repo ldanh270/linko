@@ -158,6 +158,16 @@ describe("Mongoose persistence aspects", () => {
         expect(record?.get("createdIp")).toBe("192.0.2.9")
     })
 
+    it("rejects replacement and pipeline writes that could erase audit fields", async () => {
+        const record = await Record.create({ name: "original" })
+
+        await expect(Record.replaceOne({ _id: record._id }, { name: "replacement" })).rejects.toThrow("audit fields")
+        await expect(Record.findOneAndReplace({ _id: record._id }, { name: "replacement" })).rejects.toThrow("audit fields")
+        await expect(Record.bulkWrite([{ replaceOne: { filter: { _id: record._id }, replacement: { name: "replacement", createdAt: new Date(), updatedAt: new Date() } } }])).rejects.toThrow("audit fields")
+        await expect(Record.bulkWrite([{ updateOne: { filter: { _id: record._id }, update: [{ $set: { name: "pipeline" } }] } }])).rejects.toThrow("audit fields")
+        expect((await Record.findById(record._id))?.name).toBe("original")
+    })
+
     it("previews Session TTL removal before applying a non-TTL expiry index", async () => {
         const database = mongoose.connection.db
         if (!database) throw new Error("Test database is unavailable")

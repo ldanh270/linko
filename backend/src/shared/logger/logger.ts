@@ -24,7 +24,7 @@ export interface ServerLogger {
 
 const redact = (value: string): string => value
     .replace(/\bBearer\s+[^\s"']+/gi, "Bearer [REDACTED]")
-    .replace(/\b(password|token|authorization|cookie|inviteToken)\s*[:=]\s*[^\s,"']+/gi, "$1=[REDACTED]")
+    .replace(/(\b(?:password|token|authorization|cookie|inviteToken|refreshToken|accessToken)\b["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}]+)/gi, "$1[REDACTED]")
 
 /** Create a logger whose sink can be replaced in tests. */
 export function createLogger(write: (record: LogRecord) => void): ServerLogger {
