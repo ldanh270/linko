@@ -2,6 +2,16 @@
 
 A simple way to stay connected with seamless chat and smooth calls.
 
+## MongoDB DNS troubleshooting
+
+If startup fails with `querySrv ECONNREFUSED` for a `mongodb+srv://` connection,
+check the DNS servers used by Node with
+`node -e "console.log(require('node:dns').getServers())"`.
+If the configured resolver is unavailable, set `DNS_SERVERS=1.1.1.1,8.8.8.8`
+in the backend `.env` and restart the backend. This overrides DNS resolution
+for the backend process. Use reachable DNS servers appropriate for your network;
+leave the setting empty to use the system resolver.
+
 ## Local demo data
 
 From the repository root, run:

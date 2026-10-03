@@ -1,3 +1,5 @@
+import { setServers } from "node:dns"
+
 import mongoose from "mongoose"
 
 /**
@@ -8,6 +10,12 @@ const connectDB = async () => {
     try {
         if (!process.env.MONGODB_CONNECTION_STRING) {
             throw new Error("Missing MONGODB_CONNECTION_STRING in .env file")
+        }
+        const dnsServers = process.env.DNS_SERVERS?.split(",")
+            .map((server) => server.trim())
+            .filter(Boolean)
+        if (dnsServers?.length) {
+            setServers(dnsServers)
         }
         await mongoose.connect(process.env.MONGODB_CONNECTION_STRING)
 
