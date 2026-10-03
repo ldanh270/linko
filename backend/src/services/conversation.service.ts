@@ -93,7 +93,7 @@ export class ConversationService {
         name?: string
         description?: string
     }) => {
-        let conversation: HydratedDocument<ConversationType>
+        let conversation: HydratedDocument<ConversationType> | null = null
         const _id = conversationId ? conversationId : new mongoose.Types.ObjectId()
 
         const ownerIdStr = userId.toString()

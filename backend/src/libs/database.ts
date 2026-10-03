@@ -17,7 +17,8 @@ const connectDB = async () => {
         if (dnsServers?.length) {
             setServers(dnsServers)
         }
-        await mongoose.connect(process.env.MONGODB_CONNECTION_STRING)
+        // NOTE: Index transitions are applied only by the reviewed backfill command.
+        await mongoose.connect(process.env.MONGODB_CONNECTION_STRING, { autoIndex: false })
 
         console.log("Connect to database successfully")
     } catch (error) {

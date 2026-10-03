@@ -1,6 +1,7 @@
 {
   "name": "linko",
   "private": true,
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "dev": "concurrently -k -n backend,frontend \"nr dev:backend\" \"nr dev:frontend\"",
     "seed": "nr -C backend seed",
@@ -9,8 +10,11 @@
     "i:all": "ni && nr i:backend && nr i:frontend",
     "i:backend": "ni -C backend",
     "i:frontend": "ni -C frontend",
-    "build": "nr build:frontend",
-    "build:frontend": "nr -C frontend build"
+    "build": "pnpm -C backend typecheck && pnpm -C frontend build",
+    "build:frontend": "nr -C frontend build",
+    "lint": "pnpm -C backend lint && pnpm -C frontend lint",
+    "typecheck": "pnpm -C backend typecheck && pnpm -C frontend typecheck",
+    "test": "pnpm -C backend test && pnpm -C frontend test"
   },
   "devDependencies": {
     "@antfu/ni": "^30.6.0",

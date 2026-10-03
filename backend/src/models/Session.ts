@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
-import { string } from "zod"
+import { auditPlugin } from "#/shared/persistence/auditPlugin"
+import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const sessionSchema = new mongoose.Schema(
     {
@@ -10,9 +11,8 @@ const sessionSchema = new mongoose.Schema(
             index: true,
         },
         refreshToken: {
-            type: string,
+            type: String,
             required: true,
-            unique: true,
         },
         expiresAt: {
             type: Date,
@@ -24,8 +24,10 @@ const sessionSchema = new mongoose.Schema(
     },
 )
 
-// Auto delete when expired
-sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+sessionSchema.plugin(auditPlugin)
+sessionSchema.plugin(softDeletePlugin)
+sessionSchema.index({ refreshToken: 1 }, { unique: true, name: "active_refresh_token_unique", partialFilterExpression: { delFlag: false } })
+sessionSchema.index({ expiresAt: 1 }, { name: "active_session_expiry" })
 
 const Session = mongoose.model("Session", sessionSchema)
 

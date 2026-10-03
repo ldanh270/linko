@@ -1,45 +1,42 @@
+import { ERROR_CODES } from "@linko/contracts"
 import { ACCESS_TOKEN_SECRET } from "#/configs/constants/authTokens"
 import User from "#/models/User"
+import { BusinessException } from "#/shared/errors/BusinessException"
+import { requestContext } from "#/shared/middlewares/requestContext"
 
-import { NextFunction, Request, Response } from "express"
-import jwt, { JwtPayload } from "jsonwebtoken"
+import type { RequestHandler } from "express"
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
-interface DecodedToken extends JwtPayload {
-    userId: string
-}
+const AUTH_MESSAGES = {
+    MISSING_TOKEN: "Missing access token",
+    INVALID_TOKEN: "Invalid or expired token",
+} as const
 
-const protectRoutes = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // Get access token in res.header
-        const authHeader = req.headers["authorization"]
-        const accessToken = authHeader && authHeader.split(" ")[1] // authHeader: Bearer <accessToken>
-
-        if (!accessToken) {
-            return res.status(401).json({ message: "Missing access token" })
-        }
-        // Verify access token
-        jwt.verify(accessToken, ACCESS_TOKEN_SECRET, async (error, decodedUser) => {
-            if (error || !decodedUser) {
-                console.error(error)
-                return res.status(403).json({ message: "Incorrect or expired token" })
-            }
-            // Find user id in database
-            // Select all except hashedPassword to display
-            const user = await User.findById((decodedUser as DecodedToken).userId).select(
-                "-hashedPassword",
-            )
-
-            if (!user) {
-                return res.status(404).json({ message: "User not exists" })
-            }
-            // Return user id in req
-            req.user = user
-            next()
-        })
-    } catch (error) {
-        console.error("Verify JWT in middleware protectRoutes ERROR: " + (error as Error).message)
-        return res.status(500).json({ message: "Internal server error" })
+/** Authenticate a bearer token before any protected route can access user context. */
+const protectRoutes: RequestHandler = async (request, _response, next) => {
+    const header = request.get("Authorization")
+    const token = header?.startsWith("Bearer ") ? header.slice(7) : null
+    if (!token) {
+        throw new BusinessException(ERROR_CODES.UNAUTHORIZED, 401, AUTH_MESSAGES.MISSING_TOKEN)
     }
+
+    const payload = jwt.verify(token, ACCESS_TOKEN_SECRET)
+    const userId = typeof payload === "object" && typeof payload.userId === "string"
+        ? payload.userId
+        : null
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+        throw new BusinessException(ERROR_CODES.INVALID_TOKEN, 401, AUTH_MESSAGES.INVALID_TOKEN)
+    }
+
+    const user = await User.findById(userId).select("-hashedPassword")
+    if (!user) {
+        throw new BusinessException(ERROR_CODES.INVALID_TOKEN, 401, AUTH_MESSAGES.INVALID_TOKEN)
+    }
+    request.user = user
+    const context = requestContext.getStore()
+    if (context) context.userId = user._id.toString()
+    next()
 }
 
 export default protectRoutes

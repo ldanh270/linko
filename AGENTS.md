@@ -14,12 +14,12 @@ These are the "pick one and be consistent" decisions. Before writing any code, r
 
 | Decision | Chosen value | DEFAULT if blank |
 |---|---|---|
-| ID type (PKs **and** FKs, incl. `createdBy`/`updatedBy`) | _fill_ | UUID (string) everywhere |
-| Enum strategy | _fill_ | Text values defined once in a constants file (see 6.4) |
-| `delFlag` type | _fill_ | `Boolean`, default `false` |
-| Timestamp type | _fill_ | `timestamptz` (UTC) |
-| API response envelope | _fill_ | `{ success, data, error, meta }` (see 3.5) |
-| ORM / validation lib | _fill_ | Prisma / Zod |
+| ID type (PKs **and** FKs, incl. `createdBy`/`updatedBy`) | MongoDB ObjectId; string in API DTOs | UUID (string) everywhere |
+| Enum strategy | Text values defined once in `@linko/contracts` constants | Text values defined once in a constants file (see 6.4) |
+| `delFlag` type | `Boolean`, default `false` | `Boolean`, default `false` |
+| Timestamp type | MongoDB `Date` in UTC | `timestamptz` (UTC) |
+| API response envelope | `{ success, data, error, meta }` | `{ success, data, error, meta }` (see 3.5) |
+| ORM / validation lib | Mongoose / Zod | Prisma / Zod |
 
 ---
 

@@ -9,11 +9,15 @@
     },
     "scripts": {
         "dev": "tsx watch src/index.ts",
-        "seed": "tsx scripts/seed.ts"
+        "seed": "tsx scripts/seed.ts",
+        "test": "vitest run",
+        "typecheck": "tsc --noEmit",
+        "lint": "tsc --noEmit"
     },
     "type": "module",
     "author": "ldanh270",
     "dependencies": {
+        "@linko/contracts": "workspace:*",
         "@aws-sdk/client-s3": "^3.922.0",
         "bcrypt": "^6.0.0",
         "cloudinary": "^2.8.0",
@@ -30,6 +34,7 @@
         "zod": "^4.1.13"
     },
     "devDependencies": {
+        "@types/supertest": "^6.0.3",
         "@trivago/prettier-plugin-sort-imports": "^6.0.0",
         "@types/bcrypt": "^6.0.0",
         "@types/cookie-parser": "^1.4.10",
@@ -39,6 +44,10 @@
         "@types/multer": "^2.0.0",
         "@types/node": "^24.10.1",
         "prettier": "^3.7.4",
+        "supertest": "^7.1.4",
+        "mongodb-memory-server": "^10.2.3",
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4",
         "tsx": "^4.23.15"
     }
 }

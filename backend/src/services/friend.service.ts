@@ -2,6 +2,7 @@ import { HttpStatusCode } from "#/configs/constants/httpStatusCode"
 import FriendRequest, { FriendRequestType } from "#/models/FriendRequest"
 import Friendship from "#/models/Friendship"
 import User from "#/models/User"
+import { softDelete } from "#/shared/persistence/softDeletePlugin"
 
 import { QueryFilter, Types } from "mongoose"
 
@@ -123,7 +124,7 @@ export class FriendService {
         const friendship = await Friendship.create({ userA, userB })
 
         // Delete request
-        await FriendRequest.findByIdAndDelete(requestId)
+        await softDelete(FriendRequest, { _id: requestId })
 
         await friendship.populate([
             { path: "userA", select: "name avatar email" },
@@ -144,7 +145,7 @@ export class FriendService {
             throw new Error("Only invited user can be decline request")
 
         // Delete request
-        await FriendRequest.findByIdAndDelete(requestId)
+        await softDelete(FriendRequest, { _id: requestId })
     }
 
     unfriend = async (userId: string, friendId: string) => {
@@ -154,6 +155,6 @@ export class FriendService {
         if (userA > userB) [userA, userB] = [userB, userA]
 
         // Delete friendship
-        await Friendship.findOneAndDelete({ userA, userB })
+        await softDelete(Friendship, { userA, userB })
     }
 }

@@ -1,4 +1,6 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { auditPlugin } from "#/shared/persistence/auditPlugin"
+import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const messageSchema = new mongoose.Schema(
     {
@@ -78,6 +80,8 @@ const messageSchema = new mongoose.Schema(
     },
 )
 
+messageSchema.plugin(auditPlugin)
+messageSchema.plugin(softDeletePlugin)
 messageSchema.index({ conversationId: 1, createdAt: -1 })
 
 const Message = mongoose.model("Message", messageSchema)

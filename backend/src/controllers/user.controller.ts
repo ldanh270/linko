@@ -53,6 +53,9 @@ export class UserController {
     getUserByParams = async (req: Request, res: Response) => {
         try {
             const { userId } = req.params
+            if (typeof userId !== "string") {
+                return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Invalid user id" })
+            }
             const loginUserId = req.user?._id
 
             // User not logged-in or missing user data

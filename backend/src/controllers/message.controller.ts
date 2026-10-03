@@ -218,7 +218,8 @@ export class MessageController {
             } catch (error) {
                 if (createdMessage?._id) {
                     try {
-                        await Message.deleteOne({ _id: createdMessage._id })
+                        // NOTE: Compensate a message creation that never committed to the conversation.
+                        await Message.collection.deleteOne({ _id: createdMessage._id })
                     } catch (cleanupError) {
                         console.error(
                             "Failed to clean up unsaved message after conversation update",
@@ -251,6 +252,9 @@ export class MessageController {
     getMessages = async (req: Request, res: Response) => {
         try {
             const { conversationId } = req.params
+            if (typeof conversationId !== "string") {
+                return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Invalid conversation id" })
+            }
             const userId = req.user?._id.toString()
             const { limit = 50, cursor } = req.query
 

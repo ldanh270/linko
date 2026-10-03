@@ -13,7 +13,7 @@ type MessageType = {
         contentType?: string
         size?: number
     }[]
-    replyTo?: string
+    replyTo?: string | null
     mentions?: string[]
 }
 
@@ -69,6 +69,6 @@ export class MessageService {
 
         messages = messages.reverse()
 
-        return [messages, nextCursor]
+        return [messages, nextCursor] as const
     }
 }

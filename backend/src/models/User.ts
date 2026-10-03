@@ -1,11 +1,12 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { auditPlugin } from "#/shared/persistence/auditPlugin"
+import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
 const userSchema = new mongoose.Schema(
     {
         username: {
             type: String,
             required: true,
-            unique: true,
             trim: true,
             lowercase: true,
         },
@@ -23,7 +24,6 @@ const userSchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
-            unique: true,
             trim: true,
             lowercase: true,
         },
@@ -71,7 +71,11 @@ const userSchema = new mongoose.Schema(
     },
 )
 
+userSchema.plugin(auditPlugin)
+userSchema.plugin(softDeletePlugin)
 userSchema.index({ username: 1, displayName: 1, email: 1 })
+userSchema.index({ username: 1 }, { unique: true, name: "active_username_unique", partialFilterExpression: { delFlag: false } })
+userSchema.index({ email: 1 }, { unique: true, name: "active_email_unique", partialFilterExpression: { delFlag: false } })
 
 const User = mongoose.model("User", userSchema)
 
