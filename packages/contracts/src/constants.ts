@@ -17,6 +17,10 @@ export const ERROR_CODES = {
     NOT_FOUND: "NOT_FOUND",
     CONFLICT: "CONFLICT",
     INVALID_TOKEN: "INVALID_TOKEN",
+    USERNAME_TAKEN: "USERNAME_TAKEN",
+    EMAIL_TAKEN: "EMAIL_TAKEN",
+    INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
+    INVALID_SESSION: "INVALID_SESSION",
 } as const
 
 /** Group and direct conversation roles stored as text. */

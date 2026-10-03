@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
+import { AUTH_FIELDS } from "#/modules/auth/auth.constants"
 
 const sessionSchema = new mongoose.Schema(
     {
@@ -10,9 +11,13 @@ const sessionSchema = new mongoose.Schema(
             required: true,
             index: true,
         },
-        refreshToken: {
+        [AUTH_FIELDS.REFRESH_TOKEN]: {
             type: String,
-            required: true,
+            required: false,
+        },
+        [AUTH_FIELDS.REFRESH_TOKEN_HASH]: {
+            type: String,
+            required: false,
         },
         expiresAt: {
             type: Date,
