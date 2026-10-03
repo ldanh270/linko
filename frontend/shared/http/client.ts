@@ -9,12 +9,24 @@ export interface RequestOptions extends Omit<RequestInit, "body"> {
 /** Inject authorization without binding the foundation to a session store. */
 export type AuthHeaderProvider = () => Promise<HeadersInit | undefined> | HeadersInit | undefined
 
+/** Recover one expired authorization before the client retries a request. */
+export type UnauthorizedRecovery = () => Promise<boolean>
+
 /** Centralize JSON transport and envelope validation for feature APIs. */
 export class ApiClient {
-  constructor(private readonly baseUrl = "", private readonly getAuthHeaders?: AuthHeaderProvider) {}
+  constructor(
+    private readonly baseUrl = "",
+    private readonly getAuthHeaders?: AuthHeaderProvider,
+    private readonly recoverUnauthorized?: UnauthorizedRecovery,
+  ) {}
 
   /** Request one API resource and unwrap its success envelope. */
   async request<T>({ path, body, headers, ...options }: RequestOptions): Promise<T> {
+    return this.requestOnce({ path, body, headers, ...options }, false)
+  }
+
+  private async requestOnce<T>(options: RequestOptions, hasRetried: boolean): Promise<T> {
+    const { path, body, headers, ...requestOptions } = options
     const requestHeaders = new Headers(headers)
     if (body !== undefined) requestHeaders.set("Content-Type", "application/json")
     const authHeaders = await this.getAuthHeaders?.()
@@ -22,16 +34,22 @@ export class ApiClient {
     let response: Response
     try {
       response = await fetch(`${this.baseUrl}${path}`, {
-        ...options,
+        ...requestOptions,
         headers: requestHeaders,
-        credentials: options.credentials ?? "include",
+        credentials: requestOptions.credentials ?? "include",
         body: body === undefined ? undefined : JSON.stringify(body),
       })
     } catch {
       throw new ApiError(HTTP_ERROR.NETWORK, HTTP_ERROR.GENERIC_MESSAGE, 0)
     }
     const payload: unknown = await response.json().catch(() => null)
-    if (!response.ok) throw ApiError.fromResponse(response, payload)
+    if (!response.ok) {
+      const error = ApiError.fromResponse(response, payload)
+      if (response.status === 401 && !hasRetried && await this.recoverUnauthorized?.()) {
+        return this.requestOnce(options, true)
+      }
+      throw error
+    }
     if (!isSuccessEnvelope<T>(payload)) throw new ApiError(HTTP_ERROR.INVALID_RESPONSE, HTTP_ERROR.GENERIC_MESSAGE, response.status)
     return payload.data
   }

@@ -11,7 +11,7 @@ import { withRequestContext } from "../../shared/middlewares/requestContext"
 import { withTransaction } from "../../shared/persistence/withTransaction"
 import { createLogger, type LogRecord } from "../../shared/logger/logger"
 import { AuthController } from "./auth.controller"
-import { AUTH_COOKIE_NAME } from "./auth.constants"
+import { AUTH_COOKIE_NAME, AUTH_FIELDS, AUTH_ROUTE_PATHS } from "./auth.constants"
 import { MongooseAuthRepository } from "./auth.repository"
 import { AuthTokenService, BcryptPasswordHasher } from "./auth.security"
 import { AuthService } from "./auth.service"
@@ -76,7 +76,7 @@ function createAuthTestApp(repository: AuthRepository = new MongooseAuthReposito
 /** Create an account for login-only route scenarios. */
 async function createTestAccount(): Promise<void> {
     const hashedPassword = await new BcryptPasswordHasher().hash(TEST_CREDENTIALS.password)
-    await User.create({ ...TEST_CREDENTIALS, hashedPassword })
+    await User.create({ ...TEST_CREDENTIALS, [AUTH_FIELDS.HASHED_PASSWORD]: hashedPassword })
 }
 
 /** Read the opaque refresh token value from a Set-Cookie header. */
@@ -91,10 +91,20 @@ function getRefreshCookieValue(response: { headers: Record<string, string | stri
     return token
 }
 
+/** Find the cookie header that clears the opaque refresh credential. */
+function getClearedRefreshCookieHeader(response: { headers: Record<string, string | string[] | undefined> }): string {
+    const cookie = response.headers["set-cookie"]
+    const value = (Array.isArray(cookie) ? cookie : [cookie]).find((entry) =>
+        typeof entry === "string" && entry.startsWith(`${AUTH_COOKIE_NAME}=`),
+    )
+    if (!value) throw new Error("The response did not clear the refresh cookie")
+    return value
+}
+
 describe("auth HTTP routes", () => {
     it("returns a safe user DTO in the signup success envelope", async () => {
         const response = await request(createAuthTestApp())
-            .post(`${API_ROUTES.AUTH}/signup`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.SIGNUP}`)
             .send(TEST_CREDENTIALS)
 
         expect(response.status).toBe(201)
@@ -109,13 +119,13 @@ describe("auth HTTP routes", () => {
             error: null,
             meta: null,
         })
-        expect(response.body.data).not.toHaveProperty("hashedPassword")
-        expect(response.body.data).not.toHaveProperty("delFlag")
+        expect(response.body.data).not.toHaveProperty(AUTH_FIELDS.HASHED_PASSWORD)
+        expect(response.body.data).not.toHaveProperty(AUTH_FIELDS.DELETED)
     })
 
     it("returns the shared 400 envelope for an invalid password", async () => {
         const response = await request(createAuthTestApp())
-            .post(`${API_ROUTES.AUTH}/signup`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.SIGNUP}`)
             .send({ ...TEST_CREDENTIALS, password: "weak" })
 
         expect(response.status).toBe(400)
@@ -126,13 +136,15 @@ describe("auth HTTP routes", () => {
         await createTestAccount()
 
         const response = await request(createAuthTestApp())
-            .post(`${API_ROUTES.AUTH}/login`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGIN}`)
             .send({ username: TEST_CREDENTIALS.username, password: TEST_CREDENTIALS.password })
 
         const refreshToken = getRefreshCookieValue(response)
         const tokenService = new AuthTokenService(TEST_TOKEN_SECRET)
-        const savedSession = await Session.findOne({ refreshTokenHash: tokenService.hashRefreshToken(refreshToken) })
-        const plaintextSession = await Session.collection.findOne({ refreshToken })
+        const savedSession = await Session.findOne({
+            [AUTH_FIELDS.REFRESH_TOKEN_HASH]: tokenService.hashRefreshToken(refreshToken),
+        })
+        const plaintextSession = await Session.collection.findOne({ [AUTH_FIELDS.REFRESH_TOKEN]: refreshToken })
 
         expect(response.status).toBe(200)
         expect(response.body).toMatchObject({ success: true, data: { accessToken: expect.any(String) } })
@@ -145,32 +157,34 @@ describe("auth HTTP routes", () => {
         await createTestAccount()
         const app = createAuthTestApp()
         const loginResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/login`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGIN}`)
             .send({ username: TEST_CREDENTIALS.username, password: TEST_CREDENTIALS.password })
         const originalToken = getRefreshCookieValue(loginResponse)
 
         const refreshResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/refresh-token`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.REFRESH}`)
             .set("Cookie", `${AUTH_COOKIE_NAME}=${originalToken}`)
         const rotatedToken = getRefreshCookieValue(refreshResponse)
         const tokenService = new AuthTokenService(TEST_TOKEN_SECRET)
-        const oldSession = await Session.findOne({ refreshTokenHash: tokenService.hashRefreshToken(originalToken) })
+        const oldSession = await Session.findOne({
+            [AUTH_FIELDS.REFRESH_TOKEN_HASH]: tokenService.hashRefreshToken(originalToken),
+        })
             .setOptions({ includeDeleted: true })
 
         const replayResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/refresh-token`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.REFRESH}`)
             .set("Cookie", `${AUTH_COOKIE_NAME}=${originalToken}`)
 
         expect(refreshResponse.status).toBe(200)
         expect(rotatedToken).not.toBe(originalToken)
-        expect(oldSession?.get("delFlag")).toBe(true)
+        expect(oldSession?.get(AUTH_FIELDS.DELETED)).toBe(true)
         expect(replayResponse.status).toBe(401)
         expect(replayResponse.body.error.code).toBe(ERROR_CODES.INVALID_SESSION)
     })
 
     it("rejects refresh when the browser has no refresh cookie", async () => {
         const response = await request(createAuthTestApp())
-            .post(`${API_ROUTES.AUTH}/refresh-token`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.REFRESH}`)
 
         expect(response.status).toBe(401)
         expect(response.body.error.code).toBe(ERROR_CODES.INVALID_SESSION)
@@ -180,50 +194,54 @@ describe("auth HTTP routes", () => {
         await createTestAccount()
         const app = createAuthTestApp()
         const loginResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/login`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGIN}`)
             .send({ username: TEST_CREDENTIALS.username, password: TEST_CREDENTIALS.password })
         const refreshToken = getRefreshCookieValue(loginResponse)
         const tokenService = new AuthTokenService(TEST_TOKEN_SECRET)
         await Session.collection.updateOne(
-            { refreshTokenHash: tokenService.hashRefreshToken(refreshToken) },
-            { $set: { expiresAt: new Date(Date.now() - 1000) } },
+            { [AUTH_FIELDS.REFRESH_TOKEN_HASH]: tokenService.hashRefreshToken(refreshToken) },
+            { $set: { [AUTH_FIELDS.EXPIRES_AT]: new Date(Date.now() - 1000) } },
         )
 
         const refreshResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/refresh-token`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.REFRESH}`)
             .set("Cookie", `${AUTH_COOKIE_NAME}=${refreshToken}`)
         const logoutResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/logout`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGOUT}`)
             .set("Cookie", `${AUTH_COOKIE_NAME}=${refreshToken}`)
 
         expect(refreshResponse.status).toBe(401)
         expect(refreshResponse.body.error.code).toBe(ERROR_CODES.INVALID_SESSION)
         expect(logoutResponse.status).toBe(200)
-        expect(logoutResponse.headers["set-cookie"]).toEqual(expect.arrayContaining([
-            expect.stringMatching(/^refreshToken=;/),
-        ]))
+        const clearedCookie = getClearedRefreshCookieHeader(logoutResponse)
+        expect(clearedCookie.startsWith(`${AUTH_COOKIE_NAME}=;`)).toBe(true)
+        expect(clearedCookie.toLowerCase()).toContain(`path=${TEST_COOKIE_CONFIGURATION.path.toLowerCase()}`)
+        expect(clearedCookie).toMatch(/HttpOnly/i)
+        expect(clearedCookie.toLowerCase()).toContain(`samesite=${TEST_COOKIE_CONFIGURATION.sameSite}`)
     })
 
     it("clears the exact refresh cookie and invalidates its session on logout", async () => {
         await createTestAccount()
         const app = createAuthTestApp()
         const loginResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/login`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGIN}`)
             .send({ username: TEST_CREDENTIALS.username, password: TEST_CREDENTIALS.password })
         const refreshToken = getRefreshCookieValue(loginResponse)
 
         const logoutResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/logout`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGOUT}`)
             .set("Cookie", `${AUTH_COOKIE_NAME}=${refreshToken}`)
         const replayResponse = await request(app)
-            .post(`${API_ROUTES.AUTH}/refresh-token`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.REFRESH}`)
             .set("Cookie", `${AUTH_COOKIE_NAME}=${refreshToken}`)
 
         expect(logoutResponse.status).toBe(200)
         expect(logoutResponse.body).toMatchObject({ success: true, data: null, error: null, meta: null })
-        expect(logoutResponse.headers["set-cookie"]).toEqual(expect.arrayContaining([
-            expect.stringMatching(/^refreshToken=;/),
-        ]))
+        const clearedCookie = getClearedRefreshCookieHeader(logoutResponse)
+        expect(clearedCookie.startsWith(`${AUTH_COOKIE_NAME}=;`)).toBe(true)
+        expect(clearedCookie.toLowerCase()).toContain(`path=${TEST_COOKIE_CONFIGURATION.path.toLowerCase()}`)
+        expect(clearedCookie).toMatch(/HttpOnly/i)
+        expect(clearedCookie.toLowerCase()).toContain(`samesite=${TEST_COOKIE_CONFIGURATION.sameSite}`)
         expect(replayResponse.status).toBe(401)
         expect(replayResponse.body.error.code).toBe(ERROR_CODES.INVALID_SESSION)
     })
@@ -233,7 +251,7 @@ describe("auth HTTP routes", () => {
         vi.spyOn(repository, "findUserByUsername").mockRejectedValue(new Error("private database detail"))
 
         const response = await request(createAuthTestApp(repository))
-            .post(`${API_ROUTES.AUTH}/login`)
+            .post(`${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.LOGIN}`)
             .send({ username: TEST_CREDENTIALS.username, password: TEST_CREDENTIALS.password })
 
         expect(response.status).toBe(500)

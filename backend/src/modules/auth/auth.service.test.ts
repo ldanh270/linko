@@ -70,6 +70,23 @@ describe("AuthService business rules", () => {
         expect(repository.createUser).not.toHaveBeenCalled()
     })
 
+    it("should_reject_duplicate_email_with_conflict_code", async () => {
+        const { service, repository } = createDependencies({
+            findUserConflict: vi.fn().mockResolvedValue({ username: "another-reader", email: "reader@example.com" }),
+        })
+
+        const error = await service.signup({
+            username: "reader",
+            password: "ValidPass1!",
+            email: "reader@example.com",
+            displayName: "Reader",
+        }).catch((caught: unknown) => caught)
+
+        expect(error).toBeInstanceOf(ConflictException)
+        expect(error).toMatchObject({ code: ERROR_CODES.EMAIL_TAKEN, httpStatus: 409 })
+        expect(repository.createUser).not.toHaveBeenCalled()
+    })
+
     it("should_rotate_refresh_token_once", async () => {
         const { service, repository } = createDependencies({
             consumeSession: vi.fn()

@@ -7,6 +7,14 @@ export const API_ROUTES = {
     FRIENDS: "/api/friends",
 } as const
 
+/** Route suffixes used by the auth API module and both HTTP clients. */
+export const AUTH_ROUTE_PATHS = {
+    SIGNUP: "/signup",
+    LOGIN: "/login",
+    REFRESH: "/refresh-token",
+    LOGOUT: "/logout",
+} as const
+
 /** Stable error codes in API failure envelopes. */
 export const ERROR_CODES = {
     INTERNAL: "INTERNAL",

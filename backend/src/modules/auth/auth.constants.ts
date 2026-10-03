@@ -1,3 +1,5 @@
+export { AUTH_ROUTE_PATHS } from "@linko/contracts"
+
 /** Database and token field names used across the auth persistence boundary. */
 export const AUTH_FIELDS = {
     ID: "id",
@@ -19,14 +21,6 @@ export const AUTH_FIELDS = {
 /** Stable MongoDB index names owned by the auth persistence layer. */
 export const AUTH_INDEX_NAMES = {
     REFRESH_TOKEN_HASH: "active_refresh_token_hash_unique",
-} as const
-
-/** Route suffixes mounted beneath the shared authentication API prefix. */
-export const AUTH_ROUTE_PATHS = {
-    SIGNUP: "/signup",
-    LOGIN: "/login",
-    REFRESH: "/refresh-token",
-    LOGOUT: "/logout",
 } as const
 
 /** Cookie name shared by login, refresh, and logout. */
