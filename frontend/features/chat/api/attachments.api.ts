@@ -11,7 +11,7 @@ import { authenticatedApiClient } from "../../auth/api/auth.api"
 import { createMessageMultipartBody } from "./messages.api"
 
 /** Input accepted by the multipart message upload adapter. */
-export interface SendMessageFilesInput extends SendMessageRequest {
+export type SendMessageFilesInput = SendMessageRequest & {
     readonly files: readonly File[]
     readonly signal?: AbortSignal
 }

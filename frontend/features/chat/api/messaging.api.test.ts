@@ -52,6 +52,25 @@ describe("messaging API adapter", () => {
         })
     })
 
+    it("should_send_by_recipient_id_when_starting_a_friend_direct_chat", async () => {
+        const recipientId = "507f1f77bcf86cd799439016"
+        const fetchMock = vi.fn().mockResolvedValue(successResponse(MESSAGE, 201))
+        vi.stubGlobal("fetch", fetchMock)
+
+        await sendMessage({
+            recipientId,
+            clientMessageId: "recipient-message-001",
+            content: "Hello friend",
+        })
+
+        const [, request] = fetchMock.mock.calls[0] as [string, RequestInit]
+        expect(JSON.parse(String(request.body))).toEqual({
+            [MESSAGE_FIELDS.RECIPIENT_ID]: recipientId,
+            [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: "recipient-message-001",
+            [MESSAGE_FIELDS.CONTENT]: "Hello friend",
+        })
+    })
+
     it("should_list_a_contract_cursor_page_using_shared_query_names", async () => {
         const page: CursorPage<MessageDto> = { items: [MESSAGE], nextCursor: "older-cursor" }
         const fetchMock = vi.fn().mockResolvedValue(successResponse(page))

@@ -13,7 +13,7 @@ import {
 import { authenticatedApiClient } from "../../auth/api/auth.api"
 
 /** Browser send fields augmented with cancellation for screen-owned retry state. */
-export interface SendMessageInput extends SendMessageRequest {
+export type SendMessageInput = SendMessageRequest & {
     readonly signal?: AbortSignal
 }
 
@@ -34,12 +34,17 @@ const MESSAGE_ENDPOINT = API_ROUTES.MESSAGES
  * @returns The persisted message DTO or a normalized shared-client error.
  */
 export function sendMessage(input: SendMessageInput): Promise<MessageDto> {
-    const body: SendMessageRequest = {
-        [MESSAGE_FIELDS.CONVERSATION_ID]: input.conversationId,
+    const commonFields = {
         [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: input.clientMessageId,
         [MESSAGE_FIELDS.CONTENT]: input.content,
         ...(input.replyTo === undefined ? {} : { [MESSAGE_FIELDS.REPLY_TO]: input.replyTo }),
         ...(input.mentions === undefined ? {} : { [MESSAGE_FIELDS.MENTIONS]: input.mentions }),
+    }
+    let body: SendMessageRequest
+    if (input.conversationId !== undefined) {
+        body = { ...commonFields, [MESSAGE_FIELDS.CONVERSATION_ID]: input.conversationId }
+    } else {
+        body = { ...commonFields, [MESSAGE_FIELDS.RECIPIENT_ID]: input.recipientId }
     }
     return authenticatedApiClient.request<MessageDto>({
         path: MESSAGE_ENDPOINT,
@@ -58,7 +63,11 @@ export function sendMessage(input: SendMessageInput): Promise<MessageDto> {
  */
 export function createMessageMultipartBody(input: SendMessageRequest): FormData {
     const body = new FormData()
-    body.set(MESSAGE_FIELDS.CONVERSATION_ID, input.conversationId)
+    if (input.conversationId !== undefined) {
+        body.set(MESSAGE_FIELDS.CONVERSATION_ID, input.conversationId)
+    } else {
+        body.set(MESSAGE_FIELDS.RECIPIENT_ID, input.recipientId)
+    }
     body.set(MESSAGE_FIELDS.CLIENT_MESSAGE_ID, input.clientMessageId)
     if (input.content !== undefined) body.set(MESSAGE_FIELDS.CONTENT, input.content)
     if (input.replyTo !== undefined) body.set(MESSAGE_FIELDS.REPLY_TO, input.replyTo)

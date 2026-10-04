@@ -55,6 +55,22 @@ describe("attachment API adapter", () => {
         expect(formData.getAll(MESSAGE_FIELDS.ATTACHMENTS)).toEqual([file])
     })
 
+    it("should_encode_a_recipient_target_in_direct_message_uploads", async () => {
+        const requestSpy = vi.spyOn(authenticatedApiClient, "request").mockResolvedValue(MESSAGE)
+        const file = new File(["private file bytes"], "notes.txt", { type: "text/plain" })
+        const recipientId = "507f1f77bcf86cd799439015"
+
+        await sendMessageFiles({
+            [MESSAGE_FIELDS.RECIPIENT_ID]: recipientId,
+            [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: "recipient-file-client-id",
+            files: [file],
+        })
+
+        const formData = requestSpy.mock.calls[0]?.[0].body as FormData
+        expect(formData.get(MESSAGE_FIELDS.RECIPIENT_ID)).toBe(recipientId)
+        expect(formData.get(MESSAGE_FIELDS.CONVERSATION_ID)).toBeNull()
+    })
+
     it("should_download_a_blob_with_abort_signal_and_release_its_object_url", async () => {
         const blob = new Blob(["private file bytes"], { type: "text/plain" })
         const requestBlobSpy = vi.spyOn(authenticatedApiClient, "requestBlob").mockResolvedValue(blob)
