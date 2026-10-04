@@ -173,6 +173,7 @@ export const MESSAGE_PARAMS = {
 /** Message list query parameters shared by validation and API adapters. */
 export const MESSAGE_QUERY_PARAMS = {
     CURSOR: "cursor",
+    AFTER_MESSAGE_ID: "afterMessageId",
     LIMIT: "limit",
 } as const
 
@@ -309,9 +310,17 @@ export const ROLE = {
 
 /** Socket event names shared by gateway and client listeners. */
 export const SOCKET_EVENTS = {
+    CONNECT: "connect",
+    CONNECTION: "connection",
+    CONVERSATION_JOIN: "conversation:join",
     MESSAGE_CREATED: "message:created",
     CONVERSATION_UPDATED: "conversation:updated",
     MEMBERSHIP_CHANGED: "membership:changed",
+} as const
+
+/** Socket handshake fields shared by the authenticated transport boundary. */
+export const SOCKET_AUTH_FIELDS = {
+    TOKEN: "token",
 } as const
 
 /** One stable error code from the shared contract. */

@@ -6,6 +6,7 @@ import {
     type CursorPage,
     type MessageDto,
 } from "@linko/contracts"
+import mongoose from "mongoose"
 
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
@@ -66,14 +67,15 @@ export class MessageService {
     }
 
     private async sendWithoutAttachments(input: SendMessageInput, content: string | null): Promise<MessageDto> {
+        let result: MessageWriteResult
         try {
-            const result = await this.dependencies.transactionRunner.run((transaction) =>
+            result = await this.dependencies.transactionRunner.run((transaction) =>
                 this.persistMessage(input, content, [], transaction),
             )
-            return toMessageDto(result.message)
         } catch (error) {
             return this.recoverDuplicateMessage(input, error)
         }
+        return this.toPublishedMessage(result)
     }
 
     private async sendWithAttachments(
@@ -87,16 +89,23 @@ export class MessageService {
         if (preflight.existing) return toMessageDto(preflight.existing)
 
         const attachments = await this.dependencies.attachmentService.store({ userId: input.senderId, files })
+        let result: MessageWriteResult
         try {
-            const result = await this.dependencies.transactionRunner.run((transaction) =>
+            result = await this.dependencies.transactionRunner.run((transaction) =>
                 this.persistMessage(input, content, attachments, transaction),
             )
-            if (!result.created) await this.dependencies.attachmentService.cleanup(attachments)
-            return toMessageDto(result.message)
         } catch (error) {
             await this.dependencies.attachmentService.cleanup(attachments)
             return this.recoverDuplicateMessage(input, error)
         }
+        if (!result.created) await this.dependencies.attachmentService.cleanup(attachments)
+        return this.toPublishedMessage(result)
+    }
+
+    private async toPublishedMessage(result: MessageWriteResult): Promise<MessageDto> {
+        const message = toMessageDto(result.message)
+        if (result.created) await this.dependencies.messagePublisher?.publishMessage(message)
+        return message
     }
 
     private async persistMessage(
@@ -167,19 +176,29 @@ export class MessageService {
      */
     async list(input: ListMessagesInput): Promise<CursorPage<MessageDto>> {
         validatePageLimit(input.limit)
+        const afterMessageId = input.afterMessageId
+            ? new mongoose.Types.ObjectId(decodeMessageId(input.afterMessageId))
+            : null
         const cursor = input.cursor ? decodeCursor(input.cursor) : null
+        if (afterMessageId && cursor) throw new ValidationException(MESSAGE_ERROR_MESSAGES.INVALID_CURSOR)
         return this.dependencies.transactionRunner.run(async (transaction) => {
             const access = await this.requireCurrentMember(input.conversationId, input.userId, transaction)
             const page = await this.dependencies.repository.listMessages({
                 conversationId: input.conversationId,
                 joinedAt: access.joinedAt,
                 cursor,
+                afterMessageId,
                 limit: input.limit,
             }, transaction)
             const oldestMessage = page.items[0]
+            const newestMessage = page.items.at(-1)
             return {
                 items: page.items.map(toMessageDto),
-                nextCursor: page.hasMore && oldestMessage ? encodeCursor(oldestMessage) : null,
+                nextCursor: page.hasMore && afterMessageId && newestMessage
+                    ? newestMessage.id.toString()
+                    : page.hasMore && oldestMessage
+                        ? encodeCursor(oldestMessage)
+                        : null,
             }
         })
     }
@@ -254,6 +273,13 @@ function decodeCursor(value: string): MessageCursor {
         if (error instanceof ValidationException) throw error
         throw new ValidationException(MESSAGE_ERROR_MESSAGES.INVALID_CURSOR)
     }
+}
+
+function decodeMessageId(value: string): MessageCursor["id"] {
+    if (value.length > MESSAGE_LIMITS.MAX_CURSOR_LENGTH || !MESSAGE_CURSOR_ID_PATTERN.test(value)) {
+        throw new ValidationException(MESSAGE_ERROR_MESSAGES.INVALID_CURSOR)
+    }
+    return value
 }
 
 function isMessageCursor(value: unknown): value is { readonly createdAt: string; readonly id: string } {

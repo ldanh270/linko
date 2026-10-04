@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 
 import { AUTH_FIELDS, AUTH_SECURITY } from "./auth.constants"
 import type { AuthTokenProvider, PasswordHasher } from "./auth.types"
+import { REGEX } from "../../configs/constants/regex"
 
 /** Use bcrypt for password storage and verification. */
 export class BcryptPasswordHasher implements PasswordHasher {
@@ -34,6 +35,21 @@ export class AuthTokenService implements AuthTokenProvider {
                 audience: AUTH_SECURITY.ACCESS_TOKEN_AUDIENCE,
             },
         )
+    }
+
+    /** Verify a live access token and return its MongoDB user identifier when valid. */
+    verifyAccessToken(accessToken: string): string | null {
+        try {
+            const payload: unknown = jwt.verify(accessToken, this.accessTokenSecret, {
+                issuer: AUTH_SECURITY.ACCESS_TOKEN_ISSUER,
+                audience: AUTH_SECURITY.ACCESS_TOKEN_AUDIENCE,
+            })
+            if (typeof payload !== "object" || payload === null) return null
+            const userId = (payload as Record<string, unknown>)[AUTH_FIELDS.USER_ID]
+            return typeof userId === "string" && REGEX.MONGO_ID.test(userId) ? userId : null
+        } catch {
+            return null
+        }
     }
 
     /** Generate a high-entropy refresh token for the HttpOnly cookie. */

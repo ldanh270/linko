@@ -7,7 +7,7 @@ import {
 } from "@linko/contracts"
 import mongoose from "mongoose"
 import { MongoMemoryReplSet } from "mongodb-memory-server"
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import Conversation from "../../models/Conversation"
 import Message from "../../models/Message"
@@ -74,6 +74,47 @@ describe("MessageService", () => {
         })).toBe(1)
     })
 
+    it("should_publish_a_committed_message_once_for_idempotent_retries", async () => {
+        const { memberId, conversationId } = await createGroup("realtime-publish")
+        const publisher = {
+            publishMessage: vi.fn(async () => {
+                expect(await Message.countDocuments({ [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: conversationId })).toBe(1)
+            }),
+        }
+        const service = createMessageService(publisher)
+        const input = {
+            conversationId,
+            senderId: memberId,
+            clientMessageId: "realtime-publish-once",
+            content: "Publish after commit",
+        }
+
+        const created = await service.send(input)
+        const retried = await service.send(input)
+
+        expect(retried.id).toBe(created.id)
+        expect(publisher.publishMessage).toHaveBeenCalledTimes(1)
+        expect(publisher.publishMessage).toHaveBeenCalledWith(created)
+    })
+
+    it("should_not_publish_when_the_message_transaction_fails", async () => {
+        const { memberId, conversationId } = await createGroup("realtime-rollback")
+        const repository = new MongooseMessageRepository()
+        vi.spyOn(repository, "updateConversationAfterMessage").mockRejectedValue(new Error("write failed"))
+        const publisher = { publishMessage: vi.fn().mockResolvedValue(undefined) }
+        const service = createMessageService(publisher, repository)
+
+        await expect(service.send({
+            conversationId,
+            senderId: memberId,
+            clientMessageId: "realtime-write-failure",
+            content: "Must roll back",
+        })).rejects.toThrow("write failed")
+
+        expect(publisher.publishMessage).not.toHaveBeenCalled()
+        expect(await Message.countDocuments({ [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: conversationId })).toBe(0)
+    })
+
     it("should_hide_group_messages_created_before_the_current_join_time", async () => {
         const { ownerId, memberId, conversationId } = await createGroup("joined-history")
         await insertMessage(conversationId, ownerId, "old history", BEFORE_MEMBER_JOINED_AT, "old-history")
@@ -131,13 +172,17 @@ describe("MessageService", () => {
 })
 
 /** Construct the message domain service with real MongoDB transaction boundaries. */
-function createMessageService(): MessageService {
+function createMessageService(
+    messagePublisher?: { publishMessage(message: import("@linko/contracts").MessageDto): Promise<void> },
+    repository: MongooseMessageRepository = new MongooseMessageRepository(),
+): MessageService {
     return new MessageService({
-        repository: new MongooseMessageRepository(),
+        repository,
         transactionRunner: { run: withTransaction },
         clock: { now: () => MESSAGE_TIME },
         replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
         attachmentService: { store: async () => [], cleanup: async () => undefined },
+        ...(messagePublisher ? { messagePublisher } : {}),
     })
 }
 

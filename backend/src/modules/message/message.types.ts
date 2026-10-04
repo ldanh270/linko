@@ -4,6 +4,7 @@ import type { Types } from "mongoose"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import type { AttachmentFile, MessageAttachmentRecord, MessageAttachmentPort, StoredAttachment } from "../attachment/attachment.types"
 import type { ReplyMentionValidator } from "./replyMention.types"
+import type { RealtimeMessagePublisher } from "../realtime/realtime.types"
 
 /** MongoDB ObjectId used by persistence-facing message operations. */
 export type ObjectId = Types.ObjectId
@@ -54,6 +55,7 @@ export interface ListMessageRecordsInput {
     readonly conversationId: ObjectId
     readonly joinedAt: Date
     readonly cursor: MessageCursor | null
+    readonly afterMessageId: ObjectId | null
     readonly limit: number
 }
 
@@ -107,6 +109,7 @@ export interface MessageServiceDependencies {
     readonly clock: MessageClock
     readonly replyMentionValidator: ReplyMentionValidator
     readonly attachmentService: MessageAttachmentPort
+    readonly messagePublisher?: RealtimeMessagePublisher
 }
 
 /** Authenticated message command with optional reply and mention references. */
@@ -125,6 +128,7 @@ export interface ListMessagesInput {
     readonly conversationId: ObjectId
     readonly userId: ObjectId
     readonly cursor?: string
+    readonly afterMessageId?: string
     readonly limit: number
 }
 
