@@ -27,7 +27,7 @@ export interface ListMessagesInput {
 
 const MESSAGE_ENDPOINT = API_ROUTES.MESSAGES
 
-/** Send content with the caller's stable retry key and unwrap the safe DTO.
+/** Send message content and optional references with the caller's stable retry key.
  *
  * @param input - Message content, target conversation, idempotency key, and optional abort signal.
  * @returns The persisted message DTO or a normalized shared-client error.
@@ -37,6 +37,8 @@ export function sendMessage(input: SendMessageInput): Promise<MessageDto> {
         [MESSAGE_FIELDS.CONVERSATION_ID]: input.conversationId,
         [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: input.clientMessageId,
         [MESSAGE_FIELDS.CONTENT]: input.content,
+        ...(input.replyTo === undefined ? {} : { [MESSAGE_FIELDS.REPLY_TO]: input.replyTo }),
+        ...(input.mentions === undefined ? {} : { [MESSAGE_FIELDS.MENTIONS]: input.mentions }),
     }
     return authenticatedApiClient.request<MessageDto>({
         path: MESSAGE_ENDPOINT,
@@ -44,6 +46,23 @@ export function sendMessage(input: SendMessageInput): Promise<MessageDto> {
         body,
         signal: input.signal,
     })
+}
+
+/** Serialize a message request using the same field names for a multipart upload body.
+ *
+ * Mentions use JSON encoding in multipart data so the server can validate them as one array.
+ *
+ * @param input - Shared message fields, including optional reply and mention references.
+ * @returns FormData containing the scalar message fields and serialized mention IDs.
+ */
+export function createMessageMultipartBody(input: SendMessageRequest): FormData {
+    const body = new FormData()
+    body.set(MESSAGE_FIELDS.CONVERSATION_ID, input.conversationId)
+    body.set(MESSAGE_FIELDS.CLIENT_MESSAGE_ID, input.clientMessageId)
+    body.set(MESSAGE_FIELDS.CONTENT, input.content)
+    if (input.replyTo !== undefined) body.set(MESSAGE_FIELDS.REPLY_TO, input.replyTo)
+    if (input.mentions !== undefined) body.set(MESSAGE_FIELDS.MENTIONS, JSON.stringify(input.mentions))
+    return body
 }
 
 /** Read one cursor page while leaving loading and retry state to the caller's hook.
