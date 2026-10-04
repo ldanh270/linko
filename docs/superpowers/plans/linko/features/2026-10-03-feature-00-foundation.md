@@ -38,9 +38,11 @@
 - Produce: ApiSuccess<T> / ApiFailure; API_ROUTES, ERROR_CODES, ROLE, SOCKET_EVENTS as const in packages/contracts.
 - Produce scripts: pnpm -C backend test/typecheck, pnpm -C frontend test/typecheck, pnpm -C frontend exec playwright test; root pnpm lint/typecheck/test/build lần lượt tổng hợp hai package.
 
-- [ ] Step 1: Write contract tests asserting the four envelope keys, ObjectId-string DTO identity, and text role values; run pnpm -C backend exec vitest run src/shared/contracts.test.ts and verify FAIL because the contract package is absent.
-- [ ] Step 2: Fill AGENTS.md Section 0 with inferred choices; add workspace/contract package, strict backend tsconfig and test dependencies/scripts. Do not replace Mongoose with Prisma or ObjectId with UUID.
-- [ ] Step 3: Run both typechecks and contract test; expect PASS. Commit only decisions, contract and harness files.
+- [x] Step 1: Write contract tests asserting the four envelope keys, ObjectId-string DTO identity, and text role values; run pnpm -C backend exec vitest run src/shared/contracts.test.ts and verify FAIL because the contract package is absent.
+- [x] Step 2: Fill AGENTS.md Section 0 with inferred choices; add workspace/contract package, strict backend tsconfig and test dependencies/scripts. Do not replace Mongoose with Prisma or ObjectId with UUID.
+- [x] Step 3: Run both typechecks and contract test; expect PASS. Commit only decisions, contract and harness files.
+
+**Task 1 evidence:** the shared-contract suite passed (3/3), and both package typechecks passed. Contract/harness implementation is in `4aa2d77`.
 
 ### Task 2: HTTP boundary, logger and composition root
 
@@ -53,9 +55,11 @@
 - Produce: createApp(dependencies: AppDependencies): Express; BusinessException(code: ErrorCode, httpStatus: number, message: string); ApiResponse.ok<T>(data: T); ApiResponse.fail(error: ApiError).
 - The logger receives requestId/userId from AsyncLocalStorage, redacts password, cookie, authorization and invite tokens.
 
-- [ ] Step 1: Write route tests: business exception returns its 4xx/code without logging; unexpected Error returns generic 500/requestId and one redacted structured log; malformed JSON maps to a safe 400. Run pnpm -C backend exec vitest run src/shared/http/httpBoundary.test.ts; expect FAIL.
-- [ ] Step 2: Implement shared HTTP boundary and composition root; register one error handler last. Adapt existing route wiring incrementally without adding duplicate active routes.
-- [ ] Step 3: Run focused test, backend typecheck and existing route smoke tests; expect PASS. Commit boundary work.
+- [x] Step 1: Write route tests: business exception returns its 4xx/code without logging; unexpected Error returns generic 500/requestId and one redacted structured log; malformed JSON maps to a safe 400. Run pnpm -C backend exec vitest run src/shared/http/httpBoundary.test.ts; expect FAIL.
+- [x] Step 2: Implement shared HTTP boundary and composition root; register one error handler last. Adapt existing route wiring incrementally without adding duplicate active routes.
+- [x] Step 3: Run focused test, backend typecheck and existing route smoke tests; expect PASS. Commit boundary work.
+
+**Task 2 evidence:** HTTP-boundary tests passed (7/7), including safe business/technical failures, redaction, malformed JSON, Zod, JWT, and CORS. Boundary implementation is in `56d32d7`.
 
 ### Task 3: Mongoose audit, soft delete and legacy migration
 
@@ -68,9 +72,11 @@
 - Produce: auditPlugin(schema), softDeletePlugin(schema), withTransaction<T>(operation: (tx: TransactionContext) => Promise<T>): Promise<T>. TransactionContext là port trong shared/persistence; adapter Mongoose giữ ClientSession ở lớp hạ tầng.
 - Audit fields: createdAt, updatedAt, createdBy, updatedBy, createdIp, updatedIp, delFlag. Legacy backfill uses SYSTEM ObjectId for unknown actor and null IP for historical unknown address.
 
-- [ ] Step 1: Write integration tests with MongoMemoryReplSet/wiredTiger: create/update fills actor/IP; find/count/aggregate hide delFlag=true; explicit includeDeleted returns it; transaction rollback leaves no partial writes. Run pnpm -C backend exec vitest run src/shared/persistence/persistence.integration.test.ts; expect FAIL.
-- [ ] Step 2: Implement plugins/context and an idempotent backfill with dry-run. Plan index changes before write: partial unique indexes for active records; remove Session TTL index only after backup/dry-run so expiry becomes a soft-delete lifecycle. Document rollback and any irreversible index/data operation in script README.
-- [ ] Step 3: Run integration suite against isolated replica set, backend typecheck and backfill dry-run on test DB. Verify repeated backfill changes zero records. Commit migration code; do not run against production in this task.
+- [x] Step 1: Write integration tests with MongoMemoryReplSet/wiredTiger: create/update fills actor/IP; find/count/aggregate hide delFlag=true; explicit includeDeleted returns it; transaction rollback leaves no partial writes. Run pnpm -C backend exec vitest run src/shared/persistence/persistence.integration.test.ts; expect FAIL.
+- [x] Step 2: Implement plugins/context and an idempotent backfill with dry-run. Plan index changes before write: partial unique indexes for active records; remove Session TTL index only after backup/dry-run so expiry becomes a soft-delete lifecycle. Document rollback and any irreversible index/data operation in script README.
+- [x] Step 3: Run integration suite against isolated replica set, backend typecheck and backfill dry-run on test DB. Verify repeated backfill changes zero records. Commit migration code; do not run against production in this task.
+
+**Task 3 evidence:** isolated persistence tests passed (12/12), covering actor/IP audit, default soft-delete filtering, `includeDeleted`, transaction rollback, historical rows, bulk writes, idempotent backfill, and guarded index changes. Persistence work is in `27c6701` and `89b380f`.
 
 ### Task 4: Frontend foundation and shared state
 
@@ -83,10 +89,12 @@
 - Produce: apiClient.request<T>(options: RequestOptions): Promise<T>; useQueryParamState<T>(key, schema, defaultValue); useTheme(): { mode: 'light' | 'dark' | 'system'; setMode(mode): void }; ButtonProps with variant/size/loading/disabled.
 - Session token handling belongs to F01; client normalizes ApiError and leaves auth injection configurable.
 
-- [ ] Step 1: Write tests for button keyboard/focus/loading/double-submit, URL replace/push/default/invalid-param, and theme light/dark/system preference. Run pnpm -C frontend exec vitest run shared/components/Button.test.tsx shared/url/useQueryParamState.test.ts shared/theme/useTheme.test.ts; expect FAIL.
-- [ ] Step 2: Implement tokens/Be Vietnam Pro, primitives, theme provider với chế độ light/dark/system, shared toast provider, HTTP error normalization, query provider, URL hook và responsive AppShell (rail + mobile bottom navigation). Protected-route guard is wired by F01. Keep JSX files presentation-only and put state in hooks.
-- [ ] Step 3: Run focused tests, frontend lint/typecheck/build and Playwright smoke at 360/1440 px; expect PASS. Commit frontend foundation.
+- [x] Step 1: Write tests for button keyboard/focus/loading/double-submit, URL replace/push/default/invalid-param, and theme light/dark/system preference. Run pnpm -C frontend exec vitest run shared/components/Button.test.tsx shared/url/useQueryParamState.test.ts shared/theme/useTheme.test.ts; expect FAIL.
+- [x] Step 2: Implement tokens/Be Vietnam Pro, primitives, theme provider với chế độ light/dark/system, shared toast provider, HTTP error normalization, query provider, URL hook và responsive AppShell (rail + mobile bottom navigation). Protected-route guard is wired by F01. Keep JSX files presentation-only and put state in hooks.
+- [x] Step 3: Run focused tests, frontend lint/typecheck/build and Playwright smoke at 360/1440 px; expect PASS. Commit frontend foundation.
+
+**Task 4 evidence:** shared UI tests passed (8/8), frontend lint/typecheck and production build passed. The viewport smoke now mocks the refresh endpoint so it tests the shell behind F01's intended guard; Playwright passed at 360px and 1440px. Frontend foundation is in `1fc1cbe`; smoke correction is in `93834d0`.
 
 ## Completion
 
-All future plan files may assume the contract package, test commands, error boundary, audit/soft-delete behavior and shared UI primitives above. Record any AGENTS.md deviation with a written reason before proceeding.
+All future plan files may assume the contract package, test commands, error boundary, audit/soft-delete behavior and shared UI primitives above. Record any AGENTS.md deviation with a written reason before proceeding. **F00 complete.**
