@@ -43,29 +43,35 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/conversation/group-creation.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_create_group_with_owner_only; should_reject_101st_group; should_reject_name_over_80_chars; should_allow_admin_to_update_group. Assertions cốt lõi: expect(group.participants).toEqual([{userId: ownerId, role: ROLE.OWNER}]); expect(limit.code).toBe(ERROR_CODES.GROUP_LIMIT). Group-list coverage moved to F07.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-creation.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_create_group_with_owner_only; should_reject_101st_group; should_reject_name_over_80_chars; should_allow_admin_to_update_group. Assertions cốt lõi: expect(group.participants).toEqual([{userId: ownerId, role: ROLE.OWNER}]); expect(limit.code).toBe(ERROR_CODES.GROUP_LIMIT). Group-list coverage moved to F07.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-creation.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+
+**Task 1 evidence:** group domain tests passed (9/9), covering owner-only creation, the cap, input bounds, authorization, and avatar cleanup. Domain and repository are in `95bdf25`.
 
 ### Task 2: API boundary and integration
 
 **Files:** Route/controller/dto/schema/mapper trong module; test backend/src/modules/conversation/group-creation.route.test.ts.
 
-- [ ] Step 1: Viết test route/integration thất bại: POST trả 201 GroupDto; PATCH kiểm tra Owner/Admin; 400 cho tên trống/quá dài hoặc mô tả >500; 401 không có phiên. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập. Group listing is covered by F07.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-creation.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
-- [ ] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route/integration thất bại: POST trả 201 GroupDto; PATCH kiểm tra Owner/Admin; 400 cho tên trống/quá dài hoặc mô tả >500; 401 không có phiên. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập. Group listing is covered by F07.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/conversation/group-creation.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
+- [x] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+
+**Task 2 evidence:** isolated group/conversation route tests passed (16/16), including upload compensation, visibility history, Owner/Admin checks, and simultaneous admission at the 100-group limit. Module routes are in `c397e5a`; follow-up avatar/inbox safety is in `3f2dffa`.
 
 ### Task 3: Client contract
 
 **Files:** frontend/features/groups/api/groups.api.ts; test cùng thư mục tên group-creation.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: createGroup gửi FormData khi có avatar và JSON khi không; updateGroup ánh xạ đúng DTO/code lỗi. Giả lập HTTP envelope, xác nhận mapping dữ liệu và ApiError.code. Inbox rows are covered by F07's listInbox adapter.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/groups/api/group-creation.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client, constants và DTO package chung; không thêm state/JSX.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Viết test adapter thất bại: createGroup gửi FormData khi có avatar và JSON khi không; updateGroup ánh xạ đúng DTO/code lỗi. Giả lập HTTP envelope, xác nhận mapping dữ liệu và ApiError.code. Inbox rows are covered by F07's listInbox adapter.
+- [x] Step 2: Chạy pnpm -C frontend exec vitest run features/groups/api/group-creation.api.test.ts; xác nhận FAIL.
+- [x] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client, constants và DTO package chung; không thêm state/JSX.
+- [x] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+
+**Task 3 evidence:** group API adapter tests passed (4/4); frontend typecheck and adapter lint passed. Adapter is in `ce7f967`.
 
 ## Done when
 
-FR-03 và 5 Review Focus có bằng chứng test; route cũ không còn hoạt động song song; spec và AGENTS.md được đối chiếu.
+FR-03 and all five Review Focus cases have test evidence, including concurrent group-slot reservation and Mongo failure after avatar upload. The active composition root mounts module routes, not the legacy router; spec and AGENTS.md were checked. **F03 complete.**
