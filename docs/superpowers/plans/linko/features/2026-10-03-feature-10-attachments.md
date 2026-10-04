@@ -43,10 +43,12 @@
 
 **Files:** service/repository/types/constants trong module trên; test backend/src/modules/attachment/attachments.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_reject_6th_file_before_upload; should_delete_new_objects_when_message_write_fails; should_deny_file_before_joinedAt. Assertions cốt lõi: expect(uploadCount).toBe(0); expect(deleteCount).toBe(storedCount); expect(denied.code).toBe(ERROR_CODES.ATTACHMENT_NOT_FOUND).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/attachment/attachments.service.test.ts; xác nhận FAIL đúng hành vi.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_reject_6th_file_before_upload; should_delete_new_objects_when_message_write_fails; should_deny_file_before_joinedAt. Assertions cốt lõi: expect(uploadCount).toBe(0); expect(deleteCount).toBe(storedCount); expect(denied.code).toBe(ERROR_CODES.ATTACHMENT_NOT_FOUND).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/attachment/attachments.service.test.ts; xác nhận FAIL đúng hành vi.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+
+**Task 1 evidence:** the initial red run failed because the attachment service module did not exist. The implemented tests then passed (3/3), the affected backend service suites passed (20/20), route regressions passed (14/14), and backend/frontend typechecks passed. Domain commit: `b3f82a8`.
 
 ### Task 2: API boundary and integration
 
