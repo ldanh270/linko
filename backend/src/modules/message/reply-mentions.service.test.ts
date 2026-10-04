@@ -88,6 +88,46 @@ describe("ReplyMentionService", () => {
         })).rejects.toMatchObject({ code: ERROR_CODES.VALIDATION })
     })
 
+    it("should_reject_mention_of_a_member_who_left", async () => {
+        const { ownerId, memberId, conversationId } = await createGroup("departed-mention")
+        await Conversation.updateOne(
+            {
+                [CONVERSATION_FIELDS.ID]: conversationId,
+                [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: memberId,
+            },
+            {
+                $set: {
+                    [`${CONVERSATION_FIELDS.PARTICIPANTS}.$.${PARTICIPANT_FIELDS.DEL_FLAG}`]: true,
+                },
+            },
+        )
+        const service = createReplyMentionService()
+
+        await expect(service.validate({
+            conversationId,
+            senderId: ownerId,
+            replyToId: null,
+            mentionIds: [memberId],
+        })).rejects.toMatchObject({ code: ERROR_CODES.VALIDATION })
+    })
+
+    it("should_reject_a_reply_target_hidden_from_the_sender", async () => {
+        const { memberId, conversationId, ownerId } = await createGroup("hidden-reply")
+        const target = await insertMessage(conversationId, ownerId, AFTER_MEMBER_JOINED_AT)
+        await Message.updateOne(
+            { [MESSAGE_MODEL_FIELDS.ID]: target._id },
+            { $set: { [MESSAGE_MODEL_FIELDS.HIDDEN_BY]: [memberId] } },
+        )
+        const service = createReplyMentionService()
+
+        await expect(service.validate({
+            conversationId,
+            senderId: memberId,
+            replyToId: target._id,
+            mentionIds: [],
+        })).rejects.toMatchObject({ code: ERROR_CODES.INVALID_REPLY })
+    })
+
     it("should_return_only_unique_mentions_for_current_members", async () => {
         const { ownerId, memberId, conversationId } = await createGroup("unique-mentions")
         const service = createReplyMentionService()
