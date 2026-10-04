@@ -29,43 +29,43 @@
 
 ## File ownership and interface
 
-**Existing to migrate/modify:** backend/src/socket/socket.ts, backend/src/utils/messageHelper.ts.
+**Existing to migrate/modify:** `backend/src/socket/socket.ts`. The legacy `backend/src/utils/messageHelper.ts` remains under its unmounted legacy controller; the active message module already owns the atomic summary update and realtime publication path.
 
-**Module files:** backend/src/modules/realtime/{realtime.gateway.ts, realtime.auth.ts, realtime.constants.ts, realtime.types.ts}. Đăng ký một lần tại backend/src/app.ts; bỏ wiring cũ tương ứng.
+**Module files:** backend/src/modules/realtime/{realtime.gateway.ts, realtime.auth.ts, realtime.constants.ts, realtime.types.ts, realtime.repository.ts}. Authentication lives in Socket.IO middleware because room joins are not HTTP routes; production composition builds one gateway in `backend/src/index.ts`, injects it through `backend/src/app.ts`, and attaches it to the HTTP server once.
 
-**Service signatures:** RealtimeGateway.authenticate(socket): Promise<SocketIdentity>; joinConversation(socket, conversationId): Promise<void>; publishMessage(message: MessageDto): Promise<void>; revokeMember(conversationId, userId): Promise<void>.
+**Service signatures:** RealtimeGateway.authenticate(socket): Promise<SocketIdentity>; joinConversation(socket, conversationId): Promise<boolean> (acknowledges membership-authorized joins); publishMessage(message: MessageDto): Promise<void>; revokeMember(conversationId, userId): Promise<void>.
 
-**HTTP contract:** Socket events conversation:join, message:created, conversation:updated, membership:changed; REST cursor là nguồn hồi phục. Handshake xác thực token; server kiểm tra active membership khi join. Chỉ publish sau commit; client de-duplicate bằng MessageDto.id và dùng REST cursor khi reconnect.
+**Transport contract:** Socket events `conversation:join`, `message:created`, `conversation:updated`, `membership:changed`; the existing message history GET is the REST recovery source. Handshake validates the shared access-token issuer/audience and active account; the server checks current membership for every join. Message and conversation events publish after persistence commits. Reconnect pages use `afterMessageId` and preserve the joinedAt visibility boundary; clients de-duplicate by `MessageDto.id`.
 
 **Frontend adapter:** createChatSocket, subscribeToConversation in frontend/features/chat/api/chatSocket.ts. File frontend/features/chat/api/chatSocket.ts; typed result từ packages/contracts.
 
 ### Task 1: Business rules and repository
 
-**Files:** service/repository/types/constants trong module trên; test backend/src/modules/realtime/realtime.service.test.ts.
+**Files:** service/repository/types/constants in the realtime module; tests in `backend/src/modules/realtime/realtime.gateway.test.ts` and `backend/src/modules/message/messaging.service.test.ts`.
 
-- [ ] Step 1: Viết test thất bại: should_reject_socket_without_valid_token; should_reject_join_for_nonmember; should_emit_only_after_persist. Assertions cốt lõi: expect(socket.connected).toBe(false); expect(events).toHaveLength(1); expect(events[0].id).toBe(savedMessage.id).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/realtime/realtime.service.test.ts; xác nhận FAIL đúng hành vi.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Added gateway authentication, nonmember join, safe DTO event, active-account, and commit-only/idempotent message publication tests.
+- [x] Step 2: Confirmed the initial gateway test failed because `realtime.gateway` was absent.
+- [x] Step 3: Added the Mongoose authorization repository, shared JWT verification, typed gateway ports, and after-commit publisher integration without persistence calls in the gateway service.
+- [x] Step 4: Gateway and message service tests pass; backend typecheck passes. Domain implementation committed.
 
-### Task 2: API boundary and integration
+### Task 2: Socket and REST recovery integration
 
-**Files:** route/controller/dto/schema/mapper trong module; test backend/src/modules/realtime/realtime.route.test.ts.
+**Files:** Socket.IO wiring and message history query schema/controller/repository/service; tests in `backend/src/modules/realtime/realtime.gateway.test.ts`, `backend/src/modules/message/messaging.service.test.ts`, and `backend/src/modules/message/messaging.route.test.ts`. Socket room joins use handshake middleware and acknowledgements; a separate Express route/controller would duplicate the existing message API boundary.
 
-- [ ] Step 1: Viết test route thất bại: không event cho người ngoài room; bị loại rời room; event không chứa pre-join content; reconnect GET cursor lấy tin thiếu. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/realtime/realtime.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
-- [ ] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Added tests for unauthorized/nonmember room access, member revocation, private safe events, and paginated reconnect recovery with pre-join history excluded.
+- [x] Step 2: Reconnect recovery extends the existing message history route rather than adding a separate realtime route; focused MongoDB-backed service and route regressions pass.
+- [x] Step 3: Wired one gateway in the production composition root, emits after commit, revokes removed/leaving sockets, and validates forward cursors through Zod on the existing history endpoint.
+- [x] Step 4: Focused gateway/service/route tests and backend typecheck pass. API integration committed.
 
 ### Task 3: Client contract
 
 **Files:** frontend/features/chat/api/chatSocket.ts; test frontend/features/chat/api/realtime.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: client gộp API response/socket event theo messageId, resubscribe sau reconnect, không giữ duplicate listener; giả lập envelope và xác nhận ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/chat/api/realtime.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Added adapter coverage for ID-based merging, reconnect pagination, listener cleanup, authenticated handshake, and normalized API errors.
+- [x] Step 2: Ran the realtime adapter tests; all pass.
+- [x] Step 3: Added the Socket.IO client adapter and shared auth-token access; no JSX or UI state added.
+- [x] Step 4: Adapter and message API tests, frontend typecheck, and lint pass. Client adapter committed.
 
 ## Done when
 
-FR-11 và 5 Review Focus có bằng chứng test; route cũ không hoạt động song song; spec/AGENTS.md được đối chiếu.
+FR-11 and the five review focus items have test evidence. The app mounts the module message router and does not mount the legacy message router alongside it. The legacy `messageHelper.ts` remains only under the unmounted legacy controller; the active message service/repository owns the transactional summary and realtime publication path.
