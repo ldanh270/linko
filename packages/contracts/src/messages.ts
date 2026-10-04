@@ -8,15 +8,19 @@ export interface MessageDto {
     readonly [MESSAGE_FIELDS.SENDER_ID]: EntityId
     readonly [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: string
     readonly [MESSAGE_FIELDS.CONTENT]: string | null
+    readonly [MESSAGE_FIELDS.REPLY_TO]: EntityId | null
+    readonly [MESSAGE_FIELDS.MENTIONS]: readonly EntityId[]
     readonly [MESSAGE_FIELDS.CREATED_AT]: string
     readonly [MESSAGE_FIELDS.UPDATED_AT]: string
 }
 
-/** Content-only message request accepted by the authenticated send endpoint. */
+/** Message request accepted by the authenticated send endpoint. */
 export interface SendMessageRequest {
     readonly [MESSAGE_FIELDS.CONVERSATION_ID]: EntityId
     readonly [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: string
     readonly [MESSAGE_FIELDS.CONTENT]: string
+    readonly [MESSAGE_FIELDS.REPLY_TO]?: EntityId
+    readonly [MESSAGE_FIELDS.MENTIONS]?: readonly EntityId[]
 }
 
 /** Stable cursor page shape shared by conversation history consumers. */

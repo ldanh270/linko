@@ -10,6 +10,8 @@ export function toMessageDto(message: MessageRecord): MessageDto {
         [MESSAGE_FIELDS.SENDER_ID]: message.senderId.toString(),
         [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: message.clientMessageId,
         [MESSAGE_FIELDS.CONTENT]: message.content,
+        [MESSAGE_FIELDS.REPLY_TO]: message.replyToId?.toString() ?? null,
+        [MESSAGE_FIELDS.MENTIONS]: message.mentions.map((mention) => mention.toString()),
         [MESSAGE_FIELDS.CREATED_AT]: message.createdAt.toISOString(),
         [MESSAGE_FIELDS.UPDATED_AT]: message.updatedAt.toISOString(),
     }

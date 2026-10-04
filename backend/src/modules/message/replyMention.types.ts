@@ -52,3 +52,9 @@ export interface ReplyMentionRepository {
 export interface ReplyMentionServiceDependencies {
     readonly repository: ReplyMentionRepository
 }
+
+/** Service capability consumed by message writes to validate optional references. */
+export interface ReplyMentionValidator {
+    /** Validate references in the transaction that stores the message. */
+    validate(input: ReplyMentionInput): Promise<ValidatedMessageContext>
+}

@@ -30,12 +30,11 @@ const messageSchema = new mongoose.Schema(
             maxlength: MESSAGE_LIMITS.CLIENT_MESSAGE_ID_LENGTH,
         },
 
-        // Metadata
-        replyTo: {
+        [MESSAGE_MODEL_FIELDS.REPLY_TO]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Message",
         },
-        mentions: [
+        [MESSAGE_MODEL_FIELDS.MENTIONS]: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User",

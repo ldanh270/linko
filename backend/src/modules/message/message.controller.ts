@@ -36,6 +36,12 @@ export class MessageController {
             [MESSAGE_OPERATION_FIELDS.SENDER_ID]: request.user._id,
             [MESSAGE_OPERATION_FIELDS.CLIENT_MESSAGE_ID]: request.body[MESSAGE_FIELDS.CLIENT_MESSAGE_ID],
             [MESSAGE_OPERATION_FIELDS.CONTENT]: request.body[MESSAGE_FIELDS.CONTENT],
+            replyToId: request.body[MESSAGE_FIELDS.REPLY_TO]
+                ? new mongoose.Types.ObjectId(request.body[MESSAGE_FIELDS.REPLY_TO])
+                : null,
+            mentionIds: request.body[MESSAGE_FIELDS.MENTIONS]?.map((mentionId) =>
+                new mongoose.Types.ObjectId(mentionId),
+            ) ?? [],
         })
         response.status(HttpStatusCode.CREATED).json(ApiResponse.ok(message))
     }

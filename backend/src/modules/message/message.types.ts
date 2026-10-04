@@ -2,6 +2,7 @@ import type { ConversationStatus, ConversationType, MessageDto } from "@linko/co
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
+import type { ReplyMentionValidator } from "./replyMention.types"
 
 /** MongoDB ObjectId used by persistence-facing message operations. */
 export type ObjectId = Types.ObjectId
@@ -13,6 +14,8 @@ export interface MessageRecord {
     readonly senderId: ObjectId
     readonly clientMessageId: string
     readonly content: string | null
+    readonly replyToId: ObjectId | null
+    readonly mentions: readonly ObjectId[]
     readonly createdAt: Date
     readonly updatedAt: Date
 }
@@ -32,6 +35,8 @@ export interface CreateMessageRecord {
     readonly senderId: ObjectId
     readonly clientMessageId: string
     readonly content: string
+    readonly replyToId: ObjectId | null
+    readonly mentions: readonly ObjectId[]
     readonly createdAt: Date
 }
 
@@ -97,14 +102,17 @@ export interface MessageServiceDependencies {
     readonly repository: MessageRepository
     readonly transactionRunner: MessageTransactionRunner
     readonly clock: MessageClock
+    readonly replyMentionValidator: ReplyMentionValidator
 }
 
-/** Authenticated content-only message command. */
+/** Authenticated message command with optional reply and mention references. */
 export interface SendMessageInput {
     readonly conversationId: ObjectId
     readonly senderId: ObjectId
     readonly clientMessageId: string
     readonly content: string
+    readonly replyToId?: ObjectId | null
+    readonly mentionIds?: readonly ObjectId[]
 }
 
 /** Authenticated bounded conversation history query. */

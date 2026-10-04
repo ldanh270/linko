@@ -18,6 +18,8 @@ import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "../conversation/convers
 import { MESSAGE_MODEL_FIELDS } from "../message/message.constants"
 import { MongooseMessageRepository } from "../message/message.repository"
 import { MessageService } from "../message/message.service"
+import { MongooseReplyMentionRepository } from "../message/replyMention.repository"
+import { ReplyMentionService } from "../message/replyMention.service"
 import { MongooseReadStateRepository } from "./read.repository"
 import { ReadStateService } from "./read.service"
 
@@ -160,6 +162,7 @@ describe("ReadStateService", () => {
             repository: new MongooseMessageRepository(),
             transactionRunner: { run: withTransaction },
             clock: { now: () => READ_CLOCK },
+            replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
         })
 
         await messageService.send({

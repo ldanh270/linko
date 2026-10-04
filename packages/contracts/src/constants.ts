@@ -182,6 +182,8 @@ export const MESSAGE_FIELDS = {
     SENDER_ID: "senderId",
     CLIENT_MESSAGE_ID: "clientMessageId",
     CONTENT: "content",
+    REPLY_TO: "replyTo",
+    MENTIONS: "mentions",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
 } as const

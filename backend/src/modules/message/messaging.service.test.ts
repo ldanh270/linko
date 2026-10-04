@@ -15,6 +15,8 @@ import User from "../../models/User"
 import { withTransaction } from "../../shared/persistence/withTransaction"
 import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "../conversation/conversation.constants"
 import { MongooseMessageRepository } from "./message.repository"
+import { MongooseReplyMentionRepository } from "./replyMention.repository"
+import { ReplyMentionService } from "./replyMention.service"
 import { MessageService } from "./message.service"
 import { MESSAGE_MODEL_FIELDS } from "./message.constants"
 
@@ -134,6 +136,7 @@ function createMessageService(): MessageService {
         repository: new MongooseMessageRepository(),
         transactionRunner: { run: withTransaction },
         clock: { now: () => MESSAGE_TIME },
+        replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
     })
 }
 

@@ -58,12 +58,21 @@ export class MessageService {
                 if (existing) return toMessageDto(existing)
 
                 await this.assertCanSend(access, input.senderId, transaction)
+                const messageContext = await this.dependencies.replyMentionValidator.validate({
+                    conversationId: input.conversationId,
+                    senderId: input.senderId,
+                    replyToId: input.replyToId ?? null,
+                    mentionIds: input.mentionIds ?? [],
+                    transaction,
+                })
                 const now = this.dependencies.clock.now()
                 const message = await this.dependencies.repository.createMessage({
                     conversationId: input.conversationId,
                     senderId: input.senderId,
                     clientMessageId: input.clientMessageId,
                     content,
+                    replyToId: messageContext.replyToId,
+                    mentions: messageContext.mentions,
                     createdAt: now,
                 }, transaction)
                 await this.dependencies.repository.updateConversationAfterMessage(message, transaction)

@@ -6,6 +6,7 @@ import { MESSAGE_ERROR_MESSAGES } from "./message.constants"
 import type {
     ReplyMentionInput,
     ReplyMentionServiceDependencies,
+    ReplyMentionValidator,
     ValidatedMessageContext,
 } from "./replyMention.types"
 
@@ -13,7 +14,7 @@ import type {
  *
  * @layer Service
  */
-export class ReplyMentionService {
+export class ReplyMentionService implements ReplyMentionValidator {
     /** Inject the narrow repository used for member and reply-target visibility. */
     constructor(private readonly dependencies: ReplyMentionServiceDependencies) {}
 

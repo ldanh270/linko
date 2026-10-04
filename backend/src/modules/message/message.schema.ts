@@ -8,7 +8,7 @@ import zod from "zod"
 
 import { REGEX } from "../../configs/constants/regex"
 
-/** Validate a content-only message request and its stable client retry key. */
+/** Validate a message request, optional references, and its stable retry key. */
 export const sendMessageSchema = zod.object({
     body: zod.object({
         [MESSAGE_FIELDS.CONVERSATION_ID]: zod.string().regex(REGEX.MONGO_ID),
@@ -20,6 +20,10 @@ export const sendMessageSchema = zod.object({
             .trim()
             .min(1)
             .max(MESSAGE_LIMITS.MAX_CONTENT_LENGTH),
+        [MESSAGE_FIELDS.REPLY_TO]: zod.string().regex(REGEX.MONGO_ID).optional(),
+        [MESSAGE_FIELDS.MENTIONS]: zod.array(zod.string().regex(REGEX.MONGO_ID))
+            .max(MESSAGE_LIMITS.MAX_MENTIONS)
+            .optional(),
     }).strict(),
 })
 

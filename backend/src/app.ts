@@ -46,6 +46,8 @@ import { MessageController } from "./modules/message/message.controller"
 import { MongooseMessageRepository } from "./modules/message/message.repository"
 import { createMessageRouter } from "./modules/message/message.route"
 import { MessageService } from "./modules/message/message.service"
+import { MongooseReplyMentionRepository } from "./modules/message/replyMention.repository"
+import { ReplyMentionService } from "./modules/message/replyMention.service"
 import { InboxController } from "./modules/inbox/inbox.controller"
 import { MongooseInboxRepository } from "./modules/inbox/inbox.repository"
 import { createInboxRouter } from "./modules/inbox/inbox.route"
@@ -104,6 +106,7 @@ export function createApp(dependencies: AppDependencies): Express {
         repository: new MongooseMessageRepository(),
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
+        replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
     })
     const readStateService = new ReadStateService({
         repository: new MongooseReadStateRepository(),

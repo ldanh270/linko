@@ -99,7 +99,7 @@ export class MongooseMessageRepository implements MessageRepository {
         return message ? this.toMessageRecord(message) : null
     }
 
-    /** Insert the sender's content-only message and translate unique-key races. */
+    /** Insert validated message content and references, translating unique-key races. */
     async createMessage(input: CreateMessageRecord, transaction: TransactionContext): Promise<MessageRecord> {
         try {
             const [message] = await Message.create([{
@@ -107,6 +107,8 @@ export class MongooseMessageRepository implements MessageRepository {
                 [MESSAGE_MODEL_FIELDS.SENDER_ID]: input.senderId,
                 [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: input.clientMessageId,
                 [MESSAGE_MODEL_FIELDS.CONTENT]: input.content,
+                [MESSAGE_MODEL_FIELDS.REPLY_TO]: input.replyToId,
+                [MESSAGE_MODEL_FIELDS.MENTIONS]: [...input.mentions],
                 [MESSAGE_MODEL_FIELDS.CREATED_AT]: input.createdAt,
                 [MESSAGE_MODEL_FIELDS.UPDATED_AT]: input.createdAt,
             }], { session: transaction.session })
@@ -173,6 +175,8 @@ export class MongooseMessageRepository implements MessageRepository {
             senderId: message[MESSAGE_MODEL_FIELDS.SENDER_ID],
             clientMessageId: message[MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID] ?? "",
             content: message[MESSAGE_MODEL_FIELDS.CONTENT] ?? null,
+            replyToId: message[MESSAGE_MODEL_FIELDS.REPLY_TO] ?? null,
+            mentions: message[MESSAGE_MODEL_FIELDS.MENTIONS] ?? [],
             createdAt: message[MESSAGE_MODEL_FIELDS.CREATED_AT],
             updatedAt: message[MESSAGE_MODEL_FIELDS.UPDATED_AT],
         }
