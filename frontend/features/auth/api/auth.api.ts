@@ -64,6 +64,11 @@ export async function logout(): Promise<void> {
     }
 }
 
+/** Read the short-lived in-memory access token for authenticated socket handshakes. */
+export function getAccessToken(): string | null {
+    return accessToken
+}
+
 /** Return the current bearer token without persisting it outside JavaScript memory. */
 function getAuthorizationHeaders(): HeadersInit | undefined {
     return accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined

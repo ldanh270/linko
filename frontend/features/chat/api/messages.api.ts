@@ -21,6 +21,7 @@ export interface SendMessageInput extends SendMessageRequest {
 export interface ListMessagesInput {
     readonly conversationId: string
     readonly cursor?: string
+    readonly afterMessageId?: string
     readonly limit?: number
     readonly signal?: AbortSignal
 }
@@ -75,6 +76,7 @@ export function listMessages(input: ListMessagesInput): Promise<CursorPage<Messa
         [MESSAGE_QUERY_PARAMS.LIMIT]: String(input.limit ?? MESSAGE_LIMITS.DEFAULT_PAGE_SIZE),
     })
     if (input.cursor) query.set(MESSAGE_QUERY_PARAMS.CURSOR, input.cursor)
+    if (input.afterMessageId) query.set(MESSAGE_QUERY_PARAMS.AFTER_MESSAGE_ID, input.afterMessageId)
     const path = MESSAGE_ROUTE_PATHS.BY_CONVERSATION.replace(
         `:${MESSAGE_PARAMS.CONVERSATION_ID}`,
         input.conversationId,
