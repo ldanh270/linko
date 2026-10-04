@@ -23,6 +23,7 @@ import type {
     MessageCursor,
     MessageRecord,
     MessageServiceDependencies,
+    ResolvedSendMessageInput,
     SendMessageInput,
 } from "./message.types"
 import type { ValidatedMessageContext } from "./replyMention.types"
@@ -60,13 +61,14 @@ export class MessageService {
         const attachments = input.attachments ?? []
         const content = validateContent(input.content, attachments.length > 0)
         validateClientMessageId(input.clientMessageId)
+        const resolvedInput = await this.resolveDestination(input)
 
         return attachments.length === 0
-            ? this.sendWithoutAttachments(input, content)
-            : this.sendWithAttachments(input, content, attachments)
+            ? this.sendWithoutAttachments(resolvedInput, content)
+            : this.sendWithAttachments(resolvedInput, content, attachments)
     }
 
-    private async sendWithoutAttachments(input: SendMessageInput, content: string | null): Promise<MessageDto> {
+    private async sendWithoutAttachments(input: ResolvedSendMessageInput, content: string | null): Promise<MessageDto> {
         let result: MessageWriteResult
         try {
             result = await this.dependencies.transactionRunner.run((transaction) =>
@@ -79,9 +81,9 @@ export class MessageService {
     }
 
     private async sendWithAttachments(
-        input: SendMessageInput,
+        input: ResolvedSendMessageInput,
         content: string | null,
-        files: NonNullable<SendMessageInput["attachments"]>,
+        files: NonNullable<ResolvedSendMessageInput["attachments"]>,
     ): Promise<MessageDto> {
         const preflight = await this.dependencies.transactionRunner.run((transaction) =>
             this.validateSend(input, transaction),
@@ -109,7 +111,7 @@ export class MessageService {
     }
 
     private async persistMessage(
-        input: SendMessageInput,
+        input: ResolvedSendMessageInput,
         content: string | null,
         attachments: readonly StoredAttachment[],
         transaction: TransactionContext,
@@ -133,7 +135,7 @@ export class MessageService {
         return { message, created: true }
     }
 
-    private async validateSend(input: SendMessageInput, transaction: TransactionContext): Promise<SendValidation> {
+    private async validateSend(input: ResolvedSendMessageInput, transaction: TransactionContext): Promise<SendValidation> {
         const access = await this.requireCurrentMember(input.conversationId, input.senderId, transaction)
         const existing = await this.dependencies.repository.findByClientMessageId(
             input.conversationId,
@@ -154,7 +156,7 @@ export class MessageService {
         return { existing: null, messageContext }
     }
 
-    private async recoverDuplicateMessage(input: SendMessageInput, error: unknown): Promise<MessageDto> {
+    private async recoverDuplicateMessage(input: ResolvedSendMessageInput, error: unknown): Promise<MessageDto> {
         if (!(error instanceof MessageDuplicateKeyError)) throw error
         const access = await this.requireCurrentMember(input.conversationId, input.senderId)
         const existing = await this.dependencies.repository.findByClientMessageId(
@@ -204,7 +206,7 @@ export class MessageService {
     }
 
     private async requireCurrentMember(
-        conversationId: SendMessageInput["conversationId"],
+        conversationId: ResolvedSendMessageInput["conversationId"],
         userId: SendMessageInput["senderId"],
         transaction?: TransactionContext,
     ): Promise<ConversationMessageAccessRecord & { readonly joinedAt: Date }> {
@@ -214,6 +216,25 @@ export class MessageService {
             throw new ForbiddenException(MESSAGE_ERROR_MESSAGES.NOT_A_MEMBER, ERROR_CODES.FORBIDDEN)
         }
         return { ...access, joinedAt: access.joinedAt }
+    }
+
+    private async resolveDestination(input: SendMessageInput): Promise<ResolvedSendMessageInput> {
+        const hasConversationId = input.conversationId !== undefined
+        const hasRecipientId = input.recipientId !== undefined
+        if (hasConversationId === hasRecipientId) {
+            throw new ValidationException(MESSAGE_ERROR_MESSAGES.INVALID_DESTINATION)
+        }
+        let conversationId = input.conversationId
+        if (input.recipientId) {
+            const resolver = this.dependencies.directConversationResolver
+            if (!resolver) {
+                throw new ForbiddenException(MESSAGE_ERROR_MESSAGES.FRIENDSHIP_REQUIRED, ERROR_CODES.NOT_FRIENDS)
+            }
+            conversationId = await resolver.getOrCreate(input.senderId, input.recipientId)
+        }
+        if (!conversationId) throw new ValidationException(MESSAGE_ERROR_MESSAGES.INVALID_DESTINATION)
+        const { conversationId: _originalConversationId, recipientId: _recipientId, ...messageFields } = input
+        return { ...messageFields, conversationId }
     }
 
     private async assertCanSend(

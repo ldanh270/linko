@@ -25,13 +25,21 @@ export interface MessageAttachmentDto {
 }
 
 /** Message request accepted by the authenticated send endpoint. */
-export interface SendMessageRequest {
-    readonly [MESSAGE_FIELDS.CONVERSATION_ID]: EntityId
+export type SendMessageRequest = {
     readonly [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: string
     readonly [MESSAGE_FIELDS.CONTENT]?: string
     readonly [MESSAGE_FIELDS.REPLY_TO]?: EntityId
     readonly [MESSAGE_FIELDS.MENTIONS]?: readonly EntityId[]
-}
+} & (
+    | {
+        readonly [MESSAGE_FIELDS.CONVERSATION_ID]: EntityId
+        readonly [MESSAGE_FIELDS.RECIPIENT_ID]?: never
+    }
+    | {
+        readonly [MESSAGE_FIELDS.RECIPIENT_ID]: EntityId
+        readonly [MESSAGE_FIELDS.CONVERSATION_ID]?: never
+    }
+)
 
 /** Stable cursor page shape shared by conversation history consumers. */
 export interface CursorPage<T> {

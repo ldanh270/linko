@@ -38,6 +38,10 @@ export const ERROR_CODES = {
     OWNER_TRANSFER_REQUIRED: "OWNER_TRANSFER_REQUIRED",
     GROUP_CLOSED: "GROUP_CLOSED",
     FRIENDSHIP_REQUIRED: "FRIENDSHIP_REQUIRED",
+    /** Compatibility name for F16 clients using the domain wording. */
+    NOT_FRIENDS: "FRIENDSHIP_REQUIRED",
+    FRIEND_REQUEST_PENDING: "FRIEND_REQUEST_PENDING",
+    FRIENDSHIP_EXISTS: "FRIENDSHIP_EXISTS",
     INVALID_REPLY: "INVALID_REPLY",
     ATTACHMENT_NOT_FOUND: "ATTACHMENT_NOT_FOUND",
     PIN_LIMIT: "PIN_LIMIT",
@@ -216,6 +220,7 @@ export const MESSAGE_QUERY_PARAMS = {
 export const MESSAGE_FIELDS = {
     ID: "id",
     CONVERSATION_ID: "conversationId",
+    RECIPIENT_ID: "recipientId",
     SENDER_ID: "senderId",
     CLIENT_MESSAGE_ID: "clientMessageId",
     CONTENT: "content",

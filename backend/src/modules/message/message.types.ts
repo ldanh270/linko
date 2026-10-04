@@ -110,17 +110,30 @@ export interface MessageServiceDependencies {
     readonly replyMentionValidator: ReplyMentionValidator
     readonly attachmentService: MessageAttachmentPort
     readonly messagePublisher?: RealtimeMessagePublisher
+    readonly directConversationResolver?: MessageDirectConversationResolver
 }
 
-/** Authenticated message command with optional reply and mention references. */
+/** Resolve an authorized recipient to the unique direct conversation before storing a message. */
+export interface MessageDirectConversationResolver {
+    /** Return the active friend pair's direct conversation identifier. */
+    getOrCreate(senderId: ObjectId, recipientId: ObjectId): Promise<ObjectId>
+}
+
+/** Authenticated message command with exactly one conversation or recipient target. */
 export interface SendMessageInput {
-    readonly conversationId: ObjectId
+    readonly conversationId?: ObjectId
+    readonly recipientId?: ObjectId
     readonly senderId: ObjectId
     readonly clientMessageId: string
     readonly content?: string
     readonly replyToId?: ObjectId | null
     readonly mentionIds?: readonly ObjectId[]
     readonly attachments?: readonly AttachmentFile[]
+}
+
+/** Message command after its direct recipient has been resolved to a conversation ID. */
+export interface ResolvedSendMessageInput extends Omit<SendMessageInput, "conversationId" | "recipientId"> {
+    readonly conversationId: ObjectId
 }
 
 /** Authenticated bounded conversation history query. */

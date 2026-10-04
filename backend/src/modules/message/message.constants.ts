@@ -22,6 +22,7 @@ export const MESSAGE_ERROR_MESSAGES = {
     CONVERSATION_NOT_FOUND: "Conversation not found",
     NOT_A_MEMBER: "Current conversation membership is required",
     FRIENDSHIP_REQUIRED: "An active friendship is required to send a direct message",
+    INVALID_DESTINATION: "Provide exactly one conversation or recipient identifier",
     GROUP_CLOSED: "This group has been closed",
     EMPTY_CONTENT: "Message content must contain non-whitespace characters",
     CONTENT_TOO_LONG: `Message content must not exceed ${MESSAGE_LIMITS.MAX_CONTENT_LENGTH} characters`,
@@ -37,6 +38,7 @@ export const MESSAGE_ERROR_MESSAGES = {
 /** Operation input keys assembled by HTTP controllers before service calls. */
 export const MESSAGE_OPERATION_FIELDS = {
     CONVERSATION_ID: MESSAGE_FIELDS.CONVERSATION_ID,
+    RECIPIENT_ID: MESSAGE_FIELDS.RECIPIENT_ID,
     SENDER_ID: MESSAGE_FIELDS.SENDER_ID,
     USER_ID: MEMBERSHIP_FIELDS.USER_ID,
     CLIENT_MESSAGE_ID: MESSAGE_FIELDS.CLIENT_MESSAGE_ID,

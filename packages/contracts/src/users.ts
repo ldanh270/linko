@@ -12,6 +12,21 @@ export const USER_ROUTE_PATHS = {
     SEARCH: "/search",
 } as const
 
+/** Query parameter names accepted by the authenticated public people search. */
+export const USER_SEARCH_QUERY_PARAMS = {
+    KEYWORD: "keyword",
+    TYPE: "type",
+} as const
+
+/** Search modes preserve the compact typing preview and full result list. */
+export const USER_SEARCH_MODE = {
+    TYPING: "TYPING",
+    FULL: "FULL",
+} as const
+
+/** Search mode values accepted by the people search API. */
+export type UserSearchMode = (typeof USER_SEARCH_MODE)[keyof typeof USER_SEARCH_MODE]
+
 /** Runtime profile field names shared by DTOs, multipart forms, and persistence. */
 export const USER_PROFILE_FIELDS = {
     ID: "id",

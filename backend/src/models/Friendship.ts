@@ -1,12 +1,9 @@
 import mongoose, { InferSchemaType } from "mongoose"
+import { FRIEND_INDEX_NAMES, FRIENDSHIP_FIELDS } from "../modules/friend/friend.constants"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 
-/** MongoDB field names shared by friendship persistence and direct-message checks. */
-export const FRIENDSHIP_FIELDS = {
-    USER_A: "userA",
-    USER_B: "userB",
-} as const
+export { FRIENDSHIP_FIELDS } from "../modules/friend/friend.constants"
 
 const friendshipSchema = new mongoose.Schema(
     {
@@ -44,8 +41,8 @@ friendshipSchema.index(
     { [FRIENDSHIP_FIELDS.USER_A]: 1, [FRIENDSHIP_FIELDS.USER_B]: 1 },
     {
         unique: true,
-        name: "active_friendship_unique",
-        partialFilterExpression: { delFlag: false },
+        name: FRIEND_INDEX_NAMES.ACTIVE_FRIENDSHIP,
+        partialFilterExpression: { [FRIENDSHIP_FIELDS.DEL_FLAG]: false },
     },
 )
 

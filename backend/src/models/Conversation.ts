@@ -10,6 +10,7 @@ import {
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 import { PIN_ERROR_MESSAGES } from "#/modules/pin/pin.constants"
+import { DIRECT_CONVERSATION_FIELDS, FRIEND_INDEX_NAMES } from "../modules/friend/friend.constants"
 
 const lastMessageSchema = new mongoose.Schema(
     {
@@ -163,6 +164,14 @@ const conversationSchema = new mongoose.Schema(
             default: CONVERSATION_STATUS.ACTIVE,
             required: true,
         },
+        [DIRECT_CONVERSATION_FIELDS.USER_A]: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+        [DIRECT_CONVERSATION_FIELDS.USER_B]: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
 
         [CONVERSATION_FIELDS.PARTICIPANTS]: {
             type: [participantSchema],
@@ -209,6 +218,23 @@ const conversationSchema = new mongoose.Schema(
 conversationSchema.plugin(auditPlugin)
 conversationSchema.plugin(softDeletePlugin)
 conversationSchema.index({ "participants.userId": 1, "lastMessage.createdAt": -1 })
+conversationSchema.index(
+    {
+        [CONVERSATION_FIELDS.TYPE]: 1,
+        [DIRECT_CONVERSATION_FIELDS.USER_A]: 1,
+        [DIRECT_CONVERSATION_FIELDS.USER_B]: 1,
+    },
+    {
+        unique: true,
+        name: FRIEND_INDEX_NAMES.ACTIVE_DIRECT_CONVERSATION_PAIR,
+        partialFilterExpression: {
+            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT,
+            [CONVERSATION_FIELDS.DEL_FLAG]: false,
+            [DIRECT_CONVERSATION_FIELDS.USER_A]: { $exists: true },
+            [DIRECT_CONVERSATION_FIELDS.USER_B]: { $exists: true },
+        },
+    },
+)
 
 // To auto sort participants by id (a < b) for avoid duplicate
 conversationSchema.pre("save", function () {
