@@ -67,6 +67,10 @@ import { PinController } from "./modules/pin/pin.controller"
 import { MongoosePinRepository } from "./modules/pin/pin.repository"
 import { createPinRouter } from "./modules/pin/pin.route"
 import { PinService } from "./modules/pin/pin.service"
+import { NotificationPreferenceController } from "./modules/notification/notification.controller"
+import { MongooseNotificationRepository } from "./modules/notification/notification.repository"
+import { createNotificationPreferenceRouter } from "./modules/notification/notification.route"
+import { NotificationPreferenceService } from "./modules/notification/notification.service"
 
 /** Collaborators and route groups wired by the composition root. */
 export interface AppDependencies {
@@ -141,6 +145,11 @@ export function createApp(dependencies: AppDependencies): Express {
         repository: new MongoosePinRepository(),
         transactionRunner: { run: withTransaction },
     })
+    const notificationPreferenceService = new NotificationPreferenceService({
+        repository: new MongooseNotificationRepository(),
+        transactionRunner: { run: withTransaction },
+        clock: { now: () => new Date() },
+    })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const profileService = new ProfileService({
         repository: new MongooseProfileRepository(),
@@ -157,6 +166,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const readStateController = new ReadStateController(readStateService)
     const inboxController = new InboxController(inboxService)
     const pinController = new PinController(pinService)
+    const notificationPreferenceController = new NotificationPreferenceController(notificationPreferenceService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -170,6 +180,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.MESSAGES, createMessageRouter(messageController))
     app.use(API_ROUTES.MESSAGES, createAttachmentRouter(attachmentController))
     app.use(API_ROUTES.CONVERSATIONS, createPinRouter(pinController))
+    app.use(API_ROUTES.CONVERSATIONS, createNotificationPreferenceRouter(notificationPreferenceController))
     app.use(API_ROUTES.CONVERSATIONS, createReadStateRouter(readStateController))
     app.use(API_ROUTES.CONVERSATIONS, createInboxRouter(inboxController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationLifecycleRouter(conversationLifecycleController))
