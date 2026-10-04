@@ -21,7 +21,8 @@ const mentionIdsSchema = zod.preprocess((value: unknown) => {
 /** Validate JSON and multipart message requests with optional text when files are attached. */
 export const sendMessageSchema = zod.object({
     body: zod.object({
-        [MESSAGE_FIELDS.CONVERSATION_ID]: zod.string().regex(REGEX.MONGO_ID),
+        [MESSAGE_FIELDS.CONVERSATION_ID]: zod.string().regex(REGEX.MONGO_ID).optional(),
+        [MESSAGE_FIELDS.RECIPIENT_ID]: zod.string().regex(REGEX.MONGO_ID).optional(),
         [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: zod.string()
             .trim()
             .min(1)
@@ -29,7 +30,10 @@ export const sendMessageSchema = zod.object({
         [MESSAGE_FIELDS.CONTENT]: zod.string().trim().max(MESSAGE_LIMITS.MAX_CONTENT_LENGTH).optional(),
         [MESSAGE_FIELDS.REPLY_TO]: zod.string().regex(REGEX.MONGO_ID).optional(),
         [MESSAGE_FIELDS.MENTIONS]: mentionIdsSchema,
-    }).strict(),
+    }).strict().refine(
+        (body) => (body[MESSAGE_FIELDS.CONVERSATION_ID] !== undefined)
+            !== (body[MESSAGE_FIELDS.RECIPIENT_ID] !== undefined),
+    ),
 })
 
 /** Validate a conversation history route and its bounded cursor query. */

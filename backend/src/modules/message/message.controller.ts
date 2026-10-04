@@ -30,9 +30,12 @@ export class MessageController {
     /** Persist one validated message and return its stable safe DTO. */
     readonly send: MessageRequestHandler<SendMessageRequest, MessageDto> = async (request, response) => {
         const message = await this.service.send({
-            [MESSAGE_OPERATION_FIELDS.CONVERSATION_ID]: new mongoose.Types.ObjectId(
-                request.body[MESSAGE_FIELDS.CONVERSATION_ID],
-            ),
+            [MESSAGE_OPERATION_FIELDS.CONVERSATION_ID]: request.body[MESSAGE_FIELDS.CONVERSATION_ID]
+                ? new mongoose.Types.ObjectId(request.body[MESSAGE_FIELDS.CONVERSATION_ID])
+                : undefined,
+            [MESSAGE_OPERATION_FIELDS.RECIPIENT_ID]: request.body[MESSAGE_FIELDS.RECIPIENT_ID]
+                ? new mongoose.Types.ObjectId(request.body[MESSAGE_FIELDS.RECIPIENT_ID])
+                : undefined,
             [MESSAGE_OPERATION_FIELDS.SENDER_ID]: request.user._id,
             [MESSAGE_OPERATION_FIELDS.CLIENT_MESSAGE_ID]: request.body[MESSAGE_FIELDS.CLIENT_MESSAGE_ID],
             [MESSAGE_OPERATION_FIELDS.CONTENT]: request.body[MESSAGE_FIELDS.CONTENT],

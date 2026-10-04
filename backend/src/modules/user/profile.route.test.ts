@@ -12,7 +12,11 @@ import { AuthTokenService } from "../auth/auth.security"
 import { createAuthenticate } from "../../middlewares/route.middleware"
 import { ProfileController } from "./profile.controller"
 import { PROFILE_ROUTE_PARAMS, PROFILE_ROUTE_PATHS } from "./profile.constants"
-import userRoutes from "../../routes/user.route"
+import { FriendController } from "../friend/friend.controller"
+import { createPeopleSearchRouter } from "../friend/friend.route"
+import { MongooseFriendRepository } from "../friend/friend.repository"
+import { FriendService } from "../friend/friend.service"
+import { withTransaction } from "../../shared/persistence/withTransaction"
 import { MongooseProfileRepository } from "./profile.repository"
 import { createProfileRouter } from "./profile.route"
 import { ProfileService } from "./profile.service"
@@ -70,7 +74,10 @@ function createTestApp(options: { readonly imageStorage?: ProfileImageStorage } 
     app.use(express.json())
     app.use(cookieParser())
     app.use(createAuthenticate(TEST_TOKEN_SECRET))
-    app.use(API_ROUTES.USERS, userRoutes)
+    app.use(API_ROUTES.USERS, createPeopleSearchRouter(new FriendController(new FriendService({
+        repository: new MongooseFriendRepository(),
+        transactionRunner: { run: withTransaction },
+    }))))
     app.use(API_ROUTES.USERS, createProfileRouter(new ProfileController(service)))
     app.use(createGlobalErrorHandler(logger))
     return app
@@ -265,9 +272,9 @@ describe("profile route composition", () => {
         const response = await request(createTestApp())
             .get(`${API_ROUTES.USERS}${PROFILE_ROUTE_PATHS.SEARCH}?keyword=profile_search`)
             .set("Authorization", `Bearer ${account.token}`)
-            .send({ type: "TYPING" })
 
         expect(response.status).toBe(200)
-        expect(response.body).toHaveProperty("users")
+        expect(response.body.success).toBe(true)
+        expect(response.body.data).toEqual([])
     })
 })

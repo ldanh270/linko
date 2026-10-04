@@ -192,6 +192,59 @@ describe("message HTTP routes", () => {
         expect(await Message.countDocuments({})).toBe(0)
     })
 
+    it("should_require_friendship_when_sending_by_recipientId", async () => {
+        const sender = await createAccount("recipient-send-sender")
+        const recipient = await createAccount("recipient-send-peer")
+        const response = await request(createTestApp())
+            .post(API_ROUTES.MESSAGES)
+            .set("Authorization", `Bearer ${sender.token}`)
+            .send(recipientSendBody(recipient._id, "nonfriend-recipient-message", "Must not create a DM"))
+
+        expect(response.status).toBe(403)
+        expect(response.body.error.code).toBe(ERROR_CODES.NOT_FRIENDS)
+        expect(await Conversation.countDocuments({ [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT })).toBe(0)
+        expect(await Message.countDocuments({})).toBe(0)
+    })
+
+    it("should_resolve_recipientId_once_and_recheck_friendship_after_unfriend", async () => {
+        const sender = await createAccount("recipient-active-sender")
+        const recipient = await createAccount("recipient-active-peer")
+        const [userA, userB] = [sender._id, recipient._id].sort((left, right) =>
+            left.toString().localeCompare(right.toString()),
+        )
+        await Friendship.create({
+            [FRIENDSHIP_FIELDS.USER_A]: userA,
+            [FRIENDSHIP_FIELDS.USER_B]: userB,
+        })
+        const app = createTestApp()
+
+        const firstSend = await request(app)
+            .post(API_ROUTES.MESSAGES)
+            .set("Authorization", `Bearer ${sender.token}`)
+            .send(recipientSendBody(recipient._id, "recipient-active-message", "Friends can message"))
+        const conversationId = firstSend.body.data.conversationId as string
+        await softDelete(Friendship, {
+            [FRIENDSHIP_FIELDS.USER_A]: userA,
+            [FRIENDSHIP_FIELDS.USER_B]: userB,
+        })
+        const blockedSend = await request(app)
+            .post(API_ROUTES.MESSAGES)
+            .set("Authorization", `Bearer ${sender.token}`)
+            .send(sendBody(new mongoose.Types.ObjectId(conversationId), "recipient-after-unfriend", "Must fail"))
+        const recipientBlockedSend = await request(app)
+            .post(API_ROUTES.MESSAGES)
+            .set("Authorization", `Bearer ${sender.token}`)
+            .send(recipientSendBody(recipient._id, "recipient-target-after-unfriend", "Must also fail"))
+
+        expect(firstSend.status).toBe(201)
+        expect(blockedSend.status).toBe(403)
+        expect(blockedSend.body.error.code).toBe(ERROR_CODES.FRIENDSHIP_REQUIRED)
+        expect(recipientBlockedSend.status).toBe(403)
+        expect(recipientBlockedSend.body.error.code).toBe(ERROR_CODES.NOT_FRIENDS)
+        expect(await Conversation.countDocuments({ [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT })).toBe(1)
+        expect(await Message.countDocuments({})).toBe(1)
+    })
+
     it("should_deny_send_immediately_after_a_member_leaves", async () => {
         const owner = await createAccount("departed-owner")
         const formerMember = await createAccount("departed-member")
@@ -313,6 +366,15 @@ async function createDirectConversation(
 function sendBody(conversationId: mongoose.Types.ObjectId, clientMessageId: string, content: string) {
     return {
         [MESSAGE_FIELDS.CONVERSATION_ID]: conversationId.toString(),
+        [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: clientMessageId,
+        [MESSAGE_FIELDS.CONTENT]: content,
+    }
+}
+
+/** Build a recipient-based DM request before the server resolves its canonical conversation. */
+function recipientSendBody(recipientId: mongoose.Types.ObjectId, clientMessageId: string, content: string) {
+    return {
+        [MESSAGE_FIELDS.RECIPIENT_ID]: recipientId.toString(),
         [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: clientMessageId,
         [MESSAGE_FIELDS.CONTENT]: content,
     }

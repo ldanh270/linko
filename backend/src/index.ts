@@ -1,10 +1,7 @@
 import "dotenv/config"
-import { API_ROUTES } from "@linko/contracts"
 import { createServer } from "node:http"
 
 import { loadAuthConfig } from "#/configs/auth.config"
-import friendRoutes from "#/routes/friend.route"
-import userRoutes from "#/routes/user.route"
 
 import express from "express"
 
@@ -21,8 +18,6 @@ const publicRoutes = express.Router()
 publicRoutes.get("/", (_request, response) => response.json(ApiResponse.ok({ status: "ok" })))
 
 const privateRoutes = express.Router()
-privateRoutes.use(API_ROUTES.USERS, userRoutes)
-privateRoutes.use(API_ROUTES.FRIENDS, friendRoutes)
 
 const authConfig = loadAuthConfig()
 const realtimeGateway = new RealtimeGateway({

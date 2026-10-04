@@ -2,6 +2,7 @@ import { API_ROUTES, ERROR_CODES } from "@linko/contracts"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import express, { type Express, type Router } from "express"
+import { Types } from "mongoose"
 
 import type { AuthRuntimeConfig } from "./configs/auth.config"
 import { ConversationController } from "./modules/conversation/conversation.controller"
@@ -71,6 +72,10 @@ import { NotificationPreferenceController } from "./modules/notification/notific
 import { MongooseNotificationRepository } from "./modules/notification/notification.repository"
 import { createNotificationPreferenceRouter } from "./modules/notification/notification.route"
 import { NotificationPreferenceService } from "./modules/notification/notification.service"
+import { FriendController } from "./modules/friend/friend.controller"
+import { createFriendRouter, createPeopleSearchRouter } from "./modules/friend/friend.route"
+import { MongooseFriendRepository } from "./modules/friend/friend.repository"
+import { FriendService } from "./modules/friend/friend.service"
 
 /** Collaborators and route groups wired by the composition root. */
 export interface AppDependencies {
@@ -127,12 +132,25 @@ export function createApp(dependencies: AppDependencies): Express {
         storage: new R2PrivateAttachmentStorage(),
         cleanupFailureRecorder: new LoggerAttachmentCleanupFailureRecorder(dependencies.logger),
     })
+    const friendService = new FriendService({
+        repository: new MongooseFriendRepository(),
+        transactionRunner: { run: withTransaction },
+    })
     const messageService = new MessageService({
         repository: new MongooseMessageRepository(),
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
         replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
         attachmentService,
+        directConversationResolver: {
+            async getOrCreate(senderId, recipientId) {
+                const conversation = await friendService.getOrCreateDirectConversation({
+                    actorId: senderId,
+                    friendId: recipientId,
+                })
+                return new Types.ObjectId(conversation.id)
+            },
+        },
         ...(dependencies.realtimeGateway ? { messagePublisher: dependencies.realtimeGateway } : {}),
     })
     const readStateService = new ReadStateService({
@@ -167,6 +185,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const inboxController = new InboxController(inboxService)
     const pinController = new PinController(pinService)
     const notificationPreferenceController = new NotificationPreferenceController(notificationPreferenceService)
+    const friendController = new FriendController(friendService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -178,6 +197,8 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
     app.use(API_ROUTES.MESSAGES, createMessageRouter(messageController))
+    app.use(API_ROUTES.FRIENDS, createFriendRouter(friendController))
+    app.use(API_ROUTES.USERS, createPeopleSearchRouter(friendController))
     app.use(API_ROUTES.MESSAGES, createAttachmentRouter(attachmentController))
     app.use(API_ROUTES.CONVERSATIONS, createPinRouter(pinController))
     app.use(API_ROUTES.CONVERSATIONS, createNotificationPreferenceRouter(notificationPreferenceController))
