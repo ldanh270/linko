@@ -3,6 +3,7 @@
 import type { ReactNode } from "react"
 
 import { AppShell } from "@/shared/layout/AppShell"
+import { NotificationToastsListener } from "@/features/settings/components/NotificationToastsListener"
 import { AUTH_SESSION_STATUS, AUTH_STATUS_MESSAGES } from "../auth.constants"
 import { useSession } from "../hooks/useSession"
 
@@ -14,7 +15,10 @@ export interface ProtectedAppShellProps {
 /** Render the app frame only after a cookie-backed session has been restored. UI only. */
 export function ProtectedAppShell({ children }: ProtectedAppShellProps) {
     const { status } = useSession()
-    if (status === AUTH_SESSION_STATUS.AUTHENTICATED) return <AppShell>{children}</AppShell>
+    if (status === AUTH_SESSION_STATUS.AUTHENTICATED) return <>
+        <NotificationToastsListener />
+        <AppShell>{children}</AppShell>
+    </>
 
     const message = status === AUTH_SESSION_STATUS.LOADING
         ? AUTH_STATUS_MESSAGES.LOADING
