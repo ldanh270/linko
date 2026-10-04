@@ -52,6 +52,8 @@ import { MongooseAttachmentRepository } from "./modules/attachment/attachment.re
 import { AttachmentService } from "./modules/attachment/attachment.service"
 import { LoggerAttachmentCleanupFailureRecorder } from "./modules/attachment/attachment-cleanup.recorder"
 import { R2PrivateAttachmentStorage } from "./modules/attachment/private-attachment.storage"
+import { AttachmentController } from "./modules/attachment/attachment.controller"
+import { createAttachmentRouter } from "./modules/attachment/attachment.route"
 import { InboxController } from "./modules/inbox/inbox.controller"
 import { MongooseInboxRepository } from "./modules/inbox/inbox.repository"
 import { createInboxRouter } from "./modules/inbox/inbox.route"
@@ -136,6 +138,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const conversationLifecycleController = new ConversationLifecycleController(conversationLifecycleService)
     const invitationController = new InvitationController(invitationService)
     const messageController = new MessageController(messageService)
+    const attachmentController = new AttachmentController(attachmentService)
     const readStateController = new ReadStateController(readStateService)
     const inboxController = new InboxController(inboxService)
     const app = express()
@@ -149,6 +152,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(createAuthenticate(dependencies.authConfig.accessTokenSecret))
     app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
     app.use(API_ROUTES.MESSAGES, createMessageRouter(messageController))
+    app.use(API_ROUTES.MESSAGES, createAttachmentRouter(attachmentController))
     app.use(API_ROUTES.CONVERSATIONS, createReadStateRouter(readStateController))
     app.use(API_ROUTES.CONVERSATIONS, createInboxRouter(inboxController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationLifecycleRouter(conversationLifecycleController))

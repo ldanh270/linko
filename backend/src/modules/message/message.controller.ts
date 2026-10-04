@@ -42,6 +42,14 @@ export class MessageController {
             mentionIds: request.body[MESSAGE_FIELDS.MENTIONS]?.map((mentionId) =>
                 new mongoose.Types.ObjectId(mentionId),
             ) ?? [],
+            attachments: Array.isArray(request.files)
+                ? request.files.map((file) => ({
+                    originalname: file.originalname,
+                    mimetype: file.mimetype,
+                    buffer: file.buffer,
+                    size: file.size,
+                }))
+                : [],
         })
         response.status(HttpStatusCode.CREATED).json(ApiResponse.ok(message))
     }

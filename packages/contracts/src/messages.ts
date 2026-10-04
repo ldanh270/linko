@@ -28,7 +28,7 @@ export interface MessageAttachmentDto {
 export interface SendMessageRequest {
     readonly [MESSAGE_FIELDS.CONVERSATION_ID]: EntityId
     readonly [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: string
-    readonly [MESSAGE_FIELDS.CONTENT]: string
+    readonly [MESSAGE_FIELDS.CONTENT]?: string
     readonly [MESSAGE_FIELDS.REPLY_TO]?: EntityId
     readonly [MESSAGE_FIELDS.MENTIONS]?: readonly EntityId[]
 }

@@ -32,6 +32,23 @@ export const ATTACHMENT_ERROR_MESSAGES = {
     NOT_FOUND: "Attachment not found",
     VALIDATED_METADATA_MISSING: "Validated attachment metadata is missing",
     CLEANUP_FAILED: "Attachment cleanup failed",
+    INVALID_UPLOAD: "Invalid attachment upload",
+    INVALID_ROUTE_PARAMS: "Invalid attachment route parameters",
+} as const
+
+/** Response header names and filename escaping patterns for protected downloads. */
+export const ATTACHMENT_DOWNLOAD_HEADERS = {
+    CONTENT_TYPE: "Content-Type",
+    CONTENT_DISPOSITION: "Content-Disposition",
+    CONTENT_LENGTH: "Content-Length",
+    CACHE_CONTROL: "Cache-Control",
+    CACHE_POLICY: "private, no-store",
+    CONTENT_SNIFFING: "X-Content-Type-Options",
+    CONTENT_SNIFFING_POLICY: "nosniff",
+    FALLBACK_FILENAME: "attachment",
+    FALLBACK_REPLACEMENT: "_",
+    ASCII_FALLBACK_PATTERN: /[^\x20-\x7e]|["\\]/g,
+    RFC_5987_ESCAPE_PATTERN: /[!'()*]/g,
 } as const
 
 /** Safe operation labels used when cleanup failures are logged. */

@@ -9,6 +9,16 @@ import zod from "zod"
 import { REGEX } from "../../configs/constants/regex"
 
 /** Validate a message request, optional references, and its stable retry key. */
+const mentionIdsSchema = zod.preprocess((value: unknown) => {
+    if (typeof value !== "string") return value
+    try {
+        return JSON.parse(value)
+    } catch {
+        return value
+    }
+}, zod.array(zod.string().regex(REGEX.MONGO_ID)).max(MESSAGE_LIMITS.MAX_MENTIONS).optional())
+
+/** Validate JSON and multipart message requests with optional text when files are attached. */
 export const sendMessageSchema = zod.object({
     body: zod.object({
         [MESSAGE_FIELDS.CONVERSATION_ID]: zod.string().regex(REGEX.MONGO_ID),
@@ -16,14 +26,9 @@ export const sendMessageSchema = zod.object({
             .trim()
             .min(1)
             .max(MESSAGE_LIMITS.CLIENT_MESSAGE_ID_LENGTH),
-        [MESSAGE_FIELDS.CONTENT]: zod.string()
-            .trim()
-            .min(1)
-            .max(MESSAGE_LIMITS.MAX_CONTENT_LENGTH),
+        [MESSAGE_FIELDS.CONTENT]: zod.string().trim().max(MESSAGE_LIMITS.MAX_CONTENT_LENGTH).optional(),
         [MESSAGE_FIELDS.REPLY_TO]: zod.string().regex(REGEX.MONGO_ID).optional(),
-        [MESSAGE_FIELDS.MENTIONS]: zod.array(zod.string().regex(REGEX.MONGO_ID))
-            .max(MESSAGE_LIMITS.MAX_MENTIONS)
-            .optional(),
+        [MESSAGE_FIELDS.MENTIONS]: mentionIdsSchema,
     }).strict(),
 })
 
