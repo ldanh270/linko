@@ -29,6 +29,9 @@ export const MESSAGE_ERROR_MESSAGES = {
     INVALID_CURSOR: "Message cursor is invalid",
     INVALID_PAGE_LIMIT: "Message page limit is invalid",
     INVALID_RECORD: "Stored message is missing required fields",
+    INVALID_REPLY: "Reply target is not visible in this conversation",
+    NONMEMBER_MENTION: "Only current conversation members can be mentioned",
+    TOO_MANY_MENTIONS: `A message cannot mention more than ${MESSAGE_LIMITS.MAX_MENTIONS} members`,
 } as const
 
 /** Operation input keys assembled by HTTP controllers before service calls. */
