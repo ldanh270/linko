@@ -54,10 +54,12 @@
 
 **Files:** route/controller/dto/schema/mapper trong module; test backend/src/modules/attachment/attachments.route.test.ts.
 
-- [ ] Step 1: Viết test route thất bại: supported MIME/signature accepted; unsupported/oversize 400; unauthorized/nonmember/pre-join download 404; no R2 key leaked. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/attachment/attachments.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
-- [ ] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route thất bại: supported MIME/signature accepted; unsupported/oversize 400; unauthorized/nonmember/pre-join download 404; no R2 key leaked. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/attachment/attachments.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
+- [x] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+
+**Task 2 evidence:** the initial red run failed because `attachment.controller` did not exist. The route suite now passes (8/8); the attachment, message, reply/mention, and read service/route regressions passed together (42/42), and backend typecheck passed. The production composition root mounts the module download route once; the legacy router is not mounted. API commit: `1bf4a7b`.
 
 ### Task 3: Client contract
 
