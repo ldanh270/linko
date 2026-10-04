@@ -1,8 +1,19 @@
 import { expect, test } from "@playwright/test"
+import { API_ROUTES, AUTH_ROUTE_PATHS } from "@linko/contracts"
 
 /** Check navigation, focus and page width at both shell breakpoints. */
 for (const width of [360, 1440]) {
   test(`foundation shell works at ${width}px`, async ({ page }) => {
+    await page.route(`**${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.REFRESH}`, (route) => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: { accessToken: "foundation-e2e-access-token" },
+        error: null,
+        meta: null,
+      }),
+    }))
     await page.setViewportSize({ width, height: 800 })
     await page.goto("/inbox")
     await expect(page.getByRole("heading", { name: "Tin nhắn" })).toBeVisible()
