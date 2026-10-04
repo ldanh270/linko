@@ -40,6 +40,7 @@ export const ERROR_CODES = {
     FRIENDSHIP_REQUIRED: "FRIENDSHIP_REQUIRED",
     INVALID_REPLY: "INVALID_REPLY",
     ATTACHMENT_NOT_FOUND: "ATTACHMENT_NOT_FOUND",
+    PIN_LIMIT: "PIN_LIMIT",
 } as const
 
 /** Conversation types stored by the persistence layer. */
@@ -127,6 +128,24 @@ export const GROUP_FIELDS = {
     ROLE: "role",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
+    PINNED_MESSAGE_IDS: "pinnedMessageIds",
+} as const
+
+/** Pin route parameters shared by Express registration and frontend adapters. */
+export const PIN_PARAMS = {
+    CONVERSATION_ID: CONVERSATION_PARAMS.ID,
+    MESSAGE_ID: "messageId",
+} as const
+
+/** Pin route suffixes mounted below the conversation API prefix. */
+export const PIN_ROUTE_PATHS = {
+    LIST: `/:${PIN_PARAMS.CONVERSATION_ID}/pins`,
+    MESSAGE: `/:${PIN_PARAMS.CONVERSATION_ID}/pins/:${PIN_PARAMS.MESSAGE_ID}`,
+} as const
+
+/** Maximum pin count shared by persistence validation and pin service rules. */
+export const PIN_LIMITS = {
+    MAX_PINNED_MESSAGES: 3,
 } as const
 
 /** DTO field names shared by conversation and group lifecycle responses. */

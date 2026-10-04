@@ -1,5 +1,5 @@
 import mongoose, { InferSchemaType } from "mongoose"
-import { CONVERSATION_STATUS, CONVERSATION_TYPE, GROUP_FIELDS, GROUP_LIMITS, ROLE } from "@linko/contracts"
+import { CONVERSATION_STATUS, CONVERSATION_TYPE, GROUP_FIELDS, GROUP_LIMITS, PIN_LIMITS, ROLE } from "@linko/contracts"
 import {
     CONVERSATION_FIELDS,
     GROUP_AVATAR_FIELDS,
@@ -9,6 +9,7 @@ import {
 } from "#/modules/conversation/conversation.constants"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
+import { PIN_ERROR_MESSAGES } from "#/modules/pin/pin.constants"
 
 const lastMessageSchema = new mongoose.Schema(
     {
@@ -126,6 +127,16 @@ const groupSchema = new mongoose.Schema(
             // Cloundinary public id to delete avatar
             [GROUP_AVATAR_FIELDS.ID]: {
                 type: String,
+            },
+        },
+
+        /** Group pin IDs stay newest-first and are bounded by the server-side atomic update. */
+        [GROUP_FIELDS.PINNED_MESSAGE_IDS]: {
+            type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+            default: [],
+            validate: {
+                validator: (messageIds: readonly unknown[]) => messageIds.length <= PIN_LIMITS.MAX_PINNED_MESSAGES,
+                message: PIN_ERROR_MESSAGES.PIN_LIMIT,
             },
         },
     },
