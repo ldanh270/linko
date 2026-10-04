@@ -31,11 +31,11 @@
 
 **Existing to migrate/modify:** backend/src/models/Message.ts và module message của F08.
 
-**Module files:** backend/src/modules/message/{replyMention.service.ts, replyMention.types.ts, message.schema.ts, message.dto.ts, message.service.ts}. Đăng ký một lần tại backend/src/app.ts; bỏ wiring cũ tương ứng.
+**Module files:** backend/src/modules/message/{replyMention.service.ts, replyMention.types.ts, replyMention.repository.ts, message.schema.ts, message.mapper.ts, message.service.ts}. Đăng ký validator một lần tại backend/src/app.ts; giữ một active message router.
 
 **Service signatures:** ReplyMentionService.validate(input: ReplyMentionInput): Promise<ValidatedMessageContext>.
 
-**HTTP contract:** POST /api/messages nhận replyTo và mentions. MessageService của F08 gọi ReplyMentionService đã inject trước khi lưu. Giới hạn mentions <=20 ID duy nhất; reply preview chỉ trả nếu người nhận được xem.
+**HTTP contract:** POST /api/messages nhận replyTo và mentions. MessageService của F08 gọi ReplyMentionService đã inject trước khi lưu. Giới hạn mentions <=20 ID duy nhất; response chỉ trả ID reply target, không sao chép nội dung tin cũ vào metadata.
 
 **Frontend adapter:** sendMessage ở frontend/features/chat/api/messages.api.ts nhận replyTo?: string và mentions?: string[]. File frontend/features/chat/api/messages.api.ts; typed result từ packages/contracts.
 
@@ -43,29 +43,29 @@
 
 **Files:** service/repository/types/constants trong module trên; test backend/src/modules/message/reply-mentions.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_reject_reply_from_other_conversation; should_reject_pre_join_reply; should_reject_mention_of_nonmember. Assertions cốt lõi: expect(error.code).toBe(ERROR_CODES.INVALID_REPLY); expect(mentions).toEqual(activeMemberIds).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/message/reply-mentions.service.test.ts; xác nhận FAIL đúng hành vi.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Added failures for cross-conversation and pre-join replies, outsider/departed-member mentions, hidden targets, and duplicate mention normalization.
+- [x] Step 2: Ran the local backend Vitest executable; it failed because the reply/mention repository and service modules did not exist yet.
+- [x] Step 3: Added repository and service interfaces, Mongoose visibility reads, transactional validation, stable reply error code, and current-member mention checks. The service contains no Mongoose calls.
+- [x] Step 4: Reply/mention service tests (6) and backend typecheck pass. Domain task committed as `1c445f3`; visibility edge tests committed as `3a815fd`.
 
 ### Task 2: API boundary and integration
 
 **Files:** route/controller/dto/schema/mapper trong module; test backend/src/modules/message/reply-mentions.route.test.ts.
 
-- [ ] Step 1: Viết test route thất bại: 400 cho ObjectId sai, 403 cho reply không có quyền; DTO reply preview không lộ nội dung cũ; mention IDs duy nhất. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/message/reply-mentions.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
-- [ ] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Added isolated route tests for malformed reply IDs, inaccessible targets, ID-only reply metadata, and duplicate mentions.
+- [x] Step 2: Ran the local backend Vitest executable; the new metadata tests failed because the existing send schema rejected reply and mention fields.
+- [x] Step 3: Added Zod validation, controller ObjectId mapping, safe message DTO mapping, transactional persistence, and composition-root wiring. The app has one active message router.
+- [x] Step 4: Route and affected messaging/read suites (20) plus backend typecheck pass. API task committed as `7c9ce24`.
 
 ### Task 3: Client contract
 
 **Files:** frontend/features/chat/api/messages.api.ts; test frontend/features/chat/api/reply-mentions.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter serialize replyTo/mentions nhất quán giữa JSON và multipart; giả lập envelope và xác nhận ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/chat/api/reply-mentions.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Added adapter tests for JSON fields, multipart field encoding, and preserved `ApiError.code`.
+- [x] Step 2: Ran the local frontend Vitest executable; JSON omitted both fields and the multipart serializer was missing.
+- [x] Step 3: Updated `sendMessage`, added a shared-key multipart serializer for F10, and extended the contract DTO/request types. No JSX or state.
+- [x] Step 4: F09 and existing messaging adapter tests (7) pass; frontend typecheck and eslint pass. Adapter task committed as `2f48665`.
 
 ## Done when
 
-FR-09 và 5 Review Focus có bằng chứng test; route cũ không hoạt động song song; spec/AGENTS.md được đối chiếu.
+FR-09 and all five review focus cases have test evidence: cross-conversation, pre-join, departed-member mention, duplicate mention, and sender-hidden reply target. The DTO contains only the validated reply ID; the app registers one active message router. Spec and AGENTS.md were checked.
