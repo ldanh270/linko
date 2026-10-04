@@ -43,29 +43,35 @@
 
 **Files:** Service/repository/types/constants trong module trên; test backend/src/modules/auth/auth.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_reject_duplicate_username_with_conflict_code; should_rotate_refresh_token_once; should_invalidate_session_on_logout. Assertions cốt lõi: expect(duplicate.code).toBe(ERROR_CODES.USERNAME_TAKEN); expect(secondRefresh).toRejectWithCode(ERROR_CODES.INVALID_SESSION).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/auth/auth.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_reject_duplicate_username_with_conflict_code; should_rotate_refresh_token_once; should_invalidate_session_on_logout. Assertions cốt lõi: expect(duplicate.code).toBe(ERROR_CODES.USERNAME_TAKEN); expect(secondRefresh).toRejectWithCode(ERROR_CODES.INVALID_SESSION).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/auth/auth.service.test.ts; xác nhận FAIL do hành vi chưa có, không do lỗi harness.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên, áp dụng transaction khi nhiều bản ghi cùng thay đổi, constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test, backend typecheck; phải PASS. Commit domain task.
+
+**Task 1 evidence:** auth service tests passed (4/4), including duplicate username/email, one-time refresh rotation, and logout revocation. Domain implementation is in `6a8fb53`.
 
 ### Task 2: API boundary and integration
 
 **Files:** Route/controller/dto/schema/mapper trong module; test backend/src/modules/auth/auth.route.test.ts.
 
-- [ ] Step 1: Viết test route/integration thất bại: signup 201 envelope; invalid password 400; login 200 with HttpOnly refresh cookie; logout clears exact refreshToken cookie; technical error generic 500. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/auth/auth.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
-- [ ] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route/integration thất bại: signup 201 envelope; invalid password 400; login 200 with HttpOnly refresh cookie; logout clears exact refreshToken cookie; technical error generic 500. Assert status, envelope, code lỗi và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/auth/auth.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod middleware, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route ở composition root, gỡ wiring cũ.
+- [x] Step 4: Chạy lại test, pnpm -C backend typecheck và route smoke; phải PASS. Commit API task.
+
+**Task 2 evidence:** auth route tests passed (8/8), covering signup envelope, password validation, hashed-only session persistence, cookie flags/rotation, replay and expiry handling, exact logout clearing, and generic 500 responses. The active composition root uses the module router; route code is in `4d04184`.
 
 ### Task 3: Client contract
 
 **Files:** frontend/features/auth/api/auth.api.ts, frontend/features/auth/hooks/useSession.ts, frontend/features/auth/components/ProtectedAppShell.tsx, frontend/app/(app)/layout.tsx; tests frontend/features/auth/api/auth.api.test.ts and frontend/features/auth/hooks/useSession.test.ts.
 
-- [ ] Step 1: Viết test adapter và useSession thất bại: 401 trigger một refresh rồi retry đúng một lần; nhiều 401 dùng chung một refresh; refresh thất bại xóa memory token và đưa về /login; route (app) không hiện dữ liệu khi chưa xác thực.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/auth/api/auth.api.test.ts features/auth/hooks/useSession.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions, hook session và ProtectedAppShell client component; (app) layout chỉ compose, không gọi hook trong Server Component. Dùng shared HTTP client/constants/DTO, không lưu access token ở localStorage và không đặt logic vào JSX.
-- [ ] Step 4: Chạy hai test, frontend typecheck/lint; phải PASS. Commit client auth task.
+- [x] Step 1: Viết test adapter và useSession thất bại: 401 trigger một refresh rồi retry đúng một lần; nhiều 401 dùng chung một refresh; refresh thất bại xóa memory token và đưa về /login; route (app) không hiện dữ liệu khi chưa xác thực.
+- [x] Step 2: Chạy pnpm -C frontend exec vitest run features/auth/api/auth.api.test.ts features/auth/hooks/useSession.test.ts; xác nhận FAIL.
+- [x] Step 3: Viết adapter functions, hook session và ProtectedAppShell client component; (app) layout chỉ compose, không gọi hook trong Server Component. Dùng shared HTTP client/constants/DTO, không lưu access token ở localStorage và không đặt logic vào JSX.
+- [x] Step 4: Chạy hai test, frontend typecheck/lint; phải PASS. Commit client auth task.
+
+**Task 3 evidence:** auth adapter/session tests passed (5/5), covering one refresh retry, concurrent single-flight refresh, retry limit, token clearing, redirect, and hidden protected content. Frontend typecheck and auth-file lint passed. Client implementation is in `714f899`.
 
 ## Done when
 
-FR-01 và 5 Review Focus có bằng chứng test; route cũ không còn hoạt động song song; spec và AGENTS.md được đối chiếu.
+FR-01 and all five Review Focus cases have test evidence, including duplicate identities, missing/expired cookies, refresh replay, expired logout, and generic/redacted technical errors. The active composition root registers only the module route; spec and AGENTS.md were checked. **F01 complete.**
