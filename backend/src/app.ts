@@ -63,6 +63,10 @@ import { MongooseReadStateRepository } from "./modules/read/read.repository"
 import { createReadStateRouter } from "./modules/read/read.route"
 import { ReadStateService } from "./modules/read/read.service"
 import type { RealtimeGateway } from "./modules/realtime/realtime.gateway"
+import { PinController } from "./modules/pin/pin.controller"
+import { MongoosePinRepository } from "./modules/pin/pin.repository"
+import { createPinRouter } from "./modules/pin/pin.route"
+import { PinService } from "./modules/pin/pin.service"
 
 /** Collaborators and route groups wired by the composition root. */
 export interface AppDependencies {
@@ -133,6 +137,10 @@ export function createApp(dependencies: AppDependencies): Express {
         clock: { now: () => new Date() },
     })
     const inboxService = new InboxService({ repository: new MongooseInboxRepository() })
+    const pinService = new PinService({
+        repository: new MongoosePinRepository(),
+        transactionRunner: { run: withTransaction },
+    })
     const authController = new AuthController(authService, dependencies.authConfig.refreshCookie)
     const profileService = new ProfileService({
         repository: new MongooseProfileRepository(),
@@ -148,6 +156,7 @@ export function createApp(dependencies: AppDependencies): Express {
     const attachmentController = new AttachmentController(attachmentService)
     const readStateController = new ReadStateController(readStateService)
     const inboxController = new InboxController(inboxService)
+    const pinController = new PinController(pinService)
     const app = express()
     app.use(withRequestContext)
     app.use(cors({ origin: dependencies.authConfig.clientOrigin, credentials: true }))
@@ -160,6 +169,7 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.INVITATIONS, createInvitationAcceptRouter(invitationController))
     app.use(API_ROUTES.MESSAGES, createMessageRouter(messageController))
     app.use(API_ROUTES.MESSAGES, createAttachmentRouter(attachmentController))
+    app.use(API_ROUTES.CONVERSATIONS, createPinRouter(pinController))
     app.use(API_ROUTES.CONVERSATIONS, createReadStateRouter(readStateController))
     app.use(API_ROUTES.CONVERSATIONS, createInboxRouter(inboxController))
     app.use(API_ROUTES.CONVERSATIONS, createConversationLifecycleRouter(conversationLifecycleController))
