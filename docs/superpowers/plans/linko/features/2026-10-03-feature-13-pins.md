@@ -43,29 +43,38 @@
 
 **Files:** service/repository/types/constants trong module trên; test backend/src/modules/pin/pins.service.test.ts.
 
-- [ ] Step 1: Viết test thất bại: should_reject_fourth_pin; should_reject_member_pin; should_hide_pre_join_pin_from_new_member. Assertions cốt lõi: expect(error.code).toBe(ERROR_CODES.PIN_LIMIT); expect(newMemberPins).toHaveLength(0).
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/pin/pins.service.test.ts; xác nhận FAIL đúng hành vi.
-- [ ] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
-- [ ] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
+- [x] Step 1: Viết test thất bại: should_reject_fourth_pin; should_reject_member_pin; should_hide_pre_join_pin_from_new_member. Assertions cốt lõi: expect(error.code).toBe(ERROR_CODES.PIN_LIMIT); expect(newMemberPins).toHaveLength(0).
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/pin/pins.service.test.ts; xác nhận FAIL đúng hành vi.
+- [x] Step 3: Viết repository interface + Mongoose repository và service signatures ở trên; transaction khi nhiều bản ghi thay đổi; constants/typed BusinessException; không gọi Mongoose trong service.
+- [x] Step 4: Chạy lại test và backend typecheck; phải PASS. Commit domain task.
 
 ### Task 2: API boundary and integration
 
 **Files:** route/controller/dto/schema/mapper trong module; test backend/src/modules/pin/pins.route.test.ts.
 
-- [ ] Step 1: Viết test route thất bại: 404 tin khác hội thoại; 403 member; 200 pin idempotent; chỉ GROUP chấp nhận. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
-- [ ] Step 2: Chạy pnpm -C backend exec vitest run src/modules/pin/pins.route.test.ts; xác nhận FAIL đúng lý do.
-- [ ] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
-- [ ] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
+- [x] Step 1: Viết test route thất bại: 404 tin khác hội thoại; 403 member; 200 pin idempotent; chỉ GROUP chấp nhận. Assert status, envelope, error code và DTO; dùng MongoDB test cô lập.
+- [x] Step 2: Chạy pnpm -C backend exec vitest run src/modules/pin/pins.route.test.ts; xác nhận FAIL đúng lý do.
+- [x] Step 3: Nối Zod, auth/RBAC middleware, controller HTTP-only và DTO mapper; đăng ký route tại composition root, bỏ wiring cũ.
+- [x] Step 4: Chạy test, backend typecheck và route smoke; phải PASS. Commit API task.
 
 ### Task 3: Client contract
 
 **Files:** frontend/features/groups/api/pins.api.ts; test frontend/features/groups/api/pins.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter invalidates group info query and returns ordered pin DTOs; giả lập envelope và xác nhận ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/groups/api/pins.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Viết test adapter thất bại: adapter invalidates group info query and returns ordered pin DTOs; giả lập envelope và xác nhận ApiError.code.
+- [x] Step 2: Chạy pnpm -C frontend exec vitest run features/groups/api/pins.api.test.ts; xác nhận FAIL.
+- [x] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
+- [x] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
 
 ## Done when
 
 FR-13 và 5 Review Focus có bằng chứng test; route cũ không hoạt động song song; spec/AGENTS.md được đối chiếu.
+
+## Implementation notes and verification
+
+- `PinnedMessageDto` reuses the safe `MessageDto` mapper, so the pin API does not expose persistence fields.
+- The atomic group update enforces the three-pin ceiling under concurrent owner/admin requests. Pin targets must be visible to the actor in the same active group and must not predate the actor's current `joinedAt`; list results preserve newest-pin-first order while applying the same visibility rules.
+- Pinning a closed group is rejected; unpin remains available so an owner/admin can remove stale pins.
+- The frontend API adapter accepts a narrow group-info invalidation port because this repository has no group-info query hook to bind directly. It does not introduce UI state or JSX.
+- Verification: backend pin service and route suites, group creation/lifecycle routes, and membership role routes passed (44 tests); frontend pin adapter passed (4 tests); backend/frontend typechecks passed; changed frontend files passed lint. Initial red runs confirmed the service, route, and adapter tests failed before implementation.
+- Commits: `9c45bd9` domain rules/repository; `fd03d58` protected API routes; `5afc2a9` frontend adapter.
