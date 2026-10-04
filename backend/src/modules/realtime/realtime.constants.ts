@@ -17,6 +17,7 @@ export const REALTIME_MODEL_FIELDS = {
     PARTICIPANTS: "participants",
     PARTICIPANT_USER_ID: "userId",
     PARTICIPANT_DEL_FLAG: "delFlag",
+    PARTICIPANT_LEFT_AT: "leftAt",
 } as const
 
 /** Construct one private room name for a user. */

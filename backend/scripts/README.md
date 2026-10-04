@@ -13,6 +13,14 @@ The CLI uses the backend's `DNS_SERVERS` setting for MongoDB SRV resolution. Con
 
 The script uses a reserved `SYSTEM` ObjectId for unknown historical actors. Historical IP addresses remain `null`; it never invents a client IP. If timestamps are absent, it derives `createdAt` from the ObjectId timestamp and uses that value for `updatedAt`. That value is an estimate, not proof of the original write time.
 
+## Group notification preference transition
+
+`migrateNotificationPreferences.ts` is dry-run by default. It counts conversations with a current participant whose legacy `mutedUntil` is still in the future and whose `isMuted` preference has not been set. It does not write data without `--apply`.
+
+1. Verify a restorable database backup and run `pnpm -C backend exec tsx scripts/migrateNotificationPreferences.ts` against the intended database. Review the `eligibleConversationCount` output; run against an isolated database first.
+2. After reviewing the dry-run, run `pnpm -C backend exec tsx scripts/migrateNotificationPreferences.ts --apply`. The migration sets `isMuted: true` for eligible participants and records the system audit actor. It keeps `mutedUntil` intact for transition reads.
+3. Rerun the dry-run; the count should be zero. New unmute requests set `isMuted: false` and clear `mutedUntil`.
+
 ## Rollback
 
 Restore the verified backup for a full rollback of data and indexes. For an index-only rollback, recreate the previous unique indexes and Session TTL index **only after** checking that the current active and deleted records still satisfy their old uniqueness rules. Re-enabling TTL can permanently delete expired Session documents; a backup is the only way to recover documents already removed by TTL. The backfill itself adds fields and cannot recover unknown original actor, IP, or exact timestamps.

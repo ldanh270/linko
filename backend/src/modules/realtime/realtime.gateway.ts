@@ -66,9 +66,17 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
 
     /** Emit only the message DTO after its database transaction has committed. */
     async publishMessage(message: MessageDto): Promise<void> {
-        this.requireServer()
-            .to(conversationRoom(message[MESSAGE_FIELDS.CONVERSATION_ID]))
+        const server = this.requireServer()
+        const conversationId = message[MESSAGE_FIELDS.CONVERSATION_ID]
+        const senderId = message[MESSAGE_FIELDS.SENDER_ID]
+        server.to(conversationRoom(conversationId))
             .emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
+
+        const memberIds = await this.dependencies.repository.listCurrentMemberIds(conversationId)
+        for (const memberId of memberIds) {
+            if (memberId === senderId) continue
+            server.to(userRoom(memberId)).emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
+        }
     }
 
     /** Tell current room listeners to reload the conversation summary. */

@@ -59,6 +59,11 @@ const participantSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        /** Per-participant group toast preference; legacy expiry remains readable during migration. */
+        [PARTICIPANT_FIELDS.IS_MUTED]: {
+            type: Boolean,
+            default: false,
+        },
         [PARTICIPANT_FIELDS.MUTED_UNTIL]: {
             type: Date,
             default: null,

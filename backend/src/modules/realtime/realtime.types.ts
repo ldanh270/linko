@@ -13,6 +13,8 @@ export interface RealtimeRepository {
     isActiveUser(userId: string): Promise<boolean>
     /** Return whether an account is a current participant in an active conversation. */
     isCurrentMember(conversationId: string, userId: string): Promise<boolean>
+    /** Return current participant IDs for private message notification fan-out. */
+    listCurrentMemberIds(conversationId: string): Promise<readonly string[]>
 }
 
 /** Verify access credentials using the shared auth issuer and audience rules. */

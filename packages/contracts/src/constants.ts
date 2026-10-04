@@ -171,6 +171,22 @@ export const CONVERSATION_ROUTE_PATHS = {
     READ: `/:${CONVERSATION_PARAMS.ID}/read`,
 } as const
 
+/** Group notification preference route shared by authenticated clients and the backend. */
+export const NOTIFICATION_PREFERENCE_ROUTE_PATHS = {
+    BY_CONVERSATION: `/:${CONVERSATION_PARAMS.ID}/notification-preference`,
+} as const
+
+/** Safe notification preference DTO field names shared across API boundaries. */
+export const NOTIFICATION_PREFERENCE_FIELDS = {
+    CONVERSATION_ID: "conversationId",
+    IS_MUTED: "isMuted",
+} as const
+
+/** Request fields accepted when changing one participant's notification preference. */
+export const NOTIFICATION_PREFERENCE_REQUEST_FIELDS = {
+    IS_MUTED: NOTIFICATION_PREFERENCE_FIELDS.IS_MUTED,
+} as const
+
 /** Read-state DTO field names shared by conversation routes and API adapters. */
 export const READ_FIELDS = {
     CONVERSATION_ID: "conversationId",

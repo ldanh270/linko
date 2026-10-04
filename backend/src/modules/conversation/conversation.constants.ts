@@ -12,6 +12,7 @@ export const CONVERSATION_FIELDS = {
     SEEN_BY: "seenBy",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
+    DEL_FLAG: "delFlag",
 } as const
 
 /** MongoDB participant field names shared by group filters and DTO mapping. */
@@ -20,6 +21,7 @@ export const PARTICIPANT_FIELDS = {
     NICKNAME: "nickname",
     ROLE: "role",
     IS_ARCHIVED: "isArchived",
+    IS_MUTED: "isMuted",
     MUTED_UNTIL: "mutedUntil",
     CLEARED_HISTORY_AT: "clearedHistoryAt",
     JOINED_AT: "joinedAt",

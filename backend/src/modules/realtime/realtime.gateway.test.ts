@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest"
 import { UnauthorizedException } from "../../shared/errors/UnauthorizedException"
 import { AuthTokenService } from "../auth/auth.security"
 import { RealtimeGateway } from "./realtime.gateway"
+import { userRoom } from "./realtime.constants"
 import type { RealtimeRepository, RealtimeTokenVerifier } from "./realtime.types"
 
 const USER_ID = new mongoose.Types.ObjectId("507f1f77bcf86cd799439011")
@@ -69,6 +70,21 @@ describe("RealtimeGateway", () => {
         expect(transport.server.to).toHaveBeenCalledWith(expect.stringContaining(CONVERSATION_ID.toString()))
     })
 
+    it("should_fan_out_message_events_to_other_current_members_private_rooms", async () => {
+        const transport = createTransport()
+        const listCurrentMemberIds = vi.fn().mockResolvedValue([USER_ID.toString(), OTHER_USER_ID.toString()])
+        const gateway = createGateway({ repository: { listCurrentMemberIds } })
+        gateway.register(transport.server)
+        const message = createMessage()
+
+        await gateway.publishMessage(message)
+
+        expect(listCurrentMemberIds).toHaveBeenCalledWith(CONVERSATION_ID.toString())
+        expect(transport.server.to).toHaveBeenCalledWith(userRoom(OTHER_USER_ID.toString()))
+        expect(transport.server.to).not.toHaveBeenCalledWith(userRoom(USER_ID.toString()))
+        expect(transport.emit).toHaveBeenCalledWith(SOCKET_EVENTS.MESSAGE_CREATED, message)
+    })
+
     it("should_publish_a_conversation_invalidation_to_current_room_members", async () => {
         const transport = createTransport()
         const gateway = createGateway()
@@ -112,6 +128,7 @@ function createGateway(overrides: {
         repository: {
             isActiveUser: vi.fn().mockResolvedValue(true),
             isCurrentMember: vi.fn().mockResolvedValue(true),
+            listCurrentMemberIds: vi.fn().mockResolvedValue([]),
             ...overrides.repository,
         } as RealtimeRepository,
     })
