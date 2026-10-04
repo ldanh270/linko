@@ -62,6 +62,7 @@ import { ReadStateController } from "./modules/read/read.controller"
 import { MongooseReadStateRepository } from "./modules/read/read.repository"
 import { createReadStateRouter } from "./modules/read/read.route"
 import { ReadStateService } from "./modules/read/read.service"
+import type { RealtimeGateway } from "./modules/realtime/realtime.gateway"
 
 /** Collaborators and route groups wired by the composition root. */
 export interface AppDependencies {
@@ -69,6 +70,7 @@ export interface AppDependencies {
     privateRoutes: Router
     logger: ServerLogger
     authConfig: AuthRuntimeConfig
+    realtimeGateway?: RealtimeGateway
 }
 
 /** Compose the Express middleware boundary and existing route groups once. */
@@ -86,11 +88,14 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         avatarStorage: new R2GroupAvatarStorage(),
         avatarCleanupFailureRecorder: new LoggerGroupAvatarCleanupFailureRecorder(dependencies.logger),
+        ...(dependencies.realtimeGateway ? { conversationNotifier: dependencies.realtimeGateway } : {}),
     })
     const membershipService = new MembershipService({
         repository: new MongooseMembershipRepository(),
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
+        ...(dependencies.realtimeGateway ? { membershipRevoker: dependencies.realtimeGateway } : {}),
+        ...(dependencies.realtimeGateway ? { conversationNotifier: dependencies.realtimeGateway } : {}),
     })
     const invitationRepository = new MongooseInvitationRepository()
     const invitationService = new InvitationService({
@@ -107,6 +112,7 @@ export function createApp(dependencies: AppDependencies): Express {
         invitationRevoker: invitationRepository,
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
+        ...(dependencies.realtimeGateway ? { membershipRevoker: dependencies.realtimeGateway } : {}),
     })
     const attachmentService = new AttachmentService({
         repository: new MongooseAttachmentRepository(),
@@ -119,6 +125,7 @@ export function createApp(dependencies: AppDependencies): Express {
         clock: { now: () => new Date() },
         replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
         attachmentService,
+        ...(dependencies.realtimeGateway ? { messagePublisher: dependencies.realtimeGateway } : {}),
     })
     const readStateService = new ReadStateService({
         repository: new MongooseReadStateRepository(),

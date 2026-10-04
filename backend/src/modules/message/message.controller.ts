@@ -57,6 +57,7 @@ export class MessageController {
     /** Return a bounded chronological page visible to the current membership. */
     readonly list: MessageRequestHandler<EmptyRequestBody, CursorPage<MessageDto>> = async (request, response) => {
         const rawCursor = request.query[MESSAGE_QUERY_PARAMS.CURSOR]
+        const rawAfterMessageId = request.query[MESSAGE_QUERY_PARAMS.AFTER_MESSAGE_ID]
         const rawLimit = request.query[MESSAGE_QUERY_PARAMS.LIMIT]
         const page = await this.service.list({
             [MESSAGE_OPERATION_FIELDS.CONVERSATION_ID]: new mongoose.Types.ObjectId(
@@ -64,6 +65,7 @@ export class MessageController {
             ),
             [MESSAGE_OPERATION_FIELDS.USER_ID]: request.user._id,
             cursor: typeof rawCursor === "string" ? rawCursor : undefined,
+            afterMessageId: typeof rawAfterMessageId === "string" ? rawAfterMessageId : undefined,
             limit: Number(rawLimit ?? MESSAGE_LIMITS.DEFAULT_PAGE_SIZE),
         })
         response.status(HttpStatusCode.OK).json(ApiResponse.ok(page))

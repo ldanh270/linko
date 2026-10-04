@@ -132,7 +132,9 @@ export class ConversationService {
                 )
             }
         }
-        return toGroupDto(updatedGroup)
+        const group = toGroupDto(updatedGroup)
+        await this.dependencies.conversationNotifier?.publishConversationUpdate(group.id)
+        return group
     }
 
     private assertSlotReserved(reservation: GroupSlotReservation): void {

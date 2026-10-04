@@ -159,19 +159,41 @@ export class MongooseMessageRepository implements MessageRepository {
         input: ListMessageRecordsInput,
         transaction?: TransactionContext,
     ): Promise<ListMessageRecordsResult> {
+        const afterMessage = input.afterMessageId
+            ? await Message.findOne({
+                [MESSAGE_MODEL_FIELDS.ID]: input.afterMessageId,
+                [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: input.conversationId,
+                [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gte: input.joinedAt },
+                [MESSAGE_MODEL_FIELDS.DEL_FLAG]: false,
+            }).session(transaction?.session ?? null).exec()
+            : null
+        if (input.afterMessageId && !afterMessage) return { items: [], hasMore: false }
+
         const filter: QueryFilter<MessageType> = {
             [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: input.conversationId,
             [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gte: input.joinedAt },
         }
-        if (input.cursor) filter.$or = createCursorFilter(input.cursor)
+        if (afterMessage) {
+            filter.$or = createForwardCursorFilter({
+                createdAt: afterMessage[MESSAGE_MODEL_FIELDS.CREATED_AT],
+                id: afterMessage[MESSAGE_MODEL_FIELDS.ID].toString(),
+            })
+        } else if (input.cursor) {
+            filter.$or = createCursorFilter(input.cursor)
+        }
 
+        const isForwardPage = afterMessage !== null
         const query = Message.find(filter)
-            .sort({ [MESSAGE_MODEL_FIELDS.CREATED_AT]: -1, [MESSAGE_MODEL_FIELDS.ID]: -1 })
+            .sort({
+                [MESSAGE_MODEL_FIELDS.CREATED_AT]: isForwardPage ? 1 : -1,
+                [MESSAGE_MODEL_FIELDS.ID]: isForwardPage ? 1 : -1,
+            })
             .limit(input.limit + 1)
         if (transaction) query.session(transaction.session)
         const documents = await query.exec()
         const hasMore = documents.length > input.limit
-        const pageDocuments = documents.slice(0, input.limit).reverse()
+        const boundedDocuments = documents.slice(0, input.limit)
+        const pageDocuments = isForwardPage ? boundedDocuments : boundedDocuments.reverse()
         return { items: pageDocuments.map((document) => this.toMessageRecord(document)), hasMore }
     }
 
@@ -204,6 +226,16 @@ function createCursorFilter(cursor: MessageCursor): QueryFilter<MessageType>[] {
         {
             [MESSAGE_MODEL_FIELDS.CREATED_AT]: cursor.createdAt,
             [MESSAGE_MODEL_FIELDS.ID]: { $lt: cursor.id },
+        },
+    ]
+}
+
+function createForwardCursorFilter(cursor: MessageCursor): QueryFilter<MessageType>[] {
+    return [
+        { [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gt: cursor.createdAt } },
+        {
+            [MESSAGE_MODEL_FIELDS.CREATED_AT]: cursor.createdAt,
+            [MESSAGE_MODEL_FIELDS.ID]: { $gt: cursor.id },
         },
     ]
 }

@@ -3,6 +3,7 @@ import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import type { MEMBERSHIP_ADD_OUTCOMES } from "./membership.constants"
+import type { RealtimeConversationNotifier, RealtimeMembershipRevoker } from "../realtime/realtime.types"
 
 /** MongoDB ObjectId used by membership domain operations. */
 export type ObjectId = Types.ObjectId
@@ -121,6 +122,8 @@ export interface MembershipServiceDependencies {
     readonly repository: MembershipRepository
     readonly transactionRunner: MembershipTransactionRunner
     readonly clock: MembershipClock
+    readonly membershipRevoker?: RealtimeMembershipRevoker
+    readonly conversationNotifier?: RealtimeConversationNotifier
 }
 
 /** Public member result returned by membership endpoints. */

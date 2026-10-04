@@ -75,6 +75,10 @@ export class ConversationLifecycleService {
                 )
             }
         })
+        await this.dependencies.membershipRevoker?.revokeMember(
+            input.conversationId.toString(),
+            input.actorId.toString(),
+        )
     }
 
     /** Close a group and revoke every invitation link without deleting its history. */

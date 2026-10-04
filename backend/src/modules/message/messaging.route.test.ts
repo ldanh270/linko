@@ -131,6 +131,41 @@ describe("message HTTP routes", () => {
         expect(secondPage.body.data.nextCursor).toBeNull()
     })
 
+    it("should_recover_every_message_after_the_last_seen_id_without_prejoin_history", async () => {
+        const owner = await createAccount("reconnect-owner")
+        const lateMember = await createAccount("reconnect-member")
+        const conversationId = await createGroup(owner._id, CONVERSATION_STATUS.ACTIVE, [lateMember._id])
+        const joinedAt = new Date("2026-10-04T12:00:00.000Z")
+        await Conversation.updateOne(
+            { [CONVERSATION_FIELDS.ID]: conversationId, [`${CONVERSATION_FIELDS.PARTICIPANTS}.${PARTICIPANT_FIELDS.USER_ID}`]: lateMember._id },
+            { $set: { [`${CONVERSATION_FIELDS.PARTICIPANTS}.$.${PARTICIPANT_FIELDS.JOINED_AT}`]: joinedAt } },
+        )
+        const firstId = new mongoose.Types.ObjectId("507f1f77bcf86cd799439111")
+        const secondId = new mongoose.Types.ObjectId("507f1f77bcf86cd799439112")
+        const thirdId = new mongoose.Types.ObjectId("507f1f77bcf86cd799439113")
+        await insertMessage(new mongoose.Types.ObjectId("507f1f77bcf86cd799439110"), conversationId, owner._id, "pre-join", "before-join", new Date(joinedAt.getTime() - 1))
+        await insertMessage(firstId, conversationId, owner._id, "already received", "first", joinedAt)
+        await insertMessage(secondId, conversationId, owner._id, "missed one", "second", joinedAt)
+        await insertMessage(thirdId, conversationId, owner._id, "missed two", "third", joinedAt)
+        const app = createTestApp()
+
+        const firstSync = await request(app)
+            .get(messagePath(conversationId.toString(), { afterMessageId: firstId.toString(), limit: "1" }))
+            .set("Authorization", `Bearer ${lateMember.token}`)
+        const secondSync = await request(app)
+            .get(messagePath(conversationId.toString(), {
+                afterMessageId: firstSync.body.data.nextCursor as string,
+                limit: "1",
+            }))
+            .set("Authorization", `Bearer ${lateMember.token}`)
+
+        expect(firstSync.status).toBe(200)
+        expect(firstSync.body.data.items.map((message: { id: string }) => message.id)).toEqual([secondId.toString()])
+        expect(firstSync.body.data.nextCursor).toBe(secondId.toString())
+        expect(secondSync.body.data.items.map((message: { id: string }) => message.id)).toEqual([thirdId.toString()])
+        expect(JSON.stringify(firstSync.body)).not.toContain("pre-join")
+    })
+
     it("should_require_friendship_when_sending_by_an_existing_direct_conversation_id", async () => {
         const sender = await createAccount("direct-sender")
         const peer = await createAccount("direct-peer")
@@ -316,6 +351,7 @@ function messagePath(
     const parameters = new URLSearchParams()
     if (query.limit) parameters.set(MESSAGE_QUERY_PARAMS.LIMIT, query.limit)
     if (query.cursor) parameters.set(MESSAGE_QUERY_PARAMS.CURSOR, query.cursor)
+    if (query.afterMessageId) parameters.set(MESSAGE_QUERY_PARAMS.AFTER_MESSAGE_ID, query.afterMessageId)
     const search = parameters.toString()
     return `${API_ROUTES.MESSAGES}${path}${search ? `?${search}` : ""}`
 }

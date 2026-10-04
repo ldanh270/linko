@@ -13,6 +13,9 @@ import { connectDB } from "./libs/database"
 import { ApiResponse } from "./shared/http/ApiResponse"
 import { logger } from "./shared/logger/logger"
 import { attachSocket } from "./socket/socket"
+import { RealtimeGateway } from "./modules/realtime/realtime.gateway"
+import { MongooseRealtimeRepository } from "./modules/realtime/realtime.repository"
+import { AuthTokenService } from "./modules/auth/auth.security"
 
 const publicRoutes = express.Router()
 publicRoutes.get("/", (_request, response) => response.json(ApiResponse.ok({ status: "ok" })))
@@ -22,9 +25,13 @@ privateRoutes.use(API_ROUTES.USERS, userRoutes)
 privateRoutes.use(API_ROUTES.FRIENDS, friendRoutes)
 
 const authConfig = loadAuthConfig()
-const app = createApp({ publicRoutes, privateRoutes, logger, authConfig })
+const realtimeGateway = new RealtimeGateway({
+    tokenVerifier: new AuthTokenService(authConfig.accessTokenSecret),
+    repository: new MongooseRealtimeRepository(),
+})
+const app = createApp({ publicRoutes, privateRoutes, logger, authConfig, realtimeGateway })
 const server = createServer(app)
-attachSocket(server, authConfig.clientOrigin)
+attachSocket(server, authConfig.clientOrigin, realtimeGateway)
 
 const port = Number(process.env.PORT ?? 5000)
 await connectDB()

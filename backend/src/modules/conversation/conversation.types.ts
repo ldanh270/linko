@@ -6,6 +6,7 @@ import type {
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
+import type { RealtimeConversationNotifier } from "../realtime/realtime.types"
 
 /** A MongoDB ObjectId used for persistence-facing group operations. */
 export type ObjectId = Types.ObjectId
@@ -114,6 +115,7 @@ export interface ConversationServiceDependencies {
     readonly transactionRunner: ConversationTransactionRunner
     readonly avatarStorage: GroupAvatarStorage
     readonly avatarCleanupFailureRecorder: GroupAvatarCleanupFailureRecorder
+    readonly conversationNotifier?: RealtimeConversationNotifier
 }
 
 /** Public response DTOs shared with the HTTP adapter. */

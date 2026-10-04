@@ -39,10 +39,11 @@ export const listMessagesSchema = zod.object({
     }),
     query: zod.object({
         [MESSAGE_QUERY_PARAMS.CURSOR]: zod.string().max(MESSAGE_LIMITS.MAX_CURSOR_LENGTH).optional(),
+        [MESSAGE_QUERY_PARAMS.AFTER_MESSAGE_ID]: zod.string().regex(REGEX.MONGO_ID).optional(),
         [MESSAGE_QUERY_PARAMS.LIMIT]: zod.coerce.number()
             .int()
             .min(1)
             .max(MESSAGE_LIMITS.MAX_PAGE_SIZE)
             .default(MESSAGE_LIMITS.DEFAULT_PAGE_SIZE),
-    }),
+    }).refine((query) => !(query.cursor && query.afterMessageId)),
 })

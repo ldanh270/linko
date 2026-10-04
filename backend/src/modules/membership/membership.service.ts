@@ -81,7 +81,7 @@ export class MembershipService {
 
     /** Change a current member's role after rechecking actor and target permissions in-transaction. */
     async changeRole(input: ChangeRoleInput): Promise<MemberDto> {
-        return this.dependencies.transactionRunner.run(async (transaction) => {
+        const member = await this.dependencies.transactionRunner.run(async (transaction) => {
             const group = await this.getGroup(input.conversationId, transaction)
             this.assertGroupOpen(group)
             const actor = this.getMember(group, input.actorId)
@@ -95,6 +95,8 @@ export class MembershipService {
             if (!updatedMember) throw new ConflictException(ERROR_CODES.CONFLICT, MEMBERSHIP_MESSAGES.MEMBERSHIP_CHANGED)
             return toMemberDto(updatedMember)
         })
+        await this.dependencies.conversationNotifier?.publishConversationUpdate(input.conversationId.toString())
+        return member
     }
 
     /** Remove a non-owner member after validating current group roles transactionally. */
@@ -113,6 +115,10 @@ export class MembershipService {
             }, transaction)
             if (!removed) throw new ConflictException(ERROR_CODES.CONFLICT, MEMBERSHIP_MESSAGES.MEMBERSHIP_CHANGED)
         })
+        await this.dependencies.membershipRevoker?.revokeMember(
+            input.conversationId.toString(),
+            input.targetUserId.toString(),
+        )
     }
 
     /** Transfer group ownership and participant roles in one transaction. */

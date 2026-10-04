@@ -1,5 +1,6 @@
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import type { ObjectId, GroupRecord } from "./conversation.types"
+import type { RealtimeMembershipRevoker } from "../realtime/realtime.types"
 
 /** Authenticated actor and group identifiers for a self-leave operation. */
 export interface LeaveGroupInput {
@@ -59,6 +60,7 @@ export interface ConversationLifecycleServiceDependencies {
     readonly invitationRevoker: ConversationLifecycleInvitationRevoker
     readonly transactionRunner: ConversationLifecycleTransactionRunner
     readonly clock: ConversationLifecycleClock
+    readonly membershipRevoker?: RealtimeMembershipRevoker
 }
 
 /** Execute lifecycle writes atomically across conversation and invitation documents. */
