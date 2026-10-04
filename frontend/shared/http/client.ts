@@ -25,6 +25,11 @@ export class ApiClient {
     return this.requestOnce({ path, body, headers, ...options }, false)
   }
 
+  /** Request a binary response with the same authorization, retry, and error rules as JSON calls. */
+  async requestBlob({ path, headers, ...requestOptions }: Omit<RequestOptions, "body">): Promise<Blob> {
+    return this.requestBlobOnce({ path, headers, ...requestOptions }, false)
+  }
+
   private async requestOnce<T>(options: RequestOptions, hasRetried: boolean): Promise<T> {
     const { path, body, headers, ...requestOptions } = options
     const requestHeaders = new Headers(headers)
@@ -54,6 +59,33 @@ export class ApiClient {
     }
     if (!isSuccessEnvelope<T>(payload)) throw new ApiError(HTTP_ERROR.INVALID_RESPONSE, HTTP_ERROR.GENERIC_MESSAGE, response.status)
     return payload.data
+  }
+
+  private async requestBlobOnce(options: Omit<RequestOptions, "body">, hasRetried: boolean): Promise<Blob> {
+    const { path, headers, ...requestOptions } = options
+    const requestHeaders = new Headers(headers)
+    const authHeaders = await this.getAuthHeaders?.()
+    new Headers(authHeaders).forEach((value, key) => requestHeaders.set(key, value))
+    let response: Response
+    try {
+      response = await fetch(`${this.baseUrl}${path}`, {
+        ...requestOptions,
+        headers: requestHeaders,
+        credentials: requestOptions.credentials ?? "include",
+      })
+    } catch (error) {
+      if (requestOptions.signal?.aborted) throw error
+      throw new ApiError(HTTP_ERROR.NETWORK, HTTP_ERROR.GENERIC_MESSAGE, 0)
+    }
+    if (!response.ok) {
+      const payload: unknown = await response.json().catch(() => null)
+      const error = ApiError.fromResponse(response, payload)
+      if (response.status === 401 && !hasRetried && await this.recoverUnauthorized?.()) {
+        return this.requestBlobOnce(options, true)
+      }
+      throw error
+    }
+    return response.blob()
   }
 }
 

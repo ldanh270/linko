@@ -42,4 +42,37 @@ describe("ApiClient", () => {
 
     await expect(client.request({ path: "/offline" })).rejects.toMatchObject({ code: "NETWORK_ERROR", message: "Something went wrong", status: 0 })
   })
+
+  it("returns an authenticated binary response and forwards cancellation", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("private bytes", {
+      status: 200,
+      headers: { "Content-Type": "application/pdf" },
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    const client = new ApiClient("/api", () => ({ Authorization: "Bearer attachment-token" }))
+    const controller = new AbortController()
+
+    const response = await client.requestBlob({ path: "/messages/file", signal: controller.signal })
+
+    expect(await response.text()).toBe("private bytes")
+    expect(response.type).toBe("application/pdf")
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/messages/file", expect.objectContaining({
+      headers: expect.any(Headers),
+      credentials: "include",
+      signal: controller.signal,
+    }))
+    expect((fetchMock.mock.calls[0][1].headers as Headers).get("Authorization")).toBe("Bearer attachment-token")
+  })
+
+  it("preserves abort errors for navigation-cancelled binary downloads", async () => {
+    const abortController = new AbortController()
+    abortController.abort()
+    const abortError = new DOMException("The operation was aborted", "AbortError")
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(abortError))
+    const client = new ApiClient()
+
+    await expect(client.requestBlob({ path: "/messages/file", signal: abortController.signal }))
+      .rejects.toBe(abortError)
+  })
 })

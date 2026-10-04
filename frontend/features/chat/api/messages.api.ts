@@ -59,7 +59,7 @@ export function createMessageMultipartBody(input: SendMessageRequest): FormData 
     const body = new FormData()
     body.set(MESSAGE_FIELDS.CONVERSATION_ID, input.conversationId)
     body.set(MESSAGE_FIELDS.CLIENT_MESSAGE_ID, input.clientMessageId)
-    body.set(MESSAGE_FIELDS.CONTENT, input.content)
+    if (input.content !== undefined) body.set(MESSAGE_FIELDS.CONTENT, input.content)
     if (input.replyTo !== undefined) body.set(MESSAGE_FIELDS.REPLY_TO, input.replyTo)
     if (input.mentions !== undefined) body.set(MESSAGE_FIELDS.MENTIONS, JSON.stringify(input.mentions))
     return body
