@@ -65,11 +65,13 @@
 
 **Files:** frontend/features/chat/api/attachments.api.ts; test frontend/features/chat/api/attachments.api.test.ts.
 
-- [ ] Step 1: Viết test adapter thất bại: adapter streams authenticated blob, revokes object URL, abort handles navigation; giả lập envelope và xác nhận ApiError.code.
-- [ ] Step 2: Chạy pnpm -C frontend exec vitest run features/chat/api/attachments.api.test.ts; xác nhận FAIL.
-- [ ] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
-- [ ] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+- [x] Step 1: Viết test adapter thất bại: adapter streams authenticated blob, revokes object URL, abort handles navigation; giả lập envelope và xác nhận ApiError.code.
+- [x] Step 2: Chạy pnpm -C frontend exec vitest run features/chat/api/attachments.api.test.ts; xác nhận FAIL.
+- [x] Step 3: Viết adapter functions đã nêu, dùng shared HTTP client/constants/DTO package; không thêm JSX hoặc state.
+- [x] Step 4: Chạy test, frontend typecheck/lint; phải PASS. Commit adapter task.
+
+**Task 3 evidence:** the initial red run failed because `attachments.api` did not exist. The new adapter and shared binary transport tests passed (10/10), the full frontend suite passed (57/57), and frontend typecheck and changed-file lint passed. Adapter commit: `4d5e705`.
 
 ## Done when
 
-FR-10 và 5 Review Focus có bằng chứng test; route cũ không hoạt động song song; spec/AGENTS.md được đối chiếu.
+FR-10 and all five Review Focus cases have test evidence: signature mismatch, sixth file, Mongo write compensation, removed member, and pre-join history. The active composition root mounts the module router once; the legacy router is not mounted. Spec and AGENTS.md were checked. **F10 complete.**
