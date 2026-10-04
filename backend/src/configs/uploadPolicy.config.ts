@@ -1,5 +1,7 @@
-export const MAX_UPLOAD_FILE_SIZE_BYTES = 10 * 1024 * 1024
-export const MAX_MESSAGE_ATTACHMENT_COUNT = 5
+import { ATTACHMENT_LIMITS } from "@linko/contracts"
+
+export const MAX_UPLOAD_FILE_SIZE_BYTES = ATTACHMENT_LIMITS.MAX_FILE_SIZE_BYTES
+export const MAX_MESSAGE_ATTACHMENT_COUNT = ATTACHMENT_LIMITS.MAX_FILE_COUNT
 
 /** Multer limit codes mapped at HTTP upload boundaries. */
 export const MULTER_ERROR_CODES = {

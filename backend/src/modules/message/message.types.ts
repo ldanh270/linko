@@ -2,6 +2,7 @@ import type { ConversationStatus, ConversationType, MessageDto } from "@linko/co
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
+import type { AttachmentFile, MessageAttachmentRecord, MessageAttachmentPort, StoredAttachment } from "../attachment/attachment.types"
 import type { ReplyMentionValidator } from "./replyMention.types"
 
 /** MongoDB ObjectId used by persistence-facing message operations. */
@@ -16,6 +17,7 @@ export interface MessageRecord {
     readonly content: string | null
     readonly replyToId: ObjectId | null
     readonly mentions: readonly ObjectId[]
+    readonly attachments: readonly MessageAttachmentRecord[]
     readonly createdAt: Date
     readonly updatedAt: Date
 }
@@ -34,9 +36,10 @@ export interface CreateMessageRecord {
     readonly conversationId: ObjectId
     readonly senderId: ObjectId
     readonly clientMessageId: string
-    readonly content: string
+    readonly content: string | null
     readonly replyToId: ObjectId | null
     readonly mentions: readonly ObjectId[]
+    readonly attachments: readonly StoredAttachment[]
     readonly createdAt: Date
 }
 
@@ -103,6 +106,7 @@ export interface MessageServiceDependencies {
     readonly transactionRunner: MessageTransactionRunner
     readonly clock: MessageClock
     readonly replyMentionValidator: ReplyMentionValidator
+    readonly attachmentService: MessageAttachmentPort
 }
 
 /** Authenticated message command with optional reply and mention references. */
@@ -110,9 +114,10 @@ export interface SendMessageInput {
     readonly conversationId: ObjectId
     readonly senderId: ObjectId
     readonly clientMessageId: string
-    readonly content: string
+    readonly content?: string
     readonly replyToId?: ObjectId | null
     readonly mentionIds?: readonly ObjectId[]
+    readonly attachments?: readonly AttachmentFile[]
 }
 
 /** Authenticated bounded conversation history query. */

@@ -1,4 +1,4 @@
-import { CURSOR_PAGE_FIELDS, MESSAGE_FIELDS } from "./constants"
+import { CURSOR_PAGE_FIELDS, MESSAGE_ATTACHMENT_FIELDS, MESSAGE_FIELDS } from "./constants"
 import type { EntityId } from "./envelope"
 
 /** Message data safe to return from authenticated conversation endpoints. */
@@ -10,8 +10,18 @@ export interface MessageDto {
     readonly [MESSAGE_FIELDS.CONTENT]: string | null
     readonly [MESSAGE_FIELDS.REPLY_TO]: EntityId | null
     readonly [MESSAGE_FIELDS.MENTIONS]: readonly EntityId[]
+    readonly [MESSAGE_FIELDS.ATTACHMENTS]: readonly MessageAttachmentDto[]
     readonly [MESSAGE_FIELDS.CREATED_AT]: string
     readonly [MESSAGE_FIELDS.UPDATED_AT]: string
+}
+
+/** Attachment metadata returned without an internal object key. */
+export interface MessageAttachmentDto {
+    readonly [MESSAGE_ATTACHMENT_FIELDS.ID]: EntityId
+    readonly [MESSAGE_ATTACHMENT_FIELDS.URL]: string | null
+    readonly [MESSAGE_ATTACHMENT_FIELDS.NAME]: string | null
+    readonly [MESSAGE_ATTACHMENT_FIELDS.CONTENT_TYPE]: string | null
+    readonly [MESSAGE_ATTACHMENT_FIELDS.SIZE]: number | null
 }
 
 /** Message request accepted by the authenticated send endpoint. */

@@ -8,6 +8,7 @@ import Conversation, { type ConversationType } from "../../models/Conversation"
 import Friendship, { FRIENDSHIP_FIELDS } from "../../models/Friendship"
 import Message, { type MessageType } from "../../models/Message"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
+import { ATTACHMENT_FIELDS } from "../attachment/attachment.constants"
 import {
     CONVERSATION_FIELDS as MESSAGE_CONVERSATION_FIELDS,
     LAST_MESSAGE_FIELDS as MESSAGE_LAST_MESSAGE_FIELDS,
@@ -109,6 +110,12 @@ export class MongooseMessageRepository implements MessageRepository {
                 [MESSAGE_MODEL_FIELDS.CONTENT]: input.content,
                 [MESSAGE_MODEL_FIELDS.REPLY_TO]: input.replyToId,
                 [MESSAGE_MODEL_FIELDS.MENTIONS]: [...input.mentions],
+                [MESSAGE_MODEL_FIELDS.ATTACHMENTS]: input.attachments.map((attachment) => ({
+                    [ATTACHMENT_FIELDS.ID]: attachment.id,
+                    [ATTACHMENT_FIELDS.NAME]: attachment.name,
+                    [ATTACHMENT_FIELDS.CONTENT_TYPE]: attachment.contentType,
+                    [ATTACHMENT_FIELDS.SIZE]: attachment.size,
+                })),
                 [MESSAGE_MODEL_FIELDS.CREATED_AT]: input.createdAt,
                 [MESSAGE_MODEL_FIELDS.UPDATED_AT]: input.createdAt,
             }], { session: transaction.session })
@@ -177,6 +184,14 @@ export class MongooseMessageRepository implements MessageRepository {
             content: message[MESSAGE_MODEL_FIELDS.CONTENT] ?? null,
             replyToId: message[MESSAGE_MODEL_FIELDS.REPLY_TO] ?? null,
             mentions: message[MESSAGE_MODEL_FIELDS.MENTIONS] ?? [],
+            attachments: (message[MESSAGE_MODEL_FIELDS.ATTACHMENTS] ?? []).map((attachment) => ({
+                subdocumentId: attachment[ATTACHMENT_FIELDS.SUBDOCUMENT_ID],
+                id: attachment[ATTACHMENT_FIELDS.ID] ?? "",
+                url: attachment[ATTACHMENT_FIELDS.URL] ?? null,
+                name: attachment[ATTACHMENT_FIELDS.NAME] ?? null,
+                contentType: attachment[ATTACHMENT_FIELDS.CONTENT_TYPE] ?? null,
+                size: attachment[ATTACHMENT_FIELDS.SIZE] ?? null,
+            })),
             createdAt: message[MESSAGE_MODEL_FIELDS.CREATED_AT],
             updatedAt: message[MESSAGE_MODEL_FIELDS.UPDATED_AT],
         }

@@ -163,6 +163,7 @@ describe("ReadStateService", () => {
             transactionRunner: { run: withTransaction },
             clock: { now: () => READ_CLOCK },
             replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
+            attachmentService: { store: async () => [], cleanup: async () => undefined },
         })
 
         await messageService.send({

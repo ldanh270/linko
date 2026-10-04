@@ -39,6 +39,7 @@ export const ERROR_CODES = {
     GROUP_CLOSED: "GROUP_CLOSED",
     FRIENDSHIP_REQUIRED: "FRIENDSHIP_REQUIRED",
     INVALID_REPLY: "INVALID_REPLY",
+    ATTACHMENT_NOT_FOUND: "ATTACHMENT_NOT_FOUND",
 } as const
 
 /** Conversation types stored by the persistence layer. */
@@ -184,8 +185,18 @@ export const MESSAGE_FIELDS = {
     CONTENT: "content",
     REPLY_TO: "replyTo",
     MENTIONS: "mentions",
+    ATTACHMENTS: "attachments",
     CREATED_AT: "createdAt",
     UPDATED_AT: "updatedAt",
+} as const
+
+/** Public attachment DTO field names shared by message APIs and clients. */
+export const MESSAGE_ATTACHMENT_FIELDS = {
+    ID: "id",
+    URL: "url",
+    NAME: "name",
+    CONTENT_TYPE: "contentType",
+    SIZE: "size",
 } as const
 
 /** Message API route suffixes mounted below `/api/messages`. */
@@ -202,6 +213,23 @@ export const MESSAGE_LIMITS = {
     DEFAULT_PAGE_SIZE: 30,
     MAX_PAGE_SIZE: 100,
     MAX_CURSOR_LENGTH: 256,
+} as const
+
+/** Count and byte-size limits shared by message attachment clients and servers. */
+export const ATTACHMENT_LIMITS = {
+    MAX_FILE_COUNT: 5,
+    MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024,
+} as const
+
+/** Route parameters used by the protected message attachment endpoint. */
+export const ATTACHMENT_PARAMS = {
+    MESSAGE_ID: "messageId",
+    ATTACHMENT_ID: "attachmentId",
+} as const
+
+/** Protected attachment route suffix mounted below `/api/messages`. */
+export const ATTACHMENT_ROUTE_PATHS = {
+    DOWNLOAD: `/:${ATTACHMENT_PARAMS.MESSAGE_ID}/attachments/:${ATTACHMENT_PARAMS.ATTACHMENT_ID}`,
 } as const
 
 /** Invitation request paths shared by conversation routes and API adapters. */

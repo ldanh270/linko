@@ -1,5 +1,6 @@
 import { MESSAGE_FIELDS, type MessageDto } from "@linko/contracts"
 
+import { toAttachmentDto } from "../attachment/attachment.dto"
 import type { MessageRecord } from "./message.types"
 
 /** Map persistence-independent message fields to the public API contract. */
@@ -12,6 +13,9 @@ export function toMessageDto(message: MessageRecord): MessageDto {
         [MESSAGE_FIELDS.CONTENT]: message.content,
         [MESSAGE_FIELDS.REPLY_TO]: message.replyToId?.toString() ?? null,
         [MESSAGE_FIELDS.MENTIONS]: message.mentions.map((mention) => mention.toString()),
+        [MESSAGE_FIELDS.ATTACHMENTS]: message.attachments.map((attachment) =>
+            toAttachmentDto(message.id.toString(), attachment),
+        ),
         [MESSAGE_FIELDS.CREATED_AT]: message.createdAt.toISOString(),
         [MESSAGE_FIELDS.UPDATED_AT]: message.updatedAt.toISOString(),
     }

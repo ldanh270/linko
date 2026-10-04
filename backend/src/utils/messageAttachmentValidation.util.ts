@@ -9,6 +9,7 @@ import { isValidOpenXmlPackage } from "#/utils/openXmlValidation.util"
 import { fileTypeFromBuffer } from "file-type"
 import { extname } from "node:path"
 
+/** Identify client-caused attachment validation failures before business translation. */
 export class InvalidMessageAttachmentError extends Error {}
 
 const invalidAttachment = (message: string) => new InvalidMessageAttachmentError(message)
@@ -61,7 +62,13 @@ const validateBinaryAttachment = async (
     }
 }
 
-export const validateMessageFile = async (file: Express.Multer.File) => {
+/** Validate the declared type, filename, size, and actual bytes of one attachment. */
+export const validateMessageFile = async (file: {
+    readonly originalname: string
+    readonly mimetype: string
+    readonly buffer: Buffer
+    readonly size: number
+}) => {
     if (!file.buffer?.length) throw invalidAttachment("Empty attachments are not allowed")
     if (file.size > MAX_UPLOAD_FILE_SIZE_BYTES || file.buffer.length > MAX_UPLOAD_FILE_SIZE_BYTES) {
         const maxSizeMiB = MAX_UPLOAD_FILE_SIZE_BYTES / 1024 / 1024
@@ -90,6 +97,7 @@ export const validateMessageFile = async (file: Express.Multer.File) => {
     }
 }
 
+/** Remove path segments and control characters from a user-supplied filename. */
 export const sanitizeAttachmentFilename = (originalname: string) => {
     const basename = originalname.replace(/\\/g, "/").split("/").pop() ?? "attachment"
     const safe = basename

@@ -137,6 +137,7 @@ function createMessageService(): MessageService {
         transactionRunner: { run: withTransaction },
         clock: { now: () => MESSAGE_TIME },
         replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
+        attachmentService: { store: async () => [], cleanup: async () => undefined },
     })
 }
 

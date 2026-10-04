@@ -9,7 +9,7 @@ export const MESSAGE_MODEL_FIELDS = {
     CONTENT: "content",
     REPLY_TO: "replyTo",
     MENTIONS: "mentions",
-    ATTACHMENTS: "attachments",
+    ATTACHMENTS: MESSAGE_FIELDS.ATTACHMENTS,
     REACTIONS: "reactions",
     HIDDEN_BY: "hiddenBy",
     CREATED_AT: "createdAt",

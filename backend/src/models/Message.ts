@@ -2,6 +2,7 @@ import mongoose, { InferSchemaType } from "mongoose"
 import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 import { MESSAGE_INDEX_NAMES, MESSAGE_MODEL_FIELDS } from "#/modules/message/message.constants"
+import { ATTACHMENT_FIELDS } from "#/modules/attachment/attachment.constants"
 import { MESSAGE_LIMITS } from "@linko/contracts"
 
 const messageSchema = new mongoose.Schema(
@@ -52,22 +53,22 @@ const messageSchema = new mongoose.Schema(
                 },
             },
         ],
-        attachments: [
+        [MESSAGE_MODEL_FIELDS.ATTACHMENTS]: [
             {
                 // Historical public URL; new R2 attachments use the protected application route.
-                url: {
+                [ATTACHMENT_FIELDS.URL]: {
                     type: String,
                 },
-                id: {
+                [ATTACHMENT_FIELDS.ID]: {
                     type: String,
                 },
-                name: {
+                [ATTACHMENT_FIELDS.NAME]: {
                     type: String,
                 },
-                contentType: {
+                [ATTACHMENT_FIELDS.CONTENT_TYPE]: {
                     type: String,
                 },
-                size: {
+                [ATTACHMENT_FIELDS.SIZE]: {
                     type: Number,
                 },
             },

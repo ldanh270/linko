@@ -48,6 +48,10 @@ import { createMessageRouter } from "./modules/message/message.route"
 import { MessageService } from "./modules/message/message.service"
 import { MongooseReplyMentionRepository } from "./modules/message/replyMention.repository"
 import { ReplyMentionService } from "./modules/message/replyMention.service"
+import { MongooseAttachmentRepository } from "./modules/attachment/attachment.repository"
+import { AttachmentService } from "./modules/attachment/attachment.service"
+import { LoggerAttachmentCleanupFailureRecorder } from "./modules/attachment/attachment-cleanup.recorder"
+import { R2PrivateAttachmentStorage } from "./modules/attachment/private-attachment.storage"
 import { InboxController } from "./modules/inbox/inbox.controller"
 import { MongooseInboxRepository } from "./modules/inbox/inbox.repository"
 import { createInboxRouter } from "./modules/inbox/inbox.route"
@@ -102,11 +106,17 @@ export function createApp(dependencies: AppDependencies): Express {
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
     })
+    const attachmentService = new AttachmentService({
+        repository: new MongooseAttachmentRepository(),
+        storage: new R2PrivateAttachmentStorage(),
+        cleanupFailureRecorder: new LoggerAttachmentCleanupFailureRecorder(dependencies.logger),
+    })
     const messageService = new MessageService({
         repository: new MongooseMessageRepository(),
         transactionRunner: { run: withTransaction },
         clock: { now: () => new Date() },
         replyMentionValidator: new ReplyMentionService({ repository: new MongooseReplyMentionRepository() }),
+        attachmentService,
     })
     const readStateService = new ReadStateService({
         repository: new MongooseReadStateRepository(),

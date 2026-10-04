@@ -12,6 +12,7 @@ import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import { NotFoundException } from "../../shared/errors/NotFoundException"
 import { ValidationException } from "../../shared/errors/ValidationException"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
+import type { StoredAttachment } from "../attachment/attachment.types"
 import { MESSAGE_CURSOR_ID_PATTERN, MESSAGE_ERROR_MESSAGES } from "./message.constants"
 import { MessageDuplicateKeyError } from "./MessageDuplicateKeyError"
 import { toMessageDto } from "./message.mapper"
@@ -23,6 +24,17 @@ import type {
     MessageServiceDependencies,
     SendMessageInput,
 } from "./message.types"
+import type { ValidatedMessageContext } from "./replyMention.types"
+
+type SendValidation = {
+    readonly existing: MessageRecord | null
+    readonly messageContext: ValidatedMessageContext | null
+}
+
+type MessageWriteResult = {
+    readonly message: MessageRecord
+    readonly created: boolean
+}
 
 /** Enforce conversation access, idempotent message writes, and history cursors.
  *
@@ -34,62 +46,116 @@ export class MessageService {
 
     /** Store one message and update inbox summaries atomically.
      *
-     * Retries with the same sender-scoped client ID return the original DTO.
+     * Retries with the same sender-scoped client ID return the original DTO. Private files are
+     * uploaded only after a membership preflight and compensated if the message transaction fails.
      *
-     * @param input - Authenticated sender, conversation, idempotency key, and content.
+     * @param input - Authenticated sender, conversation, idempotency key, text, and optional files.
      * @returns The persisted safe message DTO.
      * @throws {ForbiddenException} When the sender is not a current participant.
      * @throws {ConflictException} When the group is closed.
      * @throws {ValidationException} When content or the idempotency key is invalid.
      */
     async send(input: SendMessageInput): Promise<MessageDto> {
-        const content = validateContent(input.content)
+        const attachments = input.attachments ?? []
+        const content = validateContent(input.content, attachments.length > 0)
         validateClientMessageId(input.clientMessageId)
 
-        try {
-            return await this.dependencies.transactionRunner.run(async (transaction) => {
-                const access = await this.requireCurrentMember(input.conversationId, input.senderId, transaction)
-                const existing = await this.dependencies.repository.findByClientMessageId(
-                    input.conversationId,
-                    input.senderId,
-                    input.clientMessageId,
-                    transaction,
-                )
-                if (existing) return toMessageDto(existing)
+        return attachments.length === 0
+            ? this.sendWithoutAttachments(input, content)
+            : this.sendWithAttachments(input, content, attachments)
+    }
 
-                await this.assertCanSend(access, input.senderId, transaction)
-                const messageContext = await this.dependencies.replyMentionValidator.validate({
-                    conversationId: input.conversationId,
-                    senderId: input.senderId,
-                    replyToId: input.replyToId ?? null,
-                    mentionIds: input.mentionIds ?? [],
-                    transaction,
-                })
-                const now = this.dependencies.clock.now()
-                const message = await this.dependencies.repository.createMessage({
-                    conversationId: input.conversationId,
-                    senderId: input.senderId,
-                    clientMessageId: input.clientMessageId,
-                    content,
-                    replyToId: messageContext.replyToId,
-                    mentions: messageContext.mentions,
-                    createdAt: now,
-                }, transaction)
-                await this.dependencies.repository.updateConversationAfterMessage(message, transaction)
-                return toMessageDto(message)
-            })
-        } catch (error) {
-            if (!(error instanceof MessageDuplicateKeyError)) throw error
-            const access = await this.requireCurrentMember(input.conversationId, input.senderId)
-            const existing = await this.dependencies.repository.findByClientMessageId(
-                input.conversationId,
-                input.senderId,
-                input.clientMessageId,
+    private async sendWithoutAttachments(input: SendMessageInput, content: string | null): Promise<MessageDto> {
+        try {
+            const result = await this.dependencies.transactionRunner.run((transaction) =>
+                this.persistMessage(input, content, [], transaction),
             )
-            if (existing) return toMessageDto(existing)
-            await this.assertCanSend(access, input.senderId)
-            throw error
+            return toMessageDto(result.message)
+        } catch (error) {
+            return this.recoverDuplicateMessage(input, error)
         }
+    }
+
+    private async sendWithAttachments(
+        input: SendMessageInput,
+        content: string | null,
+        files: NonNullable<SendMessageInput["attachments"]>,
+    ): Promise<MessageDto> {
+        const preflight = await this.dependencies.transactionRunner.run((transaction) =>
+            this.validateSend(input, transaction),
+        )
+        if (preflight.existing) return toMessageDto(preflight.existing)
+
+        const attachments = await this.dependencies.attachmentService.store({ userId: input.senderId, files })
+        try {
+            const result = await this.dependencies.transactionRunner.run((transaction) =>
+                this.persistMessage(input, content, attachments, transaction),
+            )
+            if (!result.created) await this.dependencies.attachmentService.cleanup(attachments)
+            return toMessageDto(result.message)
+        } catch (error) {
+            await this.dependencies.attachmentService.cleanup(attachments)
+            return this.recoverDuplicateMessage(input, error)
+        }
+    }
+
+    private async persistMessage(
+        input: SendMessageInput,
+        content: string | null,
+        attachments: readonly StoredAttachment[],
+        transaction: TransactionContext,
+    ): Promise<MessageWriteResult> {
+        const validation = await this.validateSend(input, transaction)
+        if (validation.existing) return { message: validation.existing, created: false }
+        const messageContext = validation.messageContext
+        if (!messageContext) throw new Error(MESSAGE_ERROR_MESSAGES.INVALID_RECORD)
+
+        const message = await this.dependencies.repository.createMessage({
+            conversationId: input.conversationId,
+            senderId: input.senderId,
+            clientMessageId: input.clientMessageId,
+            content,
+            replyToId: messageContext.replyToId,
+            mentions: messageContext.mentions,
+            attachments,
+            createdAt: this.dependencies.clock.now(),
+        }, transaction)
+        await this.dependencies.repository.updateConversationAfterMessage(message, transaction)
+        return { message, created: true }
+    }
+
+    private async validateSend(input: SendMessageInput, transaction: TransactionContext): Promise<SendValidation> {
+        const access = await this.requireCurrentMember(input.conversationId, input.senderId, transaction)
+        const existing = await this.dependencies.repository.findByClientMessageId(
+            input.conversationId,
+            input.senderId,
+            input.clientMessageId,
+            transaction,
+        )
+        if (existing) return { existing, messageContext: null }
+
+        await this.assertCanSend(access, input.senderId, transaction)
+        const messageContext = await this.dependencies.replyMentionValidator.validate({
+            conversationId: input.conversationId,
+            senderId: input.senderId,
+            replyToId: input.replyToId ?? null,
+            mentionIds: input.mentionIds ?? [],
+            transaction,
+        })
+        return { existing: null, messageContext }
+    }
+
+    private async recoverDuplicateMessage(input: SendMessageInput, error: unknown): Promise<MessageDto> {
+        if (!(error instanceof MessageDuplicateKeyError)) throw error
+        const access = await this.requireCurrentMember(input.conversationId, input.senderId)
+        const existing = await this.dependencies.repository.findByClientMessageId(
+            input.conversationId,
+            input.senderId,
+            input.clientMessageId,
+        )
+        if (existing) return toMessageDto(existing)
+        await this.assertCanSend(access, input.senderId)
+        throw error
     }
 
     /** Read a chronological message page visible since the current membership began.
@@ -148,12 +214,13 @@ export class MessageService {
     }
 }
 
-function validateContent(content: string): string {
-    if (!content.trim()) throw new ValidationException(MESSAGE_ERROR_MESSAGES.EMPTY_CONTENT)
-    if (content.length > MESSAGE_LIMITS.MAX_CONTENT_LENGTH) {
+function validateContent(content: string | undefined, hasAttachments: boolean): string | null {
+    const normalizedContent = content?.trim() ?? ""
+    if (!normalizedContent && !hasAttachments) throw new ValidationException(MESSAGE_ERROR_MESSAGES.EMPTY_CONTENT)
+    if (normalizedContent.length > MESSAGE_LIMITS.MAX_CONTENT_LENGTH) {
         throw new ValidationException(MESSAGE_ERROR_MESSAGES.CONTENT_TOO_LONG)
     }
-    return content.trim()
+    return normalizedContent || null
 }
 
 function validateClientMessageId(clientMessageId: string): void {
