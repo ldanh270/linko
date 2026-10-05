@@ -1,3 +1,4 @@
+import { configureDnsServers } from "#/libs/database"
 import Conversation from "#/models/Conversation"
 import FriendRequest from "#/models/FriendRequest"
 import Friendship from "#/models/Friendship"
@@ -347,6 +348,7 @@ const main = async () => {
     }
 
     try {
+        configureDnsServers()
         // Prevent Mongoose from creating collections or indexes before confirmation.
         await mongoose.connect(connectionString, { autoCreate: false, autoIndex: false })
 

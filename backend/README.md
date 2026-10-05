@@ -18,7 +18,7 @@ resolver, so use one approved for that metadata.
 From the repository root, run:
 
 ```sh
-pnpm run seed
+pnpm run db:seed
 ```
 
 The command connects using `MONGODB_CONNECTION_STRING`, refuses to run when
@@ -34,6 +34,12 @@ New demo accounts use the initial local-only login `LinkoDemo123!`:
 - `demo_duong` — Dương Phạm (`demo.duong@example.test`)
 
 Use these accounts only in local development.
+
+To clear local Linko data, run `pnpm run db:clear` from the repository root. It
+refuses production mode, requires typing the exact connected database name, and
+deletes documents only from Linko-owned collections. It preserves collection
+indexes and unrelated collections. See the root [development command guide](../README.md)
+for database status, shell, and migration commands.
 
 ## Cloudflare R2 uploads
 

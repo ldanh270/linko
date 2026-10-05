@@ -6,9 +6,9 @@ The CLI uses the backend's `DNS_SERVERS` setting for MongoDB SRV resolution. Con
 ## Runbook
 
 1. Take and verify a restorable MongoDB backup. Record the restore point and pause writes that could introduce duplicate active usernames, emails, refresh tokens, or friend pairs.
-2. Run `pnpm -C backend exec tsx scripts/backfillAudit.ts` against the target database and review every count and index action. Use an isolated test database first.
-3. Run `pnpm -C backend exec tsx scripts/backfillAudit.ts --apply` to fill missing fields. Run it again; every count must be zero. This step does not change indexes.
-4. Only after the backup and dry-run are reviewed, run `pnpm -C backend exec tsx scripts/backfillAudit.ts --apply --apply-indexes --backup-confirmed --dry-run-reviewed`. The script invalidates legacy sessions, removes their plaintext refresh tokens, creates partial unique indexes for active records, drops superseded indexes, then replaces the Session TTL index with a normal expiry index. Existing sessions must sign in again after this transition. Inspect the output and MongoDB index list.
+2. Run `pnpm run db:migrate:audit` against the target database and review every count and index action. Use an isolated test database first.
+3. Run `pnpm run db:migrate:audit -- --apply` to fill missing fields. Run it again; every count must be zero. This step does not change indexes.
+4. Only after the backup and dry-run are reviewed, run `pnpm run db:migrate:audit -- --apply --apply-indexes --backup-confirmed --dry-run-reviewed`. The script invalidates legacy sessions, removes their plaintext refresh tokens, creates partial unique indexes for active records, drops superseded indexes, then replaces the Session TTL index with a normal expiry index. Existing sessions must sign in again after this transition. Inspect the output and MongoDB index list.
 5. Resume writes and verify login/logout, friendship requests, and active-only reads. Keep the backup until the release is accepted.
 
 The script uses a reserved `SYSTEM` ObjectId for unknown historical actors. Historical IP addresses remain `null`; it never invents a client IP. If timestamps are absent, it derives `createdAt` from the ObjectId timestamp and uses that value for `updatedAt`. That value is an estimate, not proof of the original write time.
@@ -17,8 +17,8 @@ The script uses a reserved `SYSTEM` ObjectId for unknown historical actors. Hist
 
 `migrateNotificationPreferences.ts` is dry-run by default. It counts conversations with a current participant whose legacy `mutedUntil` is still in the future and whose `isMuted` preference has not been set. It does not write data without `--apply`.
 
-1. Verify a restorable database backup and run `pnpm -C backend exec tsx scripts/migrateNotificationPreferences.ts` against the intended database. Review the `eligibleConversationCount` output; run against an isolated database first.
-2. After reviewing the dry-run, run `pnpm -C backend exec tsx scripts/migrateNotificationPreferences.ts --apply`. The migration sets `isMuted: true` for eligible participants and records the system audit actor. It keeps `mutedUntil` intact for transition reads.
+1. Verify a restorable database backup and run `pnpm run db:migrate:notifications` against the intended database. Review the `eligibleConversationCount` output; run against an isolated database first.
+2. After reviewing the dry-run, run `pnpm run db:migrate:notifications -- --apply`. The migration sets `isMuted: true` for eligible participants and records the system audit actor. It keeps `mutedUntil` intact for transition reads.
 3. Rerun the dry-run; the count should be zero. New unmute requests set `isMuted: false` and clear `mutedUntil`.
 
 ## Rollback

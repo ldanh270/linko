@@ -9,7 +9,14 @@
     },
     "scripts": {
         "dev": "tsx watch src/index.ts",
+        "start": "tsx src/index.ts",
         "seed": "tsx scripts/seed.ts",
+        "db:status": "tsx scripts/databaseStatus.ts",
+        "db:shell": "tsx scripts/mongoShell.ts",
+        "db:clear": "tsx scripts/clearDatabase.ts",
+        "db:seed": "pnpm run seed",
+        "db:migrate:audit": "tsx scripts/backfillAudit.ts",
+        "db:migrate:notifications": "tsx scripts/migrateNotificationPreferences.ts",
         "test": "vitest run",
         "typecheck": "tsc --noEmit",
         "lint": "tsc --noEmit"
