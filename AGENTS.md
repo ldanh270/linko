@@ -653,6 +653,7 @@ export const ORDER_STATUS = { … } as const;
 
 ### After completing a coding task
 7. Review the diff, stage only files belonging to the task, and create a local Conventional Commit without asking for confirmation. Leave unrelated changes unstaged. Do not push unless the user explicitly requests it.
+8. A coding task is not complete until the commit succeeds. Verify the new commit with `git status --short` and `git log -1 --oneline`; if commit creation fails, report the exact blocker and keep working on a safe resolution instead of silently leaving the task uncommitted.
 
 ### Definition of Done: self-review checklist
 - [ ] Layers respected: no logic in controllers/routes/UI components; no DB access outside repositories

@@ -1,6 +1,6 @@
 import { ERROR_CODES, type ApiErrorBody } from "@linko/contracts"
 import type { ErrorRequestHandler } from "express"
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 import { ZodError } from "zod"
 
 import { BusinessException } from "../errors/BusinessException"
@@ -19,7 +19,7 @@ const mapClientError = (error: unknown): BusinessException | null => {
     if (error instanceof ZodError) {
         return new BusinessException(ERROR_CODES.VALIDATION, 400, CLIENT_MESSAGES.VALIDATION)
     }
-    if (error instanceof TokenExpiredError || error instanceof JsonWebTokenError) {
+    if (error instanceof jwt.TokenExpiredError || error instanceof jwt.JsonWebTokenError) {
         return new BusinessException(ERROR_CODES.INVALID_TOKEN, 401, CLIENT_MESSAGES.INVALID_TOKEN)
     }
     if (error instanceof SyntaxError && "body" in error) {
