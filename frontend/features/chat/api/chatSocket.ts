@@ -5,13 +5,20 @@ import {
     type CursorPage,
     type MessageDto,
 } from "@linko/contracts"
-import { io, type Socket } from "socket.io-client"
+import { io } from "socket.io-client"
 
 import { getAccessToken } from "../../auth/api/auth.api"
 import { listMessages } from "./messages.api"
 
 /** Socket listener subset needed for conversation subscription and tests. */
-export type ChatSocket = Pick<Socket, "connected" | "emit" | "on" | "off">
+/** Narrow the transport to the event operations consumed by chat features. */
+export interface ChatSocket {
+    readonly connected: boolean
+    emit<Args extends readonly unknown[]>(event: string, ...args: Args): void
+    on<Args extends readonly unknown[]>(event: string, listener: (...args: Args) => void): ChatSocket
+    off<Args extends readonly unknown[]>(event: string, listener: (...args: Args) => void): ChatSocket
+    disconnect(): void
+}
 
 /** Optional recovery inputs for a conversation listener. */
 export interface ConversationSubscriptionOptions {
@@ -20,12 +27,12 @@ export interface ConversationSubscriptionOptions {
 }
 
 /** Open an authenticated Socket.IO connection using the current in-memory access token. */
-export function createChatSocket(): Socket {
+export function createChatSocket(): ChatSocket {
     return io(undefined, {
         auth: (completeHandshake) => completeHandshake({
             [SOCKET_AUTH_FIELDS.TOKEN]: getAccessToken(),
         }),
-    })
+    }) as unknown as ChatSocket
 }
 
 /** Subscribe once, authorize the room, and recover messages missed while disconnected.
@@ -46,7 +53,7 @@ export function subscribeToConversation(
     let isDisposed = false
 
     const acceptMessage = (message: MessageDto): void => {
-        if (isDisposed || knownIds.has(message[MESSAGE_FIELDS.ID])) return
+        if (isDisposed || message[MESSAGE_FIELDS.CONVERSATION_ID] !== conversationId || knownIds.has(message[MESSAGE_FIELDS.ID])) return
         knownIds.add(message[MESSAGE_FIELDS.ID])
         if (!newestMessage || compareMessages(message, newestMessage) > 0) newestMessage = message
         onMessage(message)

@@ -1,14 +1,17 @@
 import {
     API_ROUTES,
+    CONVERSATION_KIND,
     CONVERSATION_PARAMS,
     CONVERSATION_ROUTE_PATHS,
     GROUP_FIELDS,
     type CreateGroupRequest,
     type GroupDto,
+    type InboxItemDto,
     type UpdateGroupRequest,
 } from "@linko/contracts"
 
 import { authenticatedApiClient } from "../../auth/api/auth.api"
+import { listInbox } from "@/features/inbox/api/inbox.api"
 
 /** Group creation fields accepted by the browser adapter. */
 export interface CreateGroupInput extends CreateGroupRequest {
@@ -22,6 +25,20 @@ export interface UpdateGroupInput extends UpdateGroupRequest {
 }
 
 const CONVERSATION_ENDPOINT = API_ROUTES.CONVERSATIONS
+
+/** Find one accessible group through cursor pages without relying on its inbox position. */
+export async function findGroupInInbox(conversationId: string): Promise<InboxItemDto | undefined> {
+    let cursor: string | undefined
+    do {
+        const page = await listInbox({ kind: CONVERSATION_KIND.GROUP, ...(cursor ? { cursor } : {}) })
+        const match = page.items.find((item) => item.id === conversationId)
+        if (match) return match
+        const nextCursor = page.nextCursor ?? undefined
+        if (nextCursor === cursor) return undefined
+        cursor = nextCursor
+    } while (cursor)
+    return undefined
+}
 
 /** Create a private group, using multipart transport only when an avatar is present. */
 export function createGroup(input: CreateGroupInput): Promise<GroupDto> {
