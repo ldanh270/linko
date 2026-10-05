@@ -3,6 +3,9 @@ export const AUTH_CLIENT_ROUTES = {
     LOGIN: "/login",
 } as const
 
+/** Safe navigation query names used to resume an interrupted account flow. */
+export const AUTH_QUERY_PARAMS = { NEXT: "next", REGISTERED: "registered" } as const
+
 /** Window event raised when a protected API request cannot renew its session. */
 export const AUTH_CLIENT_EVENTS = {
     SESSION_EXPIRED: "linko:session-expired",

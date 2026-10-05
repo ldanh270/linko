@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation"
+import { WelcomePage as WelcomeScreen } from "@/features/welcome/pages/WelcomePage"
 
-/** Open the foundation app destination from the site root. */
-export default function Home() {
-  redirect("/inbox")
+/** Introduce private group conversations and direct visitors to account access. */
+export default function WelcomePage() {
+  return <WelcomeScreen />
 }

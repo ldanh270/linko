@@ -1,6 +1,7 @@
 import { API_ROUTES, AUTH_ROUTE_PATHS } from "@linko/contracts"
 import type { ReactNode } from "react"
 import { createElement } from "react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { cleanup } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -64,7 +65,7 @@ describe("useSession", () => {
         await authApi.login({ username: "reader", password: "ValidPass1!" })
         const { ProtectedAppShell } = await import("../components/ProtectedAppShell")
 
-        render(createElement(ProtectedAppShell, null, createElement("p", null, "private conversation")))
+        render(createElement(QueryClientProvider, { client: new QueryClient() }, createElement(ProtectedAppShell, null, createElement("p", null, "private conversation"))))
 
         expect(screen.queryByText("private conversation")).not.toBeInTheDocument()
         await waitFor(() => expect(replaceRoute).toHaveBeenCalledWith(AUTH_CLIENT_ROUTES.LOGIN))
@@ -83,7 +84,7 @@ describe("useSession", () => {
         const { render, screen } = await import("@testing-library/react")
         const { ProtectedAppShell } = await import("../components/ProtectedAppShell")
 
-        render(createElement(ProtectedAppShell, null, createElement("p", null, "private conversation")))
+        render(createElement(QueryClientProvider, { client: new QueryClient() }, createElement(ProtectedAppShell, null, createElement("p", null, "private conversation"))))
 
         expect(screen.queryByText("private conversation")).not.toBeInTheDocument()
         releaseRefresh(successResponse({ accessToken: "valid-access-token" }))

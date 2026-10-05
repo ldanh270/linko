@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { AUTH_CLIENT_EVENTS, AUTH_CLIENT_ROUTES, AUTH_SESSION_STATUS } from "../auth.constants"
 import { logout, refreshSession } from "../api/auth.api"
@@ -18,6 +19,7 @@ export interface SessionState {
 /** Restore the cookie-backed session and route away when the session expires. */
 export function useSession(): SessionState {
     const router = useRouter()
+    const queryClient = useQueryClient()
     const [status, setStatus] = useState<SessionStatus>(AUTH_SESSION_STATUS.LOADING)
 
     useEffect(() => {
@@ -25,6 +27,7 @@ export function useSession(): SessionState {
         const handleSessionExpired = () => {
             if (!isMounted) return
             setStatus(AUTH_SESSION_STATUS.UNAUTHENTICATED)
+            void queryClient.cancelQueries().finally(() => queryClient.clear())
             router.replace(AUTH_CLIENT_ROUTES.LOGIN)
         }
 
@@ -34,6 +37,7 @@ export function useSession(): SessionState {
         }).catch(() => {
             if (!isMounted) return
             setStatus(AUTH_SESSION_STATUS.UNAUTHENTICATED)
+            void queryClient.cancelQueries().finally(() => queryClient.clear())
             router.replace(AUTH_CLIENT_ROUTES.LOGIN)
         })
 
@@ -41,16 +45,18 @@ export function useSession(): SessionState {
             isMounted = false
             window.removeEventListener(AUTH_CLIENT_EVENTS.SESSION_EXPIRED, handleSessionExpired)
         }
-    }, [router])
+    }, [queryClient, router])
 
     const signOut = useCallback(async () => {
         try {
             await logout()
         } finally {
             setStatus(AUTH_SESSION_STATUS.UNAUTHENTICATED)
+            await queryClient.cancelQueries()
+            queryClient.clear()
             router.replace(AUTH_CLIENT_ROUTES.LOGIN)
         }
-    }, [router])
+    }, [queryClient, router])
 
     return { status, signOut }
 }

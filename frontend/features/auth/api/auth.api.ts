@@ -13,6 +13,7 @@ const AUTH_ENDPOINTS = {
 
 let accessToken: string | null = null
 let refreshInFlight: Promise<AuthAccessTokenDto> | null = null
+let sessionGeneration = 0
 
 const authApiClient = new ApiClient()
 
@@ -26,6 +27,7 @@ export function signup(input: SignupInput): Promise<UserDto> {
 
 /** Authenticate credentials and keep the short-lived token in memory only. */
 export async function login(input: LoginInput): Promise<AuthAccessTokenDto> {
+    sessionGeneration += 1
     accessToken = null
     const tokens = await authApiClient.request<AuthAccessTokenDto>({
         path: AUTH_ENDPOINTS.LOGIN,
@@ -49,6 +51,7 @@ export function refreshSession(): Promise<AuthAccessTokenDto> {
         return tokens
     }, (error: unknown) => {
         accessToken = null
+        sessionGeneration += 1
         refreshInFlight = null
         throw error
     })
@@ -61,12 +64,18 @@ export async function logout(): Promise<void> {
         await authApiClient.request<null>({ path: AUTH_ENDPOINTS.LOGOUT, method: "POST" })
     } finally {
         accessToken = null
+        sessionGeneration += 1
     }
 }
 
 /** Read the short-lived in-memory access token for authenticated socket handshakes. */
 export function getAccessToken(): string | null {
     return accessToken
+}
+
+/** Identify the current authenticated session for protecting late mutation callbacks. */
+export function getSessionGeneration(): number {
+    return sessionGeneration
 }
 
 /** Return the current bearer token without persisting it outside JavaScript memory. */
@@ -87,6 +96,7 @@ async function recoverUnauthorizedRequest(): Promise<boolean> {
 
 /** Tell mounted session hooks that an API request could not restore the session. */
 function notifySessionExpired(): void {
+    sessionGeneration += 1
     if (typeof window !== "undefined") {
         window.dispatchEvent(new Event(AUTH_CLIENT_EVENTS.SESSION_EXPIRED))
     }
