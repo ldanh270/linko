@@ -1,15 +1,19 @@
-import "dotenv/config"
-
-import User from "#/models/User"
-import Friendship from "#/models/Friendship"
-import FriendRequest from "#/models/FriendRequest"
 import Conversation from "#/models/Conversation"
+import FriendRequest from "#/models/FriendRequest"
+import Friendship from "#/models/Friendship"
 import Message from "#/models/Message"
+import User from "#/models/User"
+import {
+    DIRECT_CONVERSATION_FIELDS,
+    FRIEND_REQUEST_MODEL_FIELDS,
+} from "#/modules/friend/friend.constants"
+import { MESSAGE_MODEL_FIELDS } from "#/modules/message/message.constants"
 
 import bcrypt from "bcrypt"
+import "dotenv/config"
 import mongoose, { Types } from "mongoose"
-import { createInterface } from "node:readline/promises"
 import { stdin, stdout } from "node:process"
+import { createInterface } from "node:readline/promises"
 
 const DEMO_PASSWORD = "LinkoDemo123!"
 const BCRYPT_ROUNDS = 10
@@ -150,17 +154,13 @@ const seedDemoData = async (): Promise<{
         },
     ]
 
-    const [an, binh, chi, duong] = [
-        ids.users.an,
-        ids.users.binh,
-        ids.users.chi,
-        ids.users.duong,
-    ]
+    const [an, binh, chi, duong] = [ids.users.an, ids.users.binh, ids.users.chi, ids.users.duong]
 
-    const [anBinh, binhChi, chiDuong] = [
+    const [anBinh, binhChi, chiDuong, anDuong] = [
         sortIds(an, binh),
         sortIds(binh, chi),
         sortIds(chi, duong),
+        sortIds(an, duong),
     ]
 
     const friendships = [
@@ -187,6 +187,8 @@ const seedDemoData = async (): Promise<{
             from: duong,
             to: an,
             message: "Chào An, mình mới dùng Linko. Kết bạn nhé!",
+            [FRIEND_REQUEST_MODEL_FIELDS.PAIR_USER_A]: anDuong[0],
+            [FRIEND_REQUEST_MODEL_FIELDS.PAIR_USER_B]: anDuong[1],
             createdAt: createdAt(25),
             updatedAt: now,
         },
@@ -197,6 +199,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.direct1,
             conversationId: ids.conversations.direct,
             senderId: an,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-direct-an-1",
             content: "Cuối tuần này mọi người đi cà phê nhé?",
             createdAt: createdAt(90),
             updatedAt: createdAt(90),
@@ -205,6 +208,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.direct2,
             conversationId: ids.conversations.direct,
             senderId: binh,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-direct-binh-1",
             content: "Được đó, mình biết một quán mới ở gần hồ.",
             createdAt: createdAt(80),
             updatedAt: createdAt(80),
@@ -213,6 +217,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.direct3,
             conversationId: ids.conversations.direct,
             senderId: an,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-direct-an-2",
             content: "Gửi địa chỉ cho mình nhé!",
             createdAt: createdAt(72),
             updatedAt: createdAt(72),
@@ -221,6 +226,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.group1,
             conversationId: ids.conversations.group,
             senderId: chi,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-group-chi-1",
             content: "Mình tạo nhóm để lên lịch cho chuyến đi nha.",
             createdAt: createdAt(55),
             updatedAt: createdAt(55),
@@ -229,6 +235,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.group2,
             conversationId: ids.conversations.group,
             senderId: an,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-group-an-1",
             content: "Hay đó! Mình rảnh sáng thứ bảy.",
             createdAt: createdAt(48),
             updatedAt: createdAt(48),
@@ -237,6 +244,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.group3,
             conversationId: ids.conversations.group,
             senderId: binh,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-group-binh-1",
             content: "Mình cũng đi được. Để mình xem đường nhé.",
             createdAt: createdAt(36),
             updatedAt: createdAt(36),
@@ -245,6 +253,7 @@ const seedDemoData = async (): Promise<{
             _id: ids.messages.group4,
             conversationId: ids.conversations.group,
             senderId: chi,
+            [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: "demo-group-chi-2",
             content: "Chốt thứ bảy, mình gửi lịch trình sau!",
             createdAt: createdAt(30),
             updatedAt: createdAt(30),
@@ -266,6 +275,8 @@ const seedDemoData = async (): Promise<{
         {
             _id: ids.conversations.direct,
             conversationType: "DIRECT" as const,
+            [DIRECT_CONVERSATION_FIELDS.USER_A]: anBinh[0],
+            [DIRECT_CONVERSATION_FIELDS.USER_B]: anBinh[1],
             participants: directParticipants,
             lastMessage: {
                 messageId: ids.messages.direct3,
