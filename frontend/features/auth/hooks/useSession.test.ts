@@ -12,6 +12,9 @@ const { replaceRoute, router } = vi.hoisted(() => {
 })
 
 vi.mock("next/navigation", () => ({ useRouter: () => router }))
+vi.mock("@/features/settings/components/NotificationToastsListener", () => ({
+    NotificationToastsListener: () => null,
+}))
 vi.mock("@/shared/layout/AppShell", () => ({
     AppShell: ({ children }: { children: ReactNode }) => children,
 }))
