@@ -1,6 +1,7 @@
 import {
     API_ROUTES,
     FRIEND_REQUEST_BODY_FIELDS,
+    FRIEND_REQUEST_DIRECTION,
     FRIEND_ROUTE_PARAMS,
     FRIEND_ROUTE_PATHS,
     USER_ROUTE_PATHS,
@@ -9,6 +10,7 @@ import {
     type DirectConversationDto,
     type FriendDto,
     type FriendRequestDto,
+    type FriendRequestDirection,
     type SendFriendRequestBody,
     type UserSearchMode,
 } from "@linko/contracts"
@@ -35,6 +37,14 @@ export function searchPeople(input: SearchPeopleInput): Promise<FriendDto[]> {
 /** List safe public profiles for the authenticated user's current friends. */
 export function listFriends(): Promise<FriendDto[]> {
     return authenticatedApiClient.request({ path: API_ROUTES.FRIENDS })
+}
+
+/** List incoming or sent friend requests for the signed-in account. */
+export function listFriendRequests(direction: FriendRequestDirection): Promise<FriendRequestDto[]> {
+    const suffix = direction === FRIEND_REQUEST_DIRECTION.RECEIVED
+        ? FRIEND_ROUTE_PATHS.RECEIVED_REQUESTS
+        : FRIEND_ROUTE_PATHS.SENT_REQUESTS
+    return authenticatedApiClient.request({ path: `${API_ROUTES.FRIENDS}${suffix}` })
 }
 
 /** Send one friend request with an optional short note. */

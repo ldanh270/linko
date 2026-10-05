@@ -43,6 +43,9 @@ export const USER_PROFILE_FIELDS = {
     REMOVE_BACKGROUND: "removeBackground",
 } as const
 
+/** Browser upload limits for public profile images. */
+export const USER_PROFILE_LIMITS = { MAX_IMAGE_SIZE_BYTES: 10 * 1024 * 1024 } as const
+
 /** Private profile data returned only to the authenticated account owner. */
 export interface ProfileDto {
     readonly [USER_PROFILE_FIELDS.ID]: EntityId

@@ -46,6 +46,9 @@ export const FRIEND_REQUEST_DIRECTION = {
     RECEIVED: "RECEIVED",
 } as const
 
+/** Direction filter accepted by friend request listing. */
+export type FriendRequestDirection = (typeof FRIEND_REQUEST_DIRECTION)[keyof typeof FRIEND_REQUEST_DIRECTION]
+
 /** Safe friend request summary with no private account fields. */
 export interface FriendRequestDto {
     readonly [FRIEND_REQUEST_FIELDS.ID]: EntityId
