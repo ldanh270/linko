@@ -13,5 +13,5 @@
             "#/*": ["./src/*"]
         }
     },
-    "include": ["src/**/*", "test/**/*", "vitest.config.ts", "types/**/*.d.ts"]
+    "include": ["src/**/*", "scripts/**/*", "test/**/*", "vitest.config.ts", "types/**/*.d.ts"]
 }
