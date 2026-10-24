@@ -1,52 +1,79 @@
+:root {
+  --font-family-sans: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-size-body: 0.9375rem;
+  --line-height-body: 1.5;
+}
+
 :root,
 :root[data-theme="light"] {
-  --background: #faf9f6;
+  color-scheme: light;
+  --background: #f5f7fb;
   --surface: #ffffff;
-  --surface-subtle: #f4f2ee;
-  --text-primary: #252525;
-  --text-secondary: #6b6b73;
-  --brand: #4f46e5;
-  --brand-hover: #4338ca;
+  --surface-subtle: #f8f9fc;
+  --text-primary: #343a40;
+  --text-secondary: #696d81;
+  --brand: #625ad8;
+  --brand-hover: #564dc9;
   --brand-contrast: #ffffff;
-  --brand-soft: #edebff;
-  --border: #e9e7e2;
-  --positive: #147d64;
-  --danger: #c2410c;
+  --brand-soft: #eeedff;
+  --border: #e9ebf0;
+  --positive: #1b7a52;
+  --danger: #c83c3c;
   --danger-contrast: #ffffff;
+  --radius-control: 0.75rem;
+  --radius-panel: 1rem;
+  --radius-bubble: 1.125rem;
+  --shadow-panel: 0 0.125rem 0.75rem rgb(54 64 74 / 0.06);
+  --shadow-brand: 0 0.25rem 0.75rem rgb(114 105 239 / 0.2);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #17171c;
-  --surface: #24242b;
-  --surface-subtle: #2c2c34;
-  --text-primary: #f5f4f2;
-  --text-secondary: #b8b7c0;
-  --brand: #a69dff;
-  --brand-hover: #b8b0ff;
-  --brand-contrast: #17171c;
-  --brand-soft: #373257;
-  --border: #383840;
-  --positive: #67d4ac;
-  --danger: #ff9b82;
-  --danger-contrast: #17171c;
+  --background: #303841;
+  --surface: #36404a;
+  --surface-subtle: #3d4751;
+  --text-primary: #f4f5f7;
+  --text-secondary: #b4bdc6;
+  --brand: #b9b4ff;
+  --brand-hover: #c5c0ff;
+  --brand-contrast: #282e32;
+  --brand-soft: #48446f;
+  --border: #47515b;
+  --positive: #62cf9b;
+  --danger: #ff8179;
+  --danger-contrast: #282e32;
+  --shadow-panel: 0 0.125rem 0.75rem rgb(0 0 0 / 0.16);
+  --shadow-brand: 0 0.25rem 0.75rem rgb(114 105 239 / 0.24);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     color-scheme: dark;
-    --background: #17171c;
-    --surface: #24242b;
-    --surface-subtle: #2c2c34;
-    --text-primary: #f5f4f2;
-    --text-secondary: #b8b7c0;
-    --brand: #a69dff;
-    --brand-hover: #b8b0ff;
-    --brand-contrast: #17171c;
-    --brand-soft: #373257;
-    --border: #383840;
-    --positive: #67d4ac;
-    --danger: #ff9b82;
-    --danger-contrast: #17171c;
+    --background: #303841;
+    --surface: #36404a;
+    --surface-subtle: #3d4751;
+    --text-primary: #f4f5f7;
+    --text-secondary: #b4bdc6;
+    --brand: #b9b4ff;
+    --brand-hover: #c5c0ff;
+    --brand-contrast: #282e32;
+    --brand-soft: #48446f;
+    --border: #47515b;
+    --positive: #62cf9b;
+    --danger: #ff8179;
+    --danger-contrast: #282e32;
+    --shadow-panel: 0 0.125rem 0.75rem rgb(0 0 0 / 0.16);
+    --shadow-brand: 0 0.25rem 0.75rem rgb(114 105 239 / 0.24);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

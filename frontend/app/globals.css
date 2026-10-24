@@ -4,9 +4,70 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--text-primary);
-  --font-sans: "Be Vietnam Pro", sans-serif;
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-border: var(--border);
+  --color-positive: var(--positive);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-family-sans);
 }
 
-html { min-width: 320px; }
-body { background: var(--background); color: var(--text-primary); font-family: "Be Vietnam Pro", sans-serif; }
+html { min-width: 320px; min-height: 100%; }
+body {
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-variant-numeric: tabular-nums;
+}
 * { box-sizing: border-box; }
+
+::selection { background: var(--brand-soft); color: var(--text-primary); }
+
+.surface-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.page-eyebrow {
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.page-title {
+  font-size: clamp(1.5rem, 1.15rem + 1vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+
+.avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.avatar--small { width: 2.25rem; height: 2.25rem; font-size: 0.75rem; }
+.avatar--medium { width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
+.avatar--large { width: 5rem; height: 5rem; font-size: 1.5rem; }
+
+.app-layout { min-height: 100dvh; }
+.app-rail { background: var(--surface); border-right: 1px solid var(--border); }
+.app-main { min-width: 0; }
+
+@media (min-width: 768px) {
+  .app-layout { display: grid; grid-template-columns: 4.75rem minmax(0, 1fr); }
+}
