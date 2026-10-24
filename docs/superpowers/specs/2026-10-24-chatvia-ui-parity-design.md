@@ -1,6 +1,6 @@
 # Chatvia reference UI parity
 
-Status: proposed for review; implementation has not started.
+Status: approved by the user on 2026-10-24; implementation and verification tracked in the execution ledger.
 
 ## Intent
 

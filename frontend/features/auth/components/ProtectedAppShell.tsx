@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 
 import { AppShell } from "@/shared/layout/AppShell"
 import { NotificationToastsListener } from "@/features/settings/components/NotificationToastsListener"
+import { AccountAvatar } from "@/features/profile/components/AccountAvatar"
 import { AUTH_SESSION_STATUS, AUTH_STATUS_MESSAGES } from "../auth.constants"
 import { useSession } from "../hooks/useSession"
 
@@ -17,7 +18,7 @@ export function ProtectedAppShell({ children }: ProtectedAppShellProps) {
     const { status } = useSession()
     if (status === AUTH_SESSION_STATUS.AUTHENTICATED) return <>
         <NotificationToastsListener />
-        <AppShell>{children}</AppShell>
+        <AppShell account={<AccountAvatar />}>{children}</AppShell>
     </>
 
     const message = status === AUTH_SESSION_STATUS.LOADING

@@ -7,12 +7,12 @@ import type { InfiniteData } from "@tanstack/react-query"
 import { listMessages, sendMessage } from "../api/messages.api"
 import { sendMessageFiles } from "../api/attachments.api"
 import { createChatSocket, mergeMessageById, subscribeToConversation } from "../api/chatSocket"
-import { markConversationRead } from "@/features/inbox/api/read.api"
+import { CHAT_QUERY_KEYS } from "../chat.constants"
 
 /** Load a conversation timeline, synchronize realtime events, and send messages. */
 export function useConversationChat(conversationId: string) {
   const queryClient = useQueryClient()
-  const queryKey = ["messages", conversationId] as const
+  const queryKey = [CHAT_QUERY_KEYS.MESSAGES, conversationId] as const
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: undefined as string | undefined,
@@ -33,8 +33,6 @@ export function useConversationChat(conversationId: string) {
     const unsubscribe = subscribeToConversation(socket, conversationId, (message) => setLiveMessages((current) => mergeMessageById(current, message)))
     return () => { unsubscribe(); socket.disconnect() }
   }, [conversationId])
-  const messages = [...(query.data?.pages.flatMap((page) => page.items) ?? []), ...liveMessages].reduce<MessageDto[]>((all, message) => mergeMessageById(all, message), [])
-  const newestMessageId = messages.at(-1)?.[MESSAGE_FIELDS.ID]
-  useEffect(() => { if (newestMessageId) void markConversationRead({ conversationId, lastVisibleMessageId: newestMessageId }).catch(() => undefined) }, [conversationId, newestMessageId])
+  const messages = [...(query.data?.pages.flatMap((page) => page.items) ?? []), ...liveMessages].filter((message) => message[MESSAGE_FIELDS.CONVERSATION_ID] === conversationId).reduce<MessageDto[]>((all, message) => mergeMessageById(all, message), [])
   return { query, messages, send }
 }

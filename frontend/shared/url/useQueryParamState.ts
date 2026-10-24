@@ -11,6 +11,7 @@ export interface QueryParamChange {
     history?: "push" | "replace"
     debounceMs?: number
     resetPage?: boolean
+    resetKeys?: readonly string[]
 }
 
 /** Keep validated filter state in the URL so refresh and back restore the view. */
@@ -23,19 +24,23 @@ export function useQueryParamState<T extends string | number | boolean>(
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const revision = `${pathname}?${searchParams.toString()}`
     const rawValue = searchParams.get(key)
     const parsed = rawValue === null ? null : schema.safeParse(rawValue)
     const value = parsed?.success ? parsed.data : defaultValue
 
-    useEffect(() => () => {
-        if (timer.current) clearTimeout(timer.current)
-    }, [])
+    const cancelPending = useCallback(() => { if (timer.current) { clearTimeout(timer.current); timer.current = null } }, [])
+    useEffect(() => {
+        window.addEventListener("popstate", cancelPending)
+        return () => { cancelPending(); window.removeEventListener("popstate", cancelPending) }
+    }, [revision, cancelPending])
 
     const setValue = useCallback((nextValue: T, change: QueryParamChange = {}) => {
         const params = new URLSearchParams(searchParams.toString())
         if (String(nextValue) === String(defaultValue)) params.delete(key)
         else params.set(key, String(nextValue))
         if (change.resetPage !== false && key !== QUERY_PARAMS.PAGE) params.delete(QUERY_PARAMS.PAGE)
+        change.resetKeys?.forEach((resetKey) => params.delete(resetKey))
         const query = params.toString()
         const url = query ? `${pathname}?${query}` : pathname
         const navigate = () => {
@@ -47,5 +52,5 @@ export function useQueryParamState<T extends string | number | boolean>(
         else navigate()
     }, [defaultValue, key, pathname, router, searchParams])
 
-    return { value, setValue }
+    return { value, setValue, revision, cancelPending }
 }

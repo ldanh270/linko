@@ -2,6 +2,8 @@
 
 > **For agentic workers:** Use `superpowers:executing-plans` to implement this plan task-by-task in the current checkout. Steps use checkbox syntax for tracking. This is a requested planning deliverable; product implementation awaits review of the linked design. No additional worktree or execution-method decision is needed.
 
+**Execution status:** Completed after user approval. The checklists below retain the original planning detail; final implementation decisions, review fixes and measured verification results are recorded in [the execution ledger](2026-10-24-chatvia-ui-parity-progress.md). Local integration uses the approved current branch; no push or merge.
+
 **Goal:** Integrate all five `docs/assests/*.htm` interfaces into the existing Linko web application with matching styles, reusable components and existing functional APIs.
 
 **Architecture:** Keep existing feature APIs, contracts, auth, query and theme providers. Compose one navigation rail with feature-specific sidebar panels and a reusable conversation pane. Separate feature hooks and pure view-model mapping from presentation; use shared visual primitives and tokens for repeated UI.

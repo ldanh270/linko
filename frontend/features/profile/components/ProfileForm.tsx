@@ -1,47 +1,36 @@
 "use client"
 
-import { useEffect, useState, type FormEvent } from "react"
 import Image from "next/image"
-import type { ProfileDto } from "@linko/contracts"
+import { USER_PROFILE_FIELDS, USER_PROFILE_IMAGE_TYPES, USER_PROFILE_TEXT_LIMITS, type ProfileDto } from "@linko/contracts"
 import type { UpdateMineInput } from "../api/profile.api"
-import { USER_PROFILE_LIMITS } from "@linko/contracts"
-import { ApiError } from "@/shared/http/ApiError"
 import { Button } from "@/shared/components/Button"
 import { Input } from "@/shared/components/Input"
-import { SurfacePanel } from "@/shared/components/SurfacePanel"
+import { Avatar } from "@/shared/components/Avatar"
+import { useProfileForm } from "../hooks/useProfileForm"
 
-/** Form props keep persisted profile data separate from local edits. */
+/** Persisted identity and mutation status supplied by the profile editor. */
 export interface ProfileFormProps {
-  readonly profile: ProfileDto
-  readonly isSaving: boolean
-  readonly isSaved: boolean
-  readonly saveError: unknown
-  onSave(input: UpdateMineInput): void
+  readonly profile: ProfileDto; readonly isSaving: boolean; readonly isSaved: boolean
+  readonly saveError: unknown; readonly onSave: (input: UpdateMineInput) => void
 }
 
-/** Edit profile text and preview valid image files before saving. */
-export function ProfileForm({ profile, isSaving, isSaved, saveError, onSave }: ProfileFormProps) {
-  const [displayName, setDisplayName] = useState(profile.displayName)
-  const [username, setUsername] = useState(profile.username)
-  const [email, setEmail] = useState(profile.email)
-  const [bio, setBio] = useState(profile.bio ?? "")
-  const [avatar, setAvatar] = useState<File | undefined>()
-  const [background, setBackground] = useState<File | undefined>()
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [backgroundPreview, setBackgroundPreview] = useState<string | null>(null)
-  const [imageError, setImageError] = useState<string | null>(null)
-  useEffect(() => () => { if (avatarPreview) URL.revokeObjectURL(avatarPreview) }, [avatarPreview])
-  useEffect(() => () => { if (backgroundPreview) URL.revokeObjectURL(backgroundPreview) }, [backgroundPreview])
-  const selectImage = (file: File | undefined, kind: "avatar" | "background") => {
-    if (file && (!file.type.startsWith("image/") || file.size > USER_PROFILE_LIMITS.MAX_IMAGE_SIZE_BYTES)) { setImageError("Chọn ảnh hợp lệ có dung lượng tối đa 10 MiB."); return }
-    setImageError(null)
-    if (kind === "avatar") { setAvatar(file); setAvatarPreview(file ? URL.createObjectURL(file) : null) }
-    else { setBackground(file); setBackgroundPreview(file ? URL.createObjectURL(file) : null) }
-  }
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); if (!imageError) onSave({ displayName, username, email, bio, avatar, background }) }
-  return <SurfacePanel className="overflow-hidden"><div className="h-40 bg-[var(--brand-soft)] bg-cover bg-center" style={{ backgroundImage: backgroundPreview ? `url(${backgroundPreview})` : profile.backgroundUrl ? `url(${profile.backgroundUrl})` : undefined }} /><div className="-mt-12 px-6"><Image src={avatarPreview ?? profile.avatarUrl ?? "/file.svg"} alt="Ảnh đại diện" width={96} height={96} unoptimized className="h-24 w-24 rounded-2xl border-4 border-[var(--surface)] bg-[var(--surface)] object-cover" /></div>
-    <form onSubmit={onSubmit} className="grid gap-5 p-6 sm:grid-cols-2"><Input id="display-name" label="Tên hiển thị" required maxLength={80} value={displayName} onChange={(event) => setDisplayName(event.target.value)} /><Input id="username" label="Tên đăng nhập" required value={username} onChange={(event) => setUsername(event.target.value)} /><Input id="email" label="Email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-      <div className="grid gap-1.5"><label htmlFor="bio" className="text-sm font-medium">Giới thiệu</label><textarea id="bio" maxLength={500} rows={3} value={bio} onChange={(event) => setBio(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] p-3 focus-visible:outline-2 focus-visible:outline-[var(--brand)]" /></div>
-      <div className="grid gap-1.5"><label htmlFor="avatar" className="text-sm font-medium">Ảnh đại diện</label><input id="avatar" type="file" accept="image/*" onChange={(event) => selectImage(event.target.files?.[0], "avatar")} /></div><div className="grid gap-1.5"><label htmlFor="background" className="text-sm font-medium">Ảnh nền</label><input id="background" type="file" accept="image/*" onChange={(event) => selectImage(event.target.files?.[0], "background")} /></div>
-      {imageError && <p role="alert" className="text-sm text-[var(--danger)] sm:col-span-2">{imageError}</p>}{saveError !== null && saveError !== undefined && <p role="alert" className="text-sm text-[var(--danger)] sm:col-span-2">{saveError instanceof ApiError ? saveError.message : "Không thể lưu thay đổi."}</p>}{isSaved && <p role="status" className="text-sm text-[var(--positive)] sm:col-span-2">Đã lưu hồ sơ.</p>}<div className="sm:col-span-2"><Button type="submit" isLoading={isSaving} disabled={Boolean(imageError)}>Lưu thay đổi</Button></div></form></SurfacePanel>
+/** Render validated profile fields and supported image previews. UI only; logic lives in useProfileForm. */
+export function ProfileForm(props: ProfileFormProps) {
+  const state = useProfileForm(props)
+  return <form onSubmit={state.onSubmit} className="grid gap-5" noValidate>
+    <div className="profile-edit-cover">{state.backgroundPreview && <Image src={state.backgroundPreview} alt="Ảnh nền xem trước" width={520} height={120} unoptimized />}</div>
+    <Avatar label={props.profile.displayName} src={state.avatarPreview} size="large" />
+    <fieldset disabled={props.isSaving} className="grid gap-4 sm:grid-cols-2">
+      <Input id={USER_PROFILE_FIELDS.DISPLAY_NAME} label="Tên hiển thị" {...state.register(USER_PROFILE_FIELDS.DISPLAY_NAME)} error={state.errors.displayName?.message} maxLength={USER_PROFILE_TEXT_LIMITS.MAX_DISPLAY_NAME} />
+      <Input id={USER_PROFILE_FIELDS.USERNAME} label="Tên đăng nhập" {...state.register(USER_PROFILE_FIELDS.USERNAME)} error={state.errors.username?.message} />
+      <Input id={USER_PROFILE_FIELDS.EMAIL} label="Email" type="email" {...state.register(USER_PROFILE_FIELDS.EMAIL)} error={state.errors.email?.message} />
+      <div className="grid gap-1.5"><label htmlFor={USER_PROFILE_FIELDS.BIO}>Giới thiệu</label><textarea id={USER_PROFILE_FIELDS.BIO} {...state.register(USER_PROFILE_FIELDS.BIO)} maxLength={USER_PROFILE_TEXT_LIMITS.MAX_BIO} rows={3} className="rounded border border-[var(--border)] bg-[var(--surface-subtle)] p-3 focus-visible:outline-2 focus-visible:outline-[var(--brand)]" /></div>
+      <div className="grid gap-2 text-sm"><label htmlFor={USER_PROFILE_FIELDS.AVATAR}>Ảnh đại diện</label><input id={USER_PROFILE_FIELDS.AVATAR} type="file" accept={USER_PROFILE_IMAGE_TYPES.join(",")} onChange={state.onAvatarChange} /></div>
+      <div className="grid gap-2 text-sm"><label htmlFor={USER_PROFILE_FIELDS.BACKGROUND}>Ảnh nền</label><input id={USER_PROFILE_FIELDS.BACKGROUND} type="file" accept={USER_PROFILE_IMAGE_TYPES.join(",")} onChange={state.onBackgroundChange} /></div>
+    </fieldset>
+    {state.imageError && <p role="alert" className="composer-error">{state.imageError}</p>}
+    {state.errorMessage && <p role="alert" className="composer-error">{state.errorMessage}</p>}
+    {props.isSaved && <p role="status" className="text-sm text-[var(--positive)]">Đã lưu hồ sơ.</p>}
+    <Button type="submit" isLoading={props.isSaving} disabled={Boolean(state.imageError)}>Lưu thay đổi</Button>
+  </form>
 }

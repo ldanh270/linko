@@ -46,6 +46,15 @@ export const USER_PROFILE_FIELDS = {
 /** Browser upload limits for public profile images. */
 export const USER_PROFILE_LIMITS = { MAX_IMAGE_SIZE_BYTES: 10 * 1024 * 1024 } as const
 
+/** Existing profile text validation limits shared by API boundary and browser forms. */
+export const USER_PROFILE_TEXT_LIMITS = { MIN_USERNAME: 3, MAX_USERNAME: 30, MAX_DISPLAY_NAME: 50, MAX_BIO: 500 } as const
+
+/** Existing username syntax shared by profile validation consumers. */
+export const USER_PROFILE_PATTERNS = { USERNAME: /^[a-z0-9_.]+$/ } as const
+
+/** Image formats already supported by profile upload storage. */
+export const USER_PROFILE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
+
 /** Private profile data returned only to the authenticated account owner. */
 export interface ProfileDto {
     readonly [USER_PROFILE_FIELDS.ID]: EntityId

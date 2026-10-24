@@ -13,10 +13,14 @@ export function useSelectedConversation() {
   const client = useQueryClient()
   const query = useQuery({
     queryKey: [...INBOX_QUERY_KEY, "selected", conversationId], enabled: Boolean(conversationId),
-    queryFn: ({ signal }) => findSelectedConversation(conversationId, (cursor) => client.fetchQuery({
-      queryKey: [...INBOX_QUERY_KEY, CONVERSATION_KIND.ALL, cursor ?? ""],
-      queryFn: () => listInbox({ kind: CONVERSATION_KIND.ALL, cursor, signal }), staleTime: 30_000,
-    })),
+    queryFn: async ({ signal }) => {
+      const loadPage = (staleTime: number) => (cursor?: string) => client.fetchQuery({
+        queryKey: [...INBOX_QUERY_KEY, CONVERSATION_KIND.ALL, cursor ?? ""],
+        queryFn: () => listInbox({ kind: CONVERSATION_KIND.ALL, cursor, signal }), staleTime,
+      })
+      const cached = await findSelectedConversation(conversationId, loadPage(30_000))
+      return cached ?? findSelectedConversation(conversationId, loadPage(0))
+    },
   })
   return { conversationId, isConversationView, query }
 }
