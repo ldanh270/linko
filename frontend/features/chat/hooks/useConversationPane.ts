@@ -14,6 +14,7 @@ import { listMembers } from "@/features/membership/api/membership.api"
 import { useConversationChat } from "./useConversationChat"
 import { useGroupPins } from "./useGroupPins"
 import { useMessageComposer } from "./useMessageComposer"
+import { useConversationDetails } from "./useConversationDetails"
 import { mapTimeline } from "../chat.mapper"
 import { CHAT_ACCESS_ERRORS, CHAT_COPY, CHAT_KIND, CHAT_QUERY_KEYS } from "../chat.constants"
 import { ApiError } from "@/shared/http/ApiError"
@@ -46,10 +47,36 @@ export function useConversationPane(item: InboxItemDto) {
   const { value: search, setValue: setSearch, revision: searchRevision } = useQueryParamState(WORKSPACE_PARAMS.MESSAGE_SEARCH, z.string(), "")
   const [isSearchOpen, setSearchOpen] = useState(false)
   const onSearchChange = (value: string) => setSearch(value, { history: "replace", debounceMs: 250 })
+
+  const { value: isDetailsOpenRaw, setValue: setDetailsOpenRaw } = useQueryParamState(
+    WORKSPACE_PARAMS.DETAILS,
+    z.enum(["true", "false", "1", "0"]),
+    "false"
+  )
+  const isDetailsOpen = isDetailsOpenRaw === "true" || isDetailsOpenRaw === "1"
+  const onToggleDetails = () => setDetailsOpenRaw(isDetailsOpen ? "false" : "true")
+  const onCloseDetails = () => setDetailsOpenRaw("false")
+
+  const details = useConversationDetails({
+    item,
+    kind,
+    messages,
+    membersData: members.data,
+    pinsData: pins.query.data,
+    authors,
+    currentUserId: profile.data?.id ?? "",
+    isOpen: isDetailsOpen,
+    onClose: onCloseDetails,
+    onOpenSearch: () => setSearchOpen(true),
+  })
+
   const actions = kind === CHAT_KIND.GROUP ? [
-    { label: "Thông tin nhóm", icon: ICON_NAMES.GROUP, onSelect: () => router.push(buildAppRoute(APP_ROUTES.GROUP_INFO, { conversationId: id })) },
+    { label: "Thông tin nhóm", icon: ICON_NAMES.GROUP, onSelect: onToggleDetails },
     { label: "Lời mời", icon: ICON_NAMES.ADD_CONTACT, onSelect: () => router.push(buildAppRoute(APP_ROUTES.GROUP_INVITATIONS, { conversationId: id })) },
-  ] : [{ label: "Bạn bè", icon: ICON_NAMES.CONTACTS, onSelect: () => router.push(APP_ROUTES.PEOPLE) }]
+  ] : [
+    { label: "Chi tiết cuộc trò chuyện", icon: ICON_NAMES.PROFILE, onSelect: onToggleDetails },
+    { label: "Bạn bè", icon: ICON_NAMES.CONTACTS, onSelect: () => router.push(APP_ROUTES.PEOPLE) },
+  ]
   const onPin = (messageId: string, isPinned: boolean) => pins.update.mutate({ messageId, isPinned })
   const actionRows = rows.map((row) => ({ ...row, actions: [
     { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => composer.onReply(row.id) },
@@ -63,5 +90,31 @@ export function useConversationPane(item: InboxItemDto) {
       content: replyTargetRow.content || (replyTargetRow.attachments.length ? "Đính kèm tệp" : ""),
     } : null,
   }
-  return { conversationId: id, query, profile, composer: composerState, members, pins, kind, isComposerDisabled, isHistoryUnavailable, isIdentityUnavailable, header: { title, avatarUrl, backHref, actions, isSearchOpen: isSearchOpen || Boolean(search), onToggleSearch: () => setSearchOpen(!isSearchOpen), search, searchRevision, onSearchChange }, rows: search ? actionRows.filter((row) => row.content.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))) : actionRows }
+  return {
+    conversationId: id,
+    query,
+    profile,
+    composer: composerState,
+    members,
+    pins,
+    kind,
+    details,
+    isComposerDisabled,
+    isHistoryUnavailable,
+    isIdentityUnavailable,
+    header: {
+      title,
+      avatarUrl,
+      backHref,
+      actions,
+      isSearchOpen: isSearchOpen || Boolean(search),
+      onToggleSearch: () => setSearchOpen(!isSearchOpen),
+      search,
+      searchRevision,
+      onSearchChange,
+      isDetailsOpen,
+      onToggleDetails,
+    },
+    rows: search ? actionRows.filter((row) => row.content.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))) : actionRows,
+  }
 }

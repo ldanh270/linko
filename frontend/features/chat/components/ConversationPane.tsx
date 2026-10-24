@@ -7,15 +7,32 @@ import { useConversationPane } from "../hooks/useConversationPane"
 import { ConversationHeader } from "./ConversationHeader"
 import { MessageTimeline } from "./MessageTimeline"
 import { MessageComposer } from "./MessageComposer"
+import { ConversationDetailsSheet } from "./details/ConversationDetailsSheet"
 
 /** One resolved accessible conversation supplies the shared timeline renderer. */
 export interface ConversationPaneProps { readonly item: InboxItemDto }
 
-/** Compose one conversation with isolated query states and no duplicate sidebar. UI only. */
+/** Compose one conversation with isolated query states and Messenger-style details sheet. UI only. */
 export function ConversationPane({ item }: ConversationPaneProps) {
   const state = useConversationPane(item)
-  return <div className="conversation-pane"><ConversationHeader header={state.header} />
-    {state.query.isPending || state.profile.isPending ? <LoadingState label="Đang tải tin nhắn" /> : state.isIdentityUnavailable ? <ErrorState title="Không thể tải tài khoản" onRetry={() => void state.profile.refetch()} /> : state.isHistoryUnavailable ? <ErrorState title="Không thể tải cuộc trò chuyện" onRetry={() => void state.query.refetch()} /> : <MessageTimeline state={state} />}
-    <MessageComposer state={state} />
-  </div>
+  return (
+    <div className={`conversation-layout ${state.details.isOpen ? "has-details" : ""}`}>
+      <div className="conversation-pane">
+        <ConversationHeader header={state.header} />
+        {state.query.isPending || state.profile.isPending ? (
+          <LoadingState label="Đang tải tin nhắn" />
+        ) : state.isIdentityUnavailable ? (
+          <ErrorState title="Không thể tải tài khoản" onRetry={() => void state.profile.refetch()} />
+        ) : state.isHistoryUnavailable ? (
+          <ErrorState title="Không thể tải cuộc trò chuyện" onRetry={() => void state.query.refetch()} />
+        ) : (
+          <MessageTimeline state={state} />
+        )}
+        <MessageComposer state={state} />
+      </div>
+      {state.details.isOpen && (
+        <ConversationDetailsSheet details={state.details} onClose={state.details.onClose} />
+      )}
+    </div>
+  )
 }
