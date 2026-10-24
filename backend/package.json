@@ -18,6 +18,7 @@
         "db:seed": "pnpm run seed",
         "db:migrate:audit": "tsx scripts/backfillAudit.ts",
         "db:migrate:notifications": "tsx scripts/migrateNotificationPreferences.ts",
+        "db:migrate:joinAt": "tsx scripts/migrateLegacyJoinAt.ts",
         "test": "vitest run",
         "typecheck": "tsc --noEmit",
         "lint": "tsc --noEmit"

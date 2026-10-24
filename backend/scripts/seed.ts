@@ -324,7 +324,7 @@ const seedDemoData = async (): Promise<{
     )
     const messageResult = await Message.bulkWrite(insertOnlyOperations(messages), writeOptions)
     const conversationResult = await Conversation.bulkWrite(
-        insertOnlyOperations(conversations),
+        insertOnlyOperations(conversations) as unknown as Parameters<typeof Conversation.bulkWrite>[0],
         writeOptions,
     )
 

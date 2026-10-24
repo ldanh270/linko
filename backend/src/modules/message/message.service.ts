@@ -185,9 +185,10 @@ export class MessageService {
         if (afterMessageId && cursor) throw new ValidationException(MESSAGE_ERROR_MESSAGES.INVALID_CURSOR)
         return this.dependencies.transactionRunner.run(async (transaction) => {
             const access = await this.requireCurrentMember(input.conversationId, input.userId, transaction)
+            const joinedAt = access.type === CONVERSATION_TYPE.GROUP ? access.joinedAt : null
             const page = await this.dependencies.repository.listMessages({
                 conversationId: input.conversationId,
-                joinedAt: access.joinedAt,
+                joinedAt,
                 cursor,
                 afterMessageId,
                 limit: input.limit,
@@ -209,13 +210,13 @@ export class MessageService {
         conversationId: ResolvedSendMessageInput["conversationId"],
         userId: SendMessageInput["senderId"],
         transaction?: TransactionContext,
-    ): Promise<ConversationMessageAccessRecord & { readonly joinedAt: Date }> {
+    ): Promise<ConversationMessageAccessRecord> {
         const access = await this.dependencies.repository.findConversationAccess(conversationId, userId, transaction)
         if (!access) throw new NotFoundException(MESSAGE_ERROR_MESSAGES.CONVERSATION_NOT_FOUND)
-        if (!access.joinedAt) {
+        if (access.type === CONVERSATION_TYPE.GROUP && !access.joinedAt) {
             throw new ForbiddenException(MESSAGE_ERROR_MESSAGES.NOT_A_MEMBER, ERROR_CODES.FORBIDDEN)
         }
-        return { ...access, joinedAt: access.joinedAt }
+        return access
     }
 
     private async resolveDestination(input: SendMessageInput): Promise<ResolvedSendMessageInput> {
