@@ -8,6 +8,7 @@ import {
 import { io } from "socket.io-client"
 
 import { getAccessToken } from "../../auth/api/auth.api"
+import { API_ORIGIN } from "@/shared/http/apiOrigin"
 import { listMessages } from "./messages.api"
 
 /** Socket listener subset needed for conversation subscription and tests. */
@@ -28,7 +29,7 @@ export interface ConversationSubscriptionOptions {
 
 /** Open an authenticated Socket.IO connection using the current in-memory access token. */
 export function createChatSocket(): ChatSocket {
-    return io(undefined, {
+    return io(API_ORIGIN || undefined, {
         auth: (completeHandshake) => completeHandshake({
             [SOCKET_AUTH_FIELDS.TOKEN]: getAccessToken(),
         }),

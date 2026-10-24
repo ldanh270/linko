@@ -1,4 +1,5 @@
 import { ApiError, HTTP_ERROR } from "./ApiError"
+import { API_ORIGIN } from "./apiOrigin"
 
 /** Request options accepted by the shared HTTP client. */
 export interface RequestOptions extends Omit<RequestInit, "body"> {
@@ -15,7 +16,7 @@ export type UnauthorizedRecovery = () => Promise<boolean>
 /** Centralize JSON transport and envelope validation for feature APIs. */
 export class ApiClient {
   constructor(
-    private readonly baseUrl = "",
+    private readonly baseUrl = API_ORIGIN,
     private readonly getAuthHeaders?: AuthHeaderProvider,
     private readonly recoverUnauthorized?: UnauthorizedRecovery,
   ) {}

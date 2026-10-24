@@ -1,5 +1,6 @@
 import { API_ROUTES, AUTH_ROUTE_PATHS, type AuthAccessTokenDto, type LoginInput, type SignupInput, type UserDto } from "@linko/contracts"
 
+import { API_ORIGIN } from "@/shared/http/apiOrigin"
 import { ApiClient } from "@/shared/http/client"
 import { AUTH_CLIENT_EVENTS } from "../auth.constants"
 
@@ -18,7 +19,7 @@ let sessionGeneration = 0
 const authApiClient = new ApiClient()
 
 /** Use shared auth transport with an in-memory access token and single-flight refresh. */
-export const authenticatedApiClient = new ApiClient("", getAuthorizationHeaders, recoverUnauthorizedRequest)
+export const authenticatedApiClient = new ApiClient(API_ORIGIN, getAuthorizationHeaders, recoverUnauthorizedRequest)
 
 /** Register an account and return its safe public DTO. */
 export function signup(input: SignupInput): Promise<UserDto> {
