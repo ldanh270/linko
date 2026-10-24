@@ -651,9 +651,9 @@ export const ORDER_STATUS = { … } as const;
 5. New code MUST follow this document even if surrounding legacy code does not. Flag the discrepancy instead of copying the bad pattern.
 6. Add/modify doc-comments using the templates in Section 8.
 
-### After completing a coding task
-7. Review the diff, stage only files belonging to the task, and create a local Conventional Commit without asking for confirmation. Leave unrelated changes unstaged. Do not push unless the user explicitly requests it.
-8. A coding task is not complete until the commit succeeds. Verify the new commit with `git status --short` and `git log -1 --oneline`; if commit creation fails, report the exact blocker and keep working on a safe resolution instead of silently leaving the task uncommitted.
+### After completing a coding task (or sub-task)
+7. **Commit immediately upon completing each task/sub-task ("Xong cái nào commit cái đó"):** As soon as a logical unit of work (e.g., a bug fix, a feature slice, a UI adjustment, or a migration) is completed and verified, create a local Conventional Commit immediately before moving on to the next task or concluding. Never accumulate multiple distinct tasks into one delayed commit or leave finished work uncommitted. Stage only files belonging to that specific task; leave unrelated changes unstaged. Do not push unless the user explicitly requests it.
+8. A coding task or sub-task is NOT complete until its commit succeeds. Verify the new commit with `git status --short` and `git log -1 --oneline`; if commit creation fails, report the exact blocker and keep working on a safe resolution instead of silently leaving the task uncommitted.
 
 ### Definition of Done: self-review checklist
 - [ ] Layers respected: no logic in controllers/routes/UI components; no DB access outside repositories
@@ -669,9 +669,11 @@ export const ORDER_STATUS = { … } as const;
 - [ ] Loading, empty, and error states exist for every data view
 - [ ] Types strict, no `any`, no `console.log`, no dead/commented-out code
 - [ ] Doc-comments follow the template; tests added/updated; lint, typecheck, and tests pass
+- [ ] Committed immediately upon completion: each sub-task has its own atomic commit; no completed work is left uncommitted
 - [ ] Any deviation from this document is justified in the summary
 
 ### Never do
+- ❌ Leave completed tasks uncommitted or batch multiple distinct tasks into a single deferred commit at the very end
 - ❌ Return stack traces, SQL, or internal error text to a client
 - ❌ Log business exceptions (expected behavior) or swallow technical ones silently
 - ❌ Hand-write audit fields, soft-delete filters, or auth checks inside business methods
