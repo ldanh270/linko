@@ -17,7 +17,15 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     <article className={`message-row ${message.isOwn ? "message-row--own" : ""} ${message.isGroupEnd ? "" : "message-row--continuation"}`} data-owner={message.isOwn ? "self" : "peer"} data-message-id={message.id}>
       {message.isGroupEnd ? <Avatar label={message.author} src={message.avatarUrl} size="small" /> : <span className="message-avatar-spacer" aria-hidden="true" />}
       <div className="message-stack"><div className="message-content-row">
-        <div className="message-bubble">{message.isPinned && <span className="text-xs"><Icon name={ICON_NAMES.PIN} /> Đã ghim</span>}<p>{message.content}</p>
+        <div className="message-bubble">
+          {message.isPinned && <span className="text-xs"><Icon name={ICON_NAMES.PIN} /> Đã ghim</span>}
+          {message.reply && (
+            <div className="message-reply-preview">
+              <span className="message-reply-author">{message.reply.author}</span>
+              <p className="message-reply-content">{message.reply.content}</p>
+            </div>
+          )}
+          <p>{message.content}</p>
           {message.attachments.map((file) => <MessageAttachment key={file.id} file={file} />)}
           <time className="message-time" dateTime={message.createdAt}><Icon name={ICON_NAMES.CLOCK} />{message.time}</time>
         </div><DropdownMenu label={CHAT_COPY.MESSAGE_ACTIONS} items={message.actions} />

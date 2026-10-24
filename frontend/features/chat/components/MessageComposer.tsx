@@ -13,7 +13,13 @@ export interface MessageComposerProps { readonly state: ReturnType<typeof useCon
 /** Render the reference composer while preserving file, reply and mention behavior. UI only. */
 export function MessageComposer({ state }: MessageComposerProps) {
   return <form onSubmit={state.composer.onSubmit} className="composer" aria-label="Soạn tin nhắn">
-    {state.composer.replyId && <ReplyPreview onCancel={state.composer.onCancelReply} />}
+    {state.composer.replyId && (
+      <ReplyPreview
+        author={state.composer.replyTarget?.author}
+        content={state.composer.replyTarget?.content}
+        onCancel={state.composer.onCancelReply}
+      />
+    )}
     {state.composer.showMentions && state.members.data && <MentionList members={state.members.data} onSelect={state.composer.onMention} />}
     {state.composer.showMentions && state.members.isError && <p role="alert" className="composer-error">Không thể tải thành viên để nhắc tên.</p>}
     {state.composer.files.length > 0 && <p className="composer-note">{state.composer.files.length} tệp đã chọn</p>}

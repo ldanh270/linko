@@ -1,7 +1,7 @@
 import { MESSAGE_FIELDS, MESSAGE_ATTACHMENT_FIELDS, type MessageDto, type MessageAttachmentDto } from "@linko/contracts"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
 import { CHAT_COPY } from "./chat.constants"
-import type { AttachmentViewModel, ChatAuthor, MessageViewModel } from "./chat.types"
+import type { AttachmentViewModel, ChatAuthor, MessageReplyViewModel, MessageViewModel } from "./chat.types"
 
 /** Inputs for ownership, attribution and calendar grouping. */
 export interface TimelineMapping { readonly messages: readonly MessageDto[]; readonly currentUserId: string; readonly authors: readonly ChatAuthor[]; readonly pinnedIds: ReadonlySet<string> }
@@ -13,6 +13,19 @@ export function mapTimeline({ messages, currentUserId, authors, pinnedIds }: Tim
     const previous = messages[index - 1]
     const next = messages[index + 1]
     const author = authors.find((entry) => entry.id === message[MESSAGE_FIELDS.SENDER_ID])
+    const replyTargetId = message[MESSAGE_FIELDS.REPLY_TO]
+    const replyTarget = replyTargetId ? messages.find((candidate) => candidate[MESSAGE_FIELDS.ID] === replyTargetId) : null
+    const replyAuthor = replyTarget
+      ? (replyTarget[MESSAGE_FIELDS.SENDER_ID] === currentUserId
+          ? "Bạn"
+          : (authors.find((entry) => entry.id === replyTarget[MESSAGE_FIELDS.SENDER_ID])?.name ?? CHAT_COPY.MEMBER))
+      : null
+    const reply: MessageReplyViewModel | null = replyTarget ? {
+      id: replyTarget[MESSAGE_FIELDS.ID],
+      author: replyAuthor ?? CHAT_COPY.MEMBER,
+      content: replyTarget[MESSAGE_FIELDS.CONTENT] ?? (replyTarget[MESSAGE_FIELDS.ATTACHMENTS]?.length ? "Đính kèm tệp" : ""),
+    } : null
+
     return {
       id: message[MESSAGE_FIELDS.ID], content: message[MESSAGE_FIELDS.CONTENT] ?? "", isOwn: message[MESSAGE_FIELDS.SENDER_ID] === currentUserId,
       author: author?.name ?? CHAT_COPY.MEMBER, avatarUrl: author?.avatarUrl ?? null,
@@ -20,6 +33,7 @@ export function mapTimeline({ messages, currentUserId, authors, pinnedIds }: Tim
       dateLabel: date.toDateString() === new Date().toDateString() ? "Hôm nay" : date.toLocaleDateString("vi-VN"), showDate: Boolean(previous && new Date(previous[MESSAGE_FIELDS.CREATED_AT]).toDateString() !== date.toDateString()),
       isGroupEnd: !next || next[MESSAGE_FIELDS.SENDER_ID] !== message[MESSAGE_FIELDS.SENDER_ID] || new Date(next[MESSAGE_FIELDS.CREATED_AT]).toDateString() !== date.toDateString(),
       isPinned: pinnedIds.has(message[MESSAGE_FIELDS.ID]), attachments: message[MESSAGE_FIELDS.ATTACHMENTS].map((file) => mapAttachment(file, message[MESSAGE_FIELDS.ID])),
+      reply,
     }
   })
 }

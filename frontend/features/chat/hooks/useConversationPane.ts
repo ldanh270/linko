@@ -55,5 +55,13 @@ export function useConversationPane(item: InboxItemDto) {
     { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => composer.onReply(row.id) },
     ...(kind === CHAT_KIND.GROUP ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: pins.update.isPending || (!row.isPinned && pinnedIds.size >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
   ] }))
-  return { conversationId: id, query, profile, composer, members, pins, kind, isComposerDisabled, isHistoryUnavailable, isIdentityUnavailable, header: { title, avatarUrl, backHref, actions, isSearchOpen: isSearchOpen || Boolean(search), onToggleSearch: () => setSearchOpen(!isSearchOpen), search, searchRevision, onSearchChange }, rows: search ? actionRows.filter((row) => row.content.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))) : actionRows }
+  const replyTargetRow = composer.replyId ? rows.find((row) => row.id === composer.replyId) : null
+  const composerState = {
+    ...composer,
+    replyTarget: replyTargetRow ? {
+      author: replyTargetRow.author,
+      content: replyTargetRow.content || (replyTargetRow.attachments.length ? "Đính kèm tệp" : ""),
+    } : null,
+  }
+  return { conversationId: id, query, profile, composer: composerState, members, pins, kind, isComposerDisabled, isHistoryUnavailable, isIdentityUnavailable, header: { title, avatarUrl, backHref, actions, isSearchOpen: isSearchOpen || Boolean(search), onToggleSearch: () => setSearchOpen(!isSearchOpen), search, searchRevision, onSearchChange }, rows: search ? actionRows.filter((row) => row.content.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))) : actionRows }
 }
