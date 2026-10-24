@@ -11,6 +11,7 @@
         "dev": "tsx watch src/index.ts",
         "start": "tsx src/index.ts",
         "seed": "tsx scripts/seed.ts",
+        "db:hash": "tsx scripts/hashPassword.ts",
         "db:status": "tsx scripts/databaseStatus.ts",
         "db:shell": "tsx scripts/mongoShell.ts",
         "db:clear": "tsx scripts/clearDatabase.ts",

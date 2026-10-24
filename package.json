@@ -22,6 +22,7 @@
     "db:shell": "pnpm -C backend db:shell",
     "db:clear": "pnpm -C backend db:clear",
     "db:seed": "pnpm -C backend db:seed",
+    "db:hash": "pnpm -C backend db:hash",
     "db:migrate:audit": "pnpm -C backend db:migrate:audit",
     "db:migrate:notifications": "pnpm -C backend db:migrate:notifications",
     "dev:backend": "pnpm run be:dev",
