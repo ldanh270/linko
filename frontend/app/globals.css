@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "../shared/theme/tokens.css";
+@import "../shared/theme/reference-fonts.css";
+@import "../shared/theme/messenger.css";
 
 @theme inline {
   --color-background: var(--background);
@@ -64,10 +66,3 @@ body {
 .avatar--medium { width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
 .avatar--large { width: 5rem; height: 5rem; font-size: 1.5rem; }
 
-.app-layout { min-height: 100dvh; }
-.app-rail { background: var(--surface); border-right: 1px solid var(--border); }
-.app-main { min-width: 0; }
-
-@media (min-width: 768px) {
-  .app-layout { display: grid; grid-template-columns: 4.75rem minmax(0, 1fr); }
-}

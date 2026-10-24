@@ -1,0 +1,18 @@
+import { ICON_NAMES } from "./icon.constants"
+
+/** Outline fallbacks for unused glyph mappings stripped from the saved reference. */
+export const ICON_PATHS: Readonly<Record<string, string>> = {
+  [ICON_NAMES.SUN]: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5",
+  [ICON_NAMES.BACK]: "m14 5-7 7 7 7M7 12h14", [ICON_NAMES.CHEVRON]: "m6 9 6 6 6-6",
+  [ICON_NAMES.CLOSE]: "m6 6 12 12M6 18 18 6", [ICON_NAMES.ADD]: "M12 5v14M5 12h14",
+  [ICON_NAMES.IMAGE]: "M4 4h16v16H4ZM4 16l5-5 4 4 3-3 4 4M15 8h.01",
+  [ICON_NAMES.LOGOUT]: "M9 4H4v16h5m5-12 4 4-4 4m-6-4h10",
+  [ICON_NAMES.SECURITY]: "M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6ZM12 9v5m0 3h.01",
+  [ICON_NAMES.LOCK]: "M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5Zm7 4v2",
+  [ICON_NAMES.HELP]: "M9 8a3 3 0 1 1 5 3c-2 1-2 2-2 3m0 3h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
+  [ICON_NAMES.REPLY]: "m9 4-7 7 7 6v-5c7 0 10 3 13 7-1-9-5-12-13-12Z",
+  [ICON_NAMES.PIN]: "m9 3 12 12-3 1-3 4-4-4-6-1 4-4 1-3Zm0 12-6 6",
+  [ICON_NAMES.CHECK]: "m2 12 5 5L19 5m-7 10 3 3 8-9",
+  [ICON_NAMES.DELETE]: "M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7",
+  [ICON_NAMES.BRAND]: "M4 4h16v13H9l-5 4ZM8 8v5m4-7v9m4-6v3",
+}

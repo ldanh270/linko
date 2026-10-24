@@ -1,0 +1,15 @@
+/** Reference Remix Icon glyphs shared by navigation and feature actions. */
+export const ICON_NAMES = {
+  PROFILE: "user-2-line", CHAT: "message-3-line", GROUP: "group-line", CONTACTS: "contacts-line",
+  SETTINGS: "settings-2-line", MOON: "moon-clear-line", SUN: "sun-line", SEARCH: "search-line",
+  PHONE: "phone-line", VIDEO: "vidicon-line", MORE: "more-fill", MENU: "more-2-fill",
+  EMOJI: "emotion-happy-line", ATTACH: "attachment-line", SEND: "send-plane-2-fill",
+  BACK: "arrow-left-line", CHEVRON: "arrow-down-s-line", CLOSE: "close-line", ADD: "add-line",
+  ADD_CONTACT: "user-add-line", DOWNLOAD: "download-2-line", FILE: "file-text-fill",
+  IMAGE: "image-line", EDIT: "pencil-fill", LOGOUT: "logout-box-r-line", SECURITY: "shield-keyhole-line",
+  LOCK: "lock-line", HELP: "question-line", CLOCK: "time-line", REPLY: "reply-line",
+  PIN: "pushpin-line", CHECK: "check-double-line", DELETE: "delete-bin-line", BRAND: "chat-voice-fill",
+} as const
+
+/** Valid icon names prevent feature code from inventing unsupported glyphs. */
+export type IconName = (typeof ICON_NAMES)[keyof typeof ICON_NAMES]

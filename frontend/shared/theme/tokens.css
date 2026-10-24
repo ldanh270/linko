@@ -1,79 +1,24 @@
 :root {
-  --font-family-sans: "Be Vietnam Pro", system-ui, sans-serif;
-  --font-size-body: 0.9375rem;
-  --line-height-body: 1.5;
+  --font-family-sans: "Public Sans", "Be Vietnam Pro", system-ui, sans-serif;
+  --font-size-body: 0.9375rem; --line-height-body: 1.5;
+  --rail-width: 75px; --sidebar-width: 380px;
+  --radius-control: .25rem; --radius-panel: .25rem; --radius-bubble: .5rem;
+  --shadow-panel: 0 2px 4px rgb(15 34 58 / .04); --shadow-brand: none;
+  --background: #f5f7fb; --surface: #fff; --surface-subtle: #f5f7fb;
+  --input-surface: #e6ebf5; --bubble-outgoing: #eff2f7;
+  --text-primary: #343a40; --text-secondary: #74788d;
+  --brand: #7269ef; --brand-hover: #6159d5; --brand-contrast: #fff; --brand-soft: #7269ef1a;
+  --border: #e1e4ea; --positive: #06d6a0; --danger: #c83c3c; --danger-contrast: #fff;
+  --badge-background: #f9d9df; --badge-text: #ef476f; color-scheme: light;
 }
-
-:root,
-:root[data-theme="light"] {
-  color-scheme: light;
-  --background: #f5f7fb;
-  --surface: #ffffff;
-  --surface-subtle: #f8f9fc;
-  --text-primary: #343a40;
-  --text-secondary: #696d81;
-  --brand: #625ad8;
-  --brand-hover: #564dc9;
-  --brand-contrast: #ffffff;
-  --brand-soft: #eeedff;
-  --border: #e9ebf0;
-  --positive: #1b7a52;
-  --danger: #c83c3c;
-  --danger-contrast: #ffffff;
-  --radius-control: 0.75rem;
-  --radius-panel: 1rem;
-  --radius-bubble: 1.125rem;
-  --shadow-panel: 0 0.125rem 0.75rem rgb(54 64 74 / 0.06);
-  --shadow-brand: 0 0.25rem 0.75rem rgb(114 105 239 / 0.2);
-}
-
 :root[data-theme="dark"] {
-  color-scheme: dark;
-  --background: #303841;
-  --surface: #36404a;
-  --surface-subtle: #3d4751;
-  --text-primary: #f4f5f7;
-  --text-secondary: #b4bdc6;
-  --brand: #b9b4ff;
-  --brand-hover: #c5c0ff;
-  --brand-contrast: #282e32;
-  --brand-soft: #48446f;
-  --border: #47515b;
-  --positive: #62cf9b;
-  --danger: #ff8179;
-  --danger-contrast: #282e32;
-  --shadow-panel: 0 0.125rem 0.75rem rgb(0 0 0 / 0.16);
-  --shadow-brand: 0 0.25rem 0.75rem rgb(114 105 239 / 0.24);
+  --background: #303841; --surface: #262e35; --surface-subtle: #303841;
+  --input-surface: #36404a; --bubble-outgoing: #36404a;
+  --text-primary: #e1e9f1; --text-secondary: #a6b0cf;
+  --brand-hover: #8880f5; --brand-soft: #7269ef26; --border: #36404a;
+  --badge-background: #ef476f26; --badge-text: #ff91a8;
+  --danger: #ff8179; --danger-contrast: #262e35; color-scheme: dark;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    color-scheme: dark;
-    --background: #303841;
-    --surface: #36404a;
-    --surface-subtle: #3d4751;
-    --text-primary: #f4f5f7;
-    --text-secondary: #b4bdc6;
-    --brand: #b9b4ff;
-    --brand-hover: #c5c0ff;
-    --brand-contrast: #282e32;
-    --brand-soft: #48446f;
-    --border: #47515b;
-    --positive: #62cf9b;
-    --danger: #ff8179;
-    --danger-contrast: #282e32;
-    --shadow-panel: 0 0.125rem 0.75rem rgb(0 0 0 / 0.16);
-    --shadow-brand: 0 0.25rem 0.75rem rgb(114 105 239 / 0.24);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
