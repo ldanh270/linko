@@ -7,10 +7,16 @@ import type { ChatKind, ComposerRequest, SendCallbacks } from "../chat.types"
 import { useComposerFilePreviews } from "./useComposerFilePreviews"
 
 /** Composer dependencies expose only the send operation and current pending state. */
-export interface MessageComposerOptions { readonly kind: ChatKind; readonly isSending: boolean; readonly isDisabled?: boolean; readonly onSend: (input: ComposerRequest, callbacks: SendCallbacks) => void }
+export interface MessageComposerOptions {
+  readonly kind: ChatKind
+  readonly isSending: boolean
+  readonly isDisabled?: boolean
+  readonly onSend: (input: ComposerRequest, callbacks: SendCallbacks) => void
+  readonly onTyping?: () => void
+}
 
 /** Own a recipient-scoped draft, upload validation and stable retry identity. */
-export function useMessageComposer({ kind, isSending, isDisabled = false, onSend }: MessageComposerOptions) {
+export function useMessageComposer({ kind, isSending, isDisabled = false, onSend, onTyping }: MessageComposerOptions) {
   const [content, setContent] = useState("")
   const [replyId, setReplyId] = useState<string | null>(null)
   const [files, setFiles] = useState<readonly File[]>([])
@@ -22,7 +28,12 @@ export function useMessageComposer({ kind, isSending, isDisabled = false, onSend
   const [showMentions, setShowMentions] = useState(false)
   const filePreviews = useComposerFilePreviews(files)
 
-  const onContentChange = (value: string) => { setContent(value); retryId.current = null; setShowMentions(kind === CHAT_KIND.GROUP && value.endsWith("@")) }
+  const onContentChange = (value: string) => {
+    setContent(value)
+    retryId.current = null
+    setShowMentions(kind === CHAT_KIND.GROUP && value.endsWith("@"))
+    onTyping?.()
+  }
 
   const validateFiles = (selected: readonly File[]): string | null => {
     if (selected.length > ATTACHMENT_LIMITS.MAX_FILE_COUNT) return CHAT_COPY.FILE_COUNT_ERROR

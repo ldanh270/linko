@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
-import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS } from "@linko/contracts"
+import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS, SOCKET_EVENTS } from "@linko/contracts"
 import { useQueryParamState } from "@/shared/url/useQueryParamState"
 import { WORKSPACE_PARAMS } from "@/shared/layout/workspace.constants"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
@@ -15,6 +15,8 @@ import { useConversationChat } from "./useConversationChat"
 import { useGroupPins } from "./useGroupPins"
 import { useMessageComposer } from "./useMessageComposer"
 import { useConversationDetails } from "./useConversationDetails"
+import { useTypingIndicator } from "./useTypingIndicator"
+import { createChatSocket } from "../api/chatSocket"
 import { mapTimeline } from "../chat.mapper"
 import { CHAT_ACCESS_ERRORS, CHAT_COPY, CHAT_KIND, CHAT_QUERY_KEYS } from "../chat.constants"
 import { ApiError } from "@/shared/http/ApiError"
@@ -35,7 +37,34 @@ export function useConversationPane(item: InboxItemDto) {
   const isHistoryUnavailable = (query.isError && !query.data) || isHistoryAccessDenied
   const isIdentityUnavailable = (profile.isError && !profile.data) || isIdentityAccessDenied
   const isComposerDisabled = !query.data || !profile.data || isHistoryUnavailable || isIdentityUnavailable
-  const composer = useMessageComposer({ kind, isSending: send.isPending, isDisabled: isComposerDisabled, onSend: send.mutate })
+
+  const socketRef = useRef<ReturnType<typeof createChatSocket> | null>(null)
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const emitTyping = () => {
+    if (!socketRef.current) socketRef.current = createChatSocket()
+    socketRef.current.emit(SOCKET_EVENTS.TYPING_START, { conversationId: id })
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+    typingTimerRef.current = setTimeout(() => {
+      socketRef.current?.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
+    }, 2500)
+  }
+
+  const stopTyping = () => {
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+    socketRef.current?.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
+  }
+
+  const composer = useMessageComposer({
+    kind,
+    isSending: send.isPending,
+    isDisabled: isComposerDisabled,
+    onTyping: emitTyping,
+    onSend: (req, cb) => {
+      stopTyping()
+      send.mutate(req, cb)
+    },
+  })
   const pinnedIds = new Set(pins.query.data?.map((message) => message.id) ?? [])
   const authors = item.participants.map((person) => ({ id: person.id, name: person.displayName ?? CHAT_COPY.MEMBER, avatarUrl: person.avatarUrl }))
   if (profile.data) authors.push({ id: profile.data[USER_PROFILE_FIELDS.ID], name: profile.data[USER_PROFILE_FIELDS.DISPLAY_NAME], avatarUrl: profile.data[USER_PROFILE_FIELDS.AVATAR_URL] })
@@ -44,6 +73,10 @@ export function useConversationPane(item: InboxItemDto) {
   const peer = item.participants.find((person) => person.id !== profile.data?.id)
   const title = item.group?.name ?? peer?.displayName ?? CHAT_COPY.PRIVATE
   const avatarUrl = kind === CHAT_KIND.GROUP ? item.group?.avatarUrl ?? null : peer?.avatarUrl
+  const { typingUserIds } = useTypingIndicator(id, profile.data?.id)
+  const typingNames = typingUserIds
+    .map((userId) => authors.find((author) => author.id === userId)?.name || "Ai đó")
+    .join(", ")
   const { value: search, setValue: setSearch, revision: searchRevision } = useQueryParamState(WORKSPACE_PARAMS.MESSAGE_SEARCH, z.string(), "")
   const [isSearchOpen, setSearchOpen] = useState(false)
   const onSearchChange = (value: string) => setSearch(value, { history: "replace", debounceMs: 250 })
@@ -116,6 +149,7 @@ export function useConversationPane(item: InboxItemDto) {
       isDetailsOpen,
       onToggleDetails,
     },
+    typingNames,
     rows: search ? actionRows.filter((row) => row.content.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))) : actionRows,
   }
 }
