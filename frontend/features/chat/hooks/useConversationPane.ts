@@ -105,6 +105,7 @@ export function useConversationPane(item: InboxItemDto) {
     header: {
       title,
       avatarUrl,
+      peerId: peer?.id,
       backHref,
       actions,
       isSearchOpen: isSearchOpen || Boolean(search),

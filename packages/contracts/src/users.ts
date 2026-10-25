@@ -10,6 +10,7 @@ export const USER_ROUTE_PATHS = {
     ME: "/me",
     BY_ID: `/:${USER_ROUTE_PARAMS.USER_ID}`,
     SEARCH: "/search",
+    PRESENCE: "/presence",
 } as const
 
 /** Query parameter names accepted by the authenticated public people search. */
@@ -86,4 +87,19 @@ export interface UpdateProfileRequest {
     readonly [USER_PROFILE_FIELDS.BIO]?: string | null
     readonly [USER_PROFILE_FIELDS.REMOVE_AVATAR]?: boolean
     readonly [USER_PROFILE_FIELDS.REMOVE_BACKGROUND]?: boolean
+}
+
+/** Online presence payload broadcast over sockets. */
+export interface PresenceEventDto {
+    readonly userId: string
+    readonly status: "online" | "offline"
+    readonly lastActive?: string
+}
+
+/** Typing indicator payload broadcast over sockets. */
+export interface TypingEventDto {
+    readonly conversationId: string
+    readonly userId: string
+    readonly displayName?: string
+    readonly isTyping: boolean
 }

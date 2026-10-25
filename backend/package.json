@@ -26,8 +26,8 @@
     "type": "module",
     "author": "ldanh270",
     "dependencies": {
-        "@linko/contracts": "workspace:*",
         "@aws-sdk/client-s3": "^3.922.0",
+        "@linko/contracts": "workspace:*",
         "bcrypt": "^6.0.0",
         "cloudinary": "^2.8.0",
         "cookie-parser": "^1.4.7",
@@ -35,6 +35,7 @@
         "dotenv": "^17.2.3",
         "express": "^5.2.1",
         "file-type": "^21.1.1",
+        "ioredis": "^6.0.0",
         "jsonwebtoken": "^9.0.3",
         "mongoose": "^9.0.1",
         "multer": "^2.0.2",
@@ -43,7 +44,6 @@
         "zod": "^4.1.13"
     },
     "devDependencies": {
-        "@types/supertest": "^6.0.3",
         "@trivago/prettier-plugin-sort-imports": "^6.0.0",
         "@types/bcrypt": "^6.0.0",
         "@types/cookie-parser": "^1.4.10",
@@ -52,11 +52,12 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/multer": "^2.0.0",
         "@types/node": "^24.10.1",
+        "@types/supertest": "^6.0.3",
+        "mongodb-memory-server": "^10.2.3",
         "prettier": "^3.7.4",
         "supertest": "^7.1.4",
-        "mongodb-memory-server": "^10.2.3",
+        "tsx": "^4.23.15",
         "typescript": "^5.9.3",
-        "vitest": "^3.2.4",
-        "tsx": "^4.23.15"
+        "vitest": "^3.2.4"
     }
 }

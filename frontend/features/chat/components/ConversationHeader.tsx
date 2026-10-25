@@ -5,6 +5,7 @@ import { IconButton } from "@/shared/components/IconButton"
 import { SearchInput } from "@/shared/components/SearchInput"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { usePresence } from "@/shared/presence/usePresence"
 import { CHAT_DETAILS_COPY } from "../chat.constants"
 
 /** Header view prepared by the conversation hook. */
@@ -14,6 +15,9 @@ export interface ConversationHeaderProps {
 
 /** Render identity and supported conversation tools in reference positions. UI only. */
 export function ConversationHeader({ header }: ConversationHeaderProps) {
+  const presence = usePresence(header.peerId ? [header.peerId] : [])
+  const isPeerOnline = header.peerId ? presence.isOnline(header.peerId) : undefined
+
   return (
     <div>
       <header className="conversation-header">
@@ -21,8 +25,19 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
           <Link href={header.backHref} aria-label="Về danh sách tin nhắn" className="conversation-mobile-back">
             <Icon name={ICON_NAMES.BACK} />
           </Link>
-          <Avatar label={header.title} src={header.avatarUrl} />
-          <h2>{header.title}</h2>
+          <Avatar label={header.title} src={header.avatarUrl} isOnline={isPeerOnline} />
+          <div className="min-w-0">
+            <h2>{header.title}</h2>
+            {isPeerOnline !== undefined && (
+              <p className="text-xs text-[var(--text-secondary)]">
+                {isPeerOnline ? (
+                  <span className="text-[var(--positive)] font-medium">Đang hoạt động</span>
+                ) : (
+                  "Ngoại tuyến"
+                )}
+              </p>
+            )}
+          </div>
         </div>
         <div className="conversation-actions">
           <IconButton

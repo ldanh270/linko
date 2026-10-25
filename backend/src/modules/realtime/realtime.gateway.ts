@@ -14,6 +14,7 @@ import type {
     SocketIdentity,
 } from "./realtime.types"
 import { authenticateRealtimeSocket } from "./realtime.auth"
+import { presenceService } from "./presence.service"
 import type { Server } from "socket.io"
 
 /** Authenticate sockets and authorize every conversation room transition.
@@ -47,8 +48,66 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
                 return
             }
             void socket.join(userRoom(userId))
+
+            void presenceService.onConnect(userId).then((isFirst) => {
+                if (isFirst) {
+                    socket.broadcast.emit(SOCKET_EVENTS.PRESENCE_ONLINE, { userId, status: "online" })
+                }
+            })
+
+            socket.on(SOCKET_EVENTS.PRESENCE_QUERY, (userIds: unknown, acknowledge?: (res: Record<string, boolean>) => void) => {
+                if (Array.isArray(userIds)) {
+                    const validIds = userIds.filter((id): id is string => typeof id === "string" && REGEX.MONGO_ID.test(id))
+                    void presenceService.getPresenceBatch(validIds).then((res) => acknowledge?.(res))
+                } else {
+                    acknowledge?.({})
+                }
+            })
+
+            socket.on(SOCKET_EVENTS.TYPING_START, (payload: unknown) => {
+                if (typeof payload === "object" && payload !== null && "conversationId" in payload) {
+                    const conversationId = (payload as { conversationId: unknown }).conversationId
+                    if (typeof conversationId === "string" && REGEX.MONGO_ID.test(conversationId)) {
+                        void this.dependencies.repository.isCurrentMember(conversationId, userId).then((isMember) => {
+                            if (isMember) {
+                                socket.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, {
+                                    conversationId,
+                                    userId,
+                                    isTyping: true,
+                                })
+                            }
+                        })
+                    }
+                }
+            })
+
+            socket.on(SOCKET_EVENTS.TYPING_STOP, (payload: unknown) => {
+                if (typeof payload === "object" && payload !== null && "conversationId" in payload) {
+                    const conversationId = (payload as { conversationId: unknown }).conversationId
+                    if (typeof conversationId === "string" && REGEX.MONGO_ID.test(conversationId)) {
+                        socket.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, {
+                            conversationId,
+                            userId,
+                            isTyping: false,
+                        })
+                    }
+                }
+            })
+
             socket.on(SOCKET_EVENTS.CONVERSATION_JOIN, (conversationId: unknown, acknowledge?: (joined: boolean) => void) => {
                 void this.joinConversation(socket, conversationId).then((joined) => acknowledge?.(joined))
+            })
+
+            socket.on("disconnect", () => {
+                void presenceService.onDisconnect(userId).then((isOffline) => {
+                    if (isOffline) {
+                        server.emit(SOCKET_EVENTS.PRESENCE_OFFLINE, {
+                            userId,
+                            status: "offline",
+                            lastActive: new Date().toISOString(),
+                        })
+                    }
+                })
             })
         })
     }

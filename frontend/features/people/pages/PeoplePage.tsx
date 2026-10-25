@@ -10,6 +10,7 @@ import { EmptyState } from "@/shared/components/EmptyState"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { usePresence } from "@/shared/presence/usePresence"
 import { usePeoplePage } from "../hooks/usePeoplePage"
 import { AddContactModal } from "../components/AddContactModal/AddContactModal"
 import { PersonProfilePanel } from "../components/PersonProfilePanel"
@@ -18,6 +19,8 @@ import { PersonProfilePanel } from "../components/PersonProfilePanel"
 export function PeoplePage() {
   const state = usePeoplePage()
 
+  const friendIds = (state.friends.data ?? []).map((f) => f.id)
+  const presence = usePresence(friendIds)
   const totalFriends = state.friends.data?.length ?? 0
 
   return (
@@ -111,12 +114,18 @@ export function PeoplePage() {
                     className="surface-panel flex items-center justify-between gap-3 p-3.5 transition-shadow hover:shadow-md"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <Avatar label={contact.name} size="medium" />
+                      <Avatar label={contact.name} size="medium" isOnline={presence.isOnline(contact.id)} />
                       <div className="min-w-0">
                         <p className="font-semibold text-sm truncate" title={contact.name}>
                           {contact.name}
                         </p>
-                        <p className="text-xs text-[var(--text-secondary)]">Bạn bè</p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          {presence.isOnline(contact.id) ? (
+                            <span className="text-[var(--positive)] font-medium">Trực tuyến</span>
+                          ) : (
+                            "Ngoại tuyến"
+                          )}
+                        </p>
                       </div>
                     </div>
 

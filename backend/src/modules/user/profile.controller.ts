@@ -4,6 +4,7 @@ import mongoose from "mongoose"
 
 import { HttpStatusCode } from "../../configs/constants/httpStatusCode"
 import { ApiResponse } from "../../shared/http/ApiResponse"
+import { presenceService } from "../realtime/presence.service"
 import { PROFILE_FIELDS, PROFILE_ROUTE_PARAMS } from "./profile.constants"
 import { ProfileService } from "./profile.service"
 import type { UpdateProfileInput } from "./profile.types"
@@ -20,6 +21,14 @@ export class ProfileController {
     readonly getMine: RequestHandler<Record<string, string>, ApiEnvelope<ProfileDto>, Record<string, never>> = async (request, response) => {
         const profile = await this.service.getMine(request.user._id)
         response.status(HttpStatusCode.OK).json(ApiResponse.ok(profile))
+    }
+
+    /** Return batch presence statuses for requested user IDs. */
+    readonly getPresence: RequestHandler<Record<string, string>, ApiEnvelope<Record<string, boolean>>, Record<string, never>, { ids?: string }> = async (request, response) => {
+        const rawIds = typeof request.query.ids === "string" ? request.query.ids.split(",") : []
+        const userIds = rawIds.filter((id) => mongoose.Types.ObjectId.isValid(id))
+        const presence = await presenceService.getPresenceBatch(userIds)
+        response.status(HttpStatusCode.OK).json(ApiResponse.ok(presence))
     }
 
     /** Return the redacted public profile of one signed-in user's target. */
