@@ -4,6 +4,7 @@ import { Link } from "../components/Link"
 import { IconButton } from "../components/IconButton"
 import { Icon } from "../icons/Icon"
 import { ICON_NAMES } from "../icons/icon.constants"
+import { useI18n } from "../i18n/useI18n"
 import { NavigationItem, type NavigationItemProps } from "./NavigationItem"
 import { APP_ROUTES } from "./route.constants"
 import type { ReactNode } from "react"
@@ -13,9 +14,10 @@ export interface NavigationRailProps { readonly links: readonly NavigationItemPr
 
 /** Render the 75px reference rail with centered destinations and bottom account actions. UI only. */
 export function NavigationRail({ links, onToggleTheme, account }: NavigationRailProps) {
+  const { copy } = useI18n()
   return <aside className="app-rail" aria-label="Điều hướng chính">
-    <Link href={APP_ROUTES.INBOX} aria-label="Linko, về tin nhắn" className="rail-logo"><Icon name={ICON_NAMES.BRAND} /></Link>
+    <Link href={APP_ROUTES.INBOX} aria-label={copy.navigation.brandLogo} className="rail-logo"><Icon name={ICON_NAMES.BRAND} /></Link>
     <nav aria-label="Chính" className="rail-items">{links.map((item) => <NavigationItem key={item.destination} {...item} />)}</nav>
-    <div className="rail-footer"><IconButton label="Đổi giao diện sáng tối" icon={<Icon name={ICON_NAMES.MOON} />} onClick={onToggleTheme} />{account}</div>
+    <div className="rail-footer"><IconButton label={copy.navigation.toggleTheme} icon={<Icon name={ICON_NAMES.MOON} />} onClick={onToggleTheme} />{account}</div>
   </aside>
 }
