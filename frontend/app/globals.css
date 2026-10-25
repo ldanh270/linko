@@ -66,3 +66,19 @@ body {
 .avatar--medium { width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
 .avatar--large { width: 5rem; height: 5rem; font-size: 1.5rem; }
 
+
+.rail-account-link {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+
+.rail-account-link:hover {
+  opacity: 0.85;
+}
+
+.rail-account-link.is-active {
+  box-shadow: 0 0 0 2px var(--brand);
+}

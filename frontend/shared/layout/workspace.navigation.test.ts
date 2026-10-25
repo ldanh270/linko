@@ -13,4 +13,9 @@ describe("workspace navigation", () => {
     expect(withConversation("/settings", "aaaaaaaaaaaaaaaaaaaaaaaa")).toBe("/settings?conversation=aaaaaaaaaaaaaaaaaaaaaaaa")
     expect(withConversation("/settings", "bad")).toBe("/settings")
   })
+  it("should_treat_profile_people_and_settings_as_full_page_details", () => {
+    expect(getWorkspaceLocation("/profile", null).isDetail).toBe(true)
+    expect(getWorkspaceLocation("/people", null).isDetail).toBe(true)
+    expect(getWorkspaceLocation("/settings", null).isDetail).toBe(true)
+  })
 })

@@ -10,10 +10,10 @@ export interface AppShellProps { readonly children: ReactNode; readonly account?
 
 /** Compose the reference rail with workspace or secondary detail pages. UI only. */
 export function AppShell({ children, account }: AppShellProps) {
-  const { links, toggleTheme, isDetail } = useAppShell()
+  const { links, mobileLinks, toggleTheme, isDetail } = useAppShell()
   return <div className="app-layout">
     <NavigationRail links={links} onToggleTheme={toggleTheme} account={account} />
     <main id="main-content" className={`app-main ${isDetail ? "detail-layout" : ""}`}>{children}</main>
-    <MobileNavigation links={links} />
+    <MobileNavigation links={mobileLinks} />
   </div>
 }
