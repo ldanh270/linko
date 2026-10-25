@@ -1,7 +1,16 @@
 import { THEME_MODE } from "@/shared/theme/theme.constants"
 
 /** URL identifiers for the reference settings accordion. */
-export const SETTINGS_SECTIONS = { PERSONAL: "personal", PRIVACY: "privacy", SECURITY: "security", HELP: "help", APPEARANCE: "appearance" } as const
+export const SETTINGS_SECTIONS = {
+  CHAT: "chat",
+  LANGUAGE: "language",
+  APPEARANCE: "appearance",
+  SOUND: "sound",
+  PERSONAL: "personal",
+  PRIVACY: "privacy",
+  SECURITY: "security",
+  HELP: "help",
+} as const
 /** Existing theme choices retained under appearance. */
 export const THEME_OPTIONS = [{ value: THEME_MODE.SYSTEM, label: "Theo thiết bị" }, { value: THEME_MODE.LIGHT, label: "Sáng" }, { value: THEME_MODE.DARK, label: "Tối" }] as const
 /** Explain actual supported account behavior instead of adding nonfunctional switches. */

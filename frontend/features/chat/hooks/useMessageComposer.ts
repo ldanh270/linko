@@ -5,6 +5,7 @@ import { ATTACHMENT_LIMITS } from "@linko/contracts"
 import { ALLOWED_ATTACHMENT_EXTENSIONS, CHAT_COPY, CHAT_KIND } from "../chat.constants"
 import type { ChatKind, ComposerRequest, SendCallbacks } from "../chat.types"
 import { useComposerFilePreviews } from "./useComposerFilePreviews"
+import { useChatPreferences } from "../preferences/useChatPreferences"
 
 /** Composer dependencies expose only the send operation and current pending state. */
 export interface MessageComposerOptions {
@@ -98,7 +99,18 @@ export function useMessageComposer({ kind, isSending, isDisabled = false, onSend
       },
     })
   }
-  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) onSubmit(event) }
+  const { preferences: chatPreferences } = useChatPreferences()
+  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (chatPreferences.sendOnEnter) {
+      if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+        onSubmit(event)
+      }
+    } else {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.nativeEvent.isComposing) {
+        onSubmit(event)
+      }
+    }
+  }
   const onInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => onContentChange(event.target.value)
   const onFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files ?? [])

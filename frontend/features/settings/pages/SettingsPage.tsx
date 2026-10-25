@@ -6,65 +6,53 @@ import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
 import { LoadingState } from "@/shared/components/LoadingState"
 import { ErrorState } from "@/shared/components/ErrorState"
-import { ProfileIdentity } from "@/features/profile/components/ProfileIdentity"
-import { ProfileEditModal } from "@/features/profile/components/ProfileEditModal/ProfileEditModal"
+import { useI18n } from "@/shared/i18n/useI18n"
 import { useSettingsPage } from "../hooks/useSettingsPage"
-import { PersonalInfoSection } from "../components/PersonalInfoSection"
+import { AccountSummarySection } from "../components/AccountSummarySection"
+import { ChatSettingsSection } from "../components/ChatSettingsSection"
+import { LanguageSection } from "../components/LanguageSection"
 import { AppearanceSection } from "../components/AppearanceSection"
+import { SoundNotificationSection } from "../components/SoundNotificationSection"
 import { SettingsDisclosure } from "../components/SettingsDisclosure"
 import { LogoutDialog } from "../components/LogoutDialog/LogoutDialog"
 
-/** Render the full-page application settings with clean section panels. UI only. */
+/** Render the full-page application settings with chat preferences, language, appearance and security. UI only. */
 export function SettingsPage() {
   const state = useSettingsPage()
+  const { copy } = useI18n()
   const profileData = state.profile.query.data
 
   return (
     <section className="mx-auto grid max-w-4xl gap-6">
       <PageHeader
-        eyebrow="Tùy chỉnh & Hệ thống"
-        title="Cài đặt"
-        description="Quản lý tùy chọn cá nhân, hiển thị giao diện, quyền riêng tư và phiên bảo mật."
+        eyebrow={copy.settings.eyebrow}
+        title={copy.settings.title}
+        description={copy.settings.description}
       />
 
-      {/* Account & Profile Section */}
-      <article className="surface-panel p-6 grid gap-5">
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
-          <div>
-            <h2 className="text-lg font-semibold">Tài khoản & Hồ sơ</h2>
-            <p className="text-sm text-[var(--text-secondary)]">Thông tin định danh và tài khoản hiển thị trên Linko.</p>
-          </div>
-          {profileData && (
-            <Button size="small" variant="secondary" onClick={state.profile.onOpenEdit}>
-              <Icon name={ICON_NAMES.EDIT} /> Chỉnh sửa
-            </Button>
-          )}
-        </div>
+      {/* Account Info Card (Read-only with direct link to /profile) */}
+      {state.profile.query.isPending ? (
+        <LoadingState label={copy.common.loading} />
+      ) : !profileData ? (
+        <ErrorState title="Không thể tải tài khoản" onRetry={state.profile.onRetry} />
+      ) : (
+        <AccountSummarySection profile={profileData} />
+      )}
 
-        {state.profile.query.isPending ? (
-          <LoadingState label="Đang tải thông tin tài khoản..." />
-        ) : !profileData ? (
-          <ErrorState title="Không thể tải tài khoản" onRetry={state.profile.onRetry} />
-        ) : (
-          <div className="grid gap-6">
-            <ProfileIdentity
-              name={profileData.displayName}
-              username={profileData.username}
-              avatarUrl={profileData.avatarUrl}
-              onEdit={state.profile.onOpenEdit}
-            />
-            <div className="border-t border-[var(--border)] pt-4">
-              <PersonalInfoSection profile={state.profile} onEdit={state.profile.onOpenEdit} />
-            </div>
-          </div>
-        )}
-      </article>
+      {/* Chat Settings Section */}
+      <ChatSettingsSection />
+
+      {/* Language Section (Đa ngôn ngữ) */}
+      <LanguageSection />
+
+      {/* Sound Notifications Section */}
+      <SoundNotificationSection />
 
       {/* Appearance Section */}
       <article className="surface-panel p-6 grid gap-4">
         <div className="border-b border-[var(--border)] pb-3">
-          <h2 className="text-lg font-semibold">Giao diện hiển thị</h2>
-          <p className="text-sm text-[var(--text-secondary)]">Chọn chủ đề hiển thị phù hợp với thiết bị của bạn.</p>
+          <h2 className="text-lg font-semibold">{copy.settings.appearanceTitle}</h2>
+          <p className="text-sm text-[var(--text-secondary)]">{copy.settings.appearanceDescription}</p>
         </div>
         <AppearanceSection options={state.themeOptions} />
       </article>
@@ -72,8 +60,8 @@ export function SettingsPage() {
       {/* Privacy, Security & Help Explanations */}
       <article className="surface-panel p-6 grid gap-4">
         <div className="border-b border-[var(--border)] pb-3">
-          <h2 className="text-lg font-semibold">Bảo mật & Quyền riêng tư</h2>
-          <p className="text-sm text-[var(--text-secondary)]">Chính sách bảo vệ thông tin và các tính năng hỗ trợ.</p>
+          <h2 className="text-lg font-semibold">{copy.settings.privacyTitle}</h2>
+          <p className="text-sm text-[var(--text-secondary)]">{copy.settings.privacyDescription}</p>
         </div>
         <div className="grid gap-3">
           {state.explanations.map((section) => (
@@ -85,21 +73,18 @@ export function SettingsPage() {
       {/* Session / Danger Zone */}
       <article className="surface-panel p-6 border-[var(--danger)]/40 bg-[var(--danger)]/5 grid gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--danger)]">Đăng xuất tài khoản</h2>
+          <h2 className="text-lg font-semibold text-[var(--danger)]">{copy.settings.logoutTitle}</h2>
           <p className="text-sm text-[var(--text-secondary)]">
-            Kết thúc phiên làm việc trên thiết bị này. Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng Linko.
+            {copy.settings.logoutDescription}
           </p>
         </div>
         <div>
           <Button variant="danger" onClick={state.logout.onOpen}>
-            <Icon name={ICON_NAMES.LOGOUT} /> Đăng xuất khỏi thiết bị
+            <Icon name={ICON_NAMES.LOGOUT} /> {copy.settings.logoutBtn}
           </Button>
         </div>
       </article>
 
-      {state.profile.isEditing && (
-        <ProfileEditModal state={state.profile} onClose={state.profile.onCloseEdit} />
-      )}
       {state.logout.isOpen && <LogoutDialog state={state.logout} />}
     </section>
   )
