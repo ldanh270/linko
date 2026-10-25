@@ -13,6 +13,7 @@ export const APP_ROUTES = {
   DIRECT: "/direct",
   DIRECT_CONVERSATION: "/direct/:conversationId",
   PEOPLE: "/people",
+  NOTIFICATIONS: "/notifications",
   PROFILE: "/profile",
   SETTINGS: "/settings",
   ATTACHMENT: "/attachments/:messageId/:attachmentId",

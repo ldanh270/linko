@@ -17,5 +17,6 @@ describe("workspace navigation", () => {
     expect(getWorkspaceLocation("/profile", null).isDetail).toBe(true)
     expect(getWorkspaceLocation("/people", null).isDetail).toBe(true)
     expect(getWorkspaceLocation("/settings", null).isDetail).toBe(true)
+    expect(getWorkspaceLocation("/notifications", null).isDetail).toBe(true)
   })
 })

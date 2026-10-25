@@ -2,10 +2,11 @@ import { APP_ROUTES } from "./route.constants"
 import { OBJECT_ID_PATTERN, WORKSPACE_PARAMS } from "./workspace.constants"
 
 /** Primary standalone routes that display full-page details rather than a messenger workspace. */
-const FULL_PAGE_ROUTES = new Set<string>([
+export const FULL_PAGE_ROUTES = new Set<string>([
   APP_ROUTES.PROFILE,
   APP_ROUTES.PEOPLE,
   APP_ROUTES.SETTINGS,
+  APP_ROUTES.NOTIFICATIONS,
 ])
 
 /** Derive workspace selection while keeping non-chat panels visible on small screens. */

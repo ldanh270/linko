@@ -9,6 +9,7 @@ export const ICON_NAMES = {
   IMAGE: "image-line", EDIT: "pencil-fill", LOGOUT: "logout-box-r-line", SECURITY: "shield-keyhole-line",
   LOCK: "lock-line", HELP: "question-line", CLOCK: "time-line", REPLY: "reply-line",
   PIN: "pushpin-line", CHECK: "check-double-line", DELETE: "delete-bin-line", BRAND: "chat-voice-fill",
+  BELL: "notification-3-line",
 } as const
 
 /** Valid icon names prevent feature code from inventing unsupported glyphs. */

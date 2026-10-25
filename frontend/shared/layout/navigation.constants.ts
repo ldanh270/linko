@@ -5,6 +5,7 @@ import { APP_ROUTES } from "./route.constants"
 export const APP_NAVIGATION = [
   { href: APP_ROUTES.INBOX, label: "Tin nhắn", icon: ICON_NAMES.CHAT },
   { href: APP_ROUTES.PEOPLE, label: "Danh bạ", icon: ICON_NAMES.CONTACTS },
+  { href: APP_ROUTES.NOTIFICATIONS, label: "Thông báo", icon: ICON_NAMES.BELL },
   { href: APP_ROUTES.SETTINGS, label: "Cài đặt", icon: ICON_NAMES.SETTINGS },
 ] as const
 
