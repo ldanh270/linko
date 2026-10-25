@@ -3,9 +3,11 @@ import { Button } from "@/shared/components/Button"
 import { IconButton } from "@/shared/components/IconButton"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { ATTACHMENT_ACCEPT_ATTRIBUTE } from "../chat.constants"
 import type { useConversationPane } from "../hooks/useConversationPane"
 import { ReplyPreview } from "./ReplyPreview"
 import { MentionList } from "./MentionList"
+import { ComposerFilePreviews } from "./ComposerFilePreviews"
 
 /** Composer state exposes only behavior prepared outside JSX. */
 export interface MessageComposerProps { readonly state: ReturnType<typeof useConversationPane> }
@@ -22,11 +24,11 @@ export function MessageComposer({ state }: MessageComposerProps) {
     )}
     {state.composer.showMentions && state.members.data && <MentionList members={state.members.data} onSelect={state.composer.onMention} />}
     {state.composer.showMentions && state.members.isError && <p role="alert" className="composer-error">Không thể tải thành viên để nhắc tên.</p>}
-    {state.composer.files.length > 0 && <p className="composer-note">{state.composer.files.length} tệp đã chọn</p>}
+    <ComposerFilePreviews previews={state.composer.filePreviews} onRemove={state.composer.onRemoveFile} />
     <div className="composer-controls"><label className="sr-only" htmlFor="message-input">Soạn tin nhắn</label>
       <textarea id="message-input" rows={1} maxLength={MESSAGE_LIMITS.MAX_CONTENT_LENGTH} value={state.composer.content} onChange={state.composer.onInputChange} onKeyDown={state.composer.onKeyDown} placeholder="Nhập tin nhắn..." disabled={state.composer.isSending || state.isComposerDisabled} />
       <IconButton className="emoji-action" label="Thêm biểu tượng cảm xúc" disabled={state.composer.isSending || state.isComposerDisabled} icon={<Icon name={ICON_NAMES.EMOJI} />} onClick={state.composer.onEmoji} />
-      <label className="composer-attachment" title="Đính kèm tệp"><Icon name={ICON_NAMES.ATTACH} /><span className="sr-only">Đính kèm tệp</span><input type="file" multiple className="sr-only" onChange={state.composer.onFileInputChange} disabled={state.composer.isSending || state.isComposerDisabled} /></label>
+      <label className="composer-attachment" title="Đính kèm tệp"><Icon name={ICON_NAMES.ATTACH} /><span className="sr-only">Đính kèm tệp</span><input type="file" multiple accept={ATTACHMENT_ACCEPT_ATTRIBUTE} className="sr-only" onChange={state.composer.onFileInputChange} disabled={state.composer.isSending || state.isComposerDisabled} /></label>
       <Button type="submit" aria-label="Gửi tin nhắn" isLoading={state.composer.isSending} disabled={!state.composer.canSend || state.isComposerDisabled} title="Gửi tin nhắn"><Icon name={ICON_NAMES.SEND} /></Button>
     </div>
     {state.composer.fileError && <p role="alert" className="composer-error">{state.composer.fileError}</p>}

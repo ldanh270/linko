@@ -1,16 +1,54 @@
+"use client"
+
 import { Link } from "@/shared/components/Link"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
 import { CHAT_DETAILS_COPY } from "../../chat.constants"
 import type { AttachmentViewModel } from "../../chat.types"
+import { useAttachmentThumbnail } from "../../hooks/useAttachmentThumbnail"
+import { useConversationDetailsMedia } from "../../hooks/useConversationDetailsMedia"
+import { ImageLightbox } from "../ImageLightbox"
 
 export interface ConversationDetailsMediaProps {
   readonly photos: readonly AttachmentViewModel[]
   readonly files: readonly AttachmentViewModel[]
 }
 
+interface ConversationPhotoThumbProps {
+  readonly photo: AttachmentViewModel
+  readonly onSelect: (photo: AttachmentViewModel, objectUrl: string) => void
+}
+
+function ConversationPhotoThumb({ photo, onSelect }: ConversationPhotoThumbProps) {
+  const isImage = Boolean(photo.imageUrl)
+  const thumbnail = useAttachmentThumbnail({
+    messageId: photo.messageId,
+    attachmentId: photo.id,
+    isImage,
+  })
+
+  return (
+    <button
+      type="button"
+      className="details-photo-thumb"
+      onClick={() => thumbnail.objectUrl && onSelect(photo, thumbnail.objectUrl)}
+      disabled={!thumbnail.objectUrl}
+      aria-label={`Xem ảnh ${photo.name}`}
+    >
+      {thumbnail.objectUrl ? (
+        <img src={thumbnail.objectUrl} alt={photo.name} loading="lazy" />
+      ) : (
+        <div className="details-photo-placeholder">
+          <Icon name={ICON_NAMES.IMAGE} />
+        </div>
+      )}
+    </button>
+  )
+}
+
 /** Render shared images and file attachments from the conversation timeline. UI only. */
 export function ConversationDetailsMedia({ photos, files }: ConversationDetailsMediaProps) {
+  const { activePhoto, onSelectPhoto, onClosePhoto } = useConversationDetailsMedia()
   const hasPhotos = photos.length > 0
   const hasFiles = files.length > 0
 
@@ -25,15 +63,11 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
           <h4 className="details-subsection-title">{CHAT_DETAILS_COPY.PHOTOS}</h4>
           <div className="details-photos-grid">
             {photos.map((photo) => (
-              <Link key={photo.id} href={photo.href} className="details-photo-thumb" target="_blank">
-                {photo.imageUrl ? (
-                  <img src={photo.imageUrl} alt={photo.name} loading="lazy" />
-                ) : (
-                  <div className="details-photo-placeholder">
-                    <Icon name={ICON_NAMES.IMAGE} />
-                  </div>
-                )}
-              </Link>
+              <ConversationPhotoThumb
+                key={photo.id}
+                photo={photo}
+                onSelect={onSelectPhoto}
+              />
             ))}
           </div>
         </div>
@@ -59,6 +93,15 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
             ))}
           </ul>
         </div>
+      )}
+
+      {activePhoto && (
+        <ImageLightbox
+          src={activePhoto.objectUrl}
+          alt={activePhoto.photo.name}
+          name={activePhoto.photo.name}
+          onClose={onClosePhoto}
+        />
       )}
     </div>
   )

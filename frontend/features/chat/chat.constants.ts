@@ -11,8 +11,19 @@ export const CHAT_QUERY_KEYS = { MESSAGES: "messages", MEMBERS: "members", PREFE
 export const CHAT_COPY = {
   MEMBER: "Thành viên", PRIVATE: "Tin nhắn riêng", GROUP: "Nhóm riêng", SEND_ERROR: "Tin nhắn chưa gửi được. Hãy thử lại.",
   FILE_COUNT_ERROR: "Mỗi tin nhắn có thể đính kèm tối đa 5 tệp.", FILE_SIZE_ERROR: "Mỗi tệp có dung lượng tối đa 10 MiB.",
+  FILE_TYPE_ERROR: "Định dạng tệp không được hỗ trợ. Vui lòng chọn ảnh (JPG, PNG, WebP, GIF) hoặc tài liệu (PDF, Word, Excel, CSV, TXT).",
   UNTITLED_FILE: "Tệp đính kèm", MESSAGE_ACTIONS: "Tùy chọn tin nhắn", REPLY: "Trả lời", PIN: "Ghim", UNPIN: "Bỏ ghim",
 } as const
+
+/** Allowed file extensions for attachments in messages. */
+export const ALLOWED_ATTACHMENT_EXTENSIONS = [
+  ".jpg", ".jpeg", ".jfif", ".png", ".webp", ".gif",
+  ".pdf", ".txt", ".csv", ".docx", ".xlsx", ".pptx",
+] as const
+
+/** Accept attribute value for browser file pickers. */
+export const ATTACHMENT_ACCEPT_ATTRIBUTE =
+  "image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.jfif,.png,.webp,.gif,.pdf,.txt,.csv,.docx,.xlsx,.pptx" as const
 
 /** Details sheet accordion section keys. */
 export const CHAT_DETAILS_SECTIONS = {

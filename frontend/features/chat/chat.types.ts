@@ -15,13 +15,22 @@ export interface MessageViewModel {
   readonly reply: MessageReplyViewModel | null
 }
 /** Safe attachment presentation removes route/size/type calculations from JSX. */
-export interface AttachmentViewModel { readonly id: string; readonly name: string; readonly sizeLabel: string; readonly imageUrl: string | null; readonly href: string }
+export interface AttachmentViewModel { readonly id: string; readonly messageId: string; readonly name: string; readonly sizeLabel: string; readonly imageUrl: string | null; readonly href: string }
 /** Timeline actions are prepared by the feature hook rather than inside row markup. */
 export interface MessageRowViewModel extends MessageViewModel { readonly actions: readonly DropdownAction[] }
 /** Composer request preserves idempotency and existing attachment/reply/mention contracts. */
 export interface ComposerRequest { readonly clientMessageId: string; readonly content: string; readonly files: readonly File[]; readonly mentions: readonly string[]; readonly replyTo?: string }
+/** Local file preview item before message is sent. */
+export interface ComposerFilePreview {
+  readonly id: string
+  readonly file: File
+  readonly name: string
+  readonly sizeLabel: string
+  readonly isImage: boolean
+  readonly previewUrl: string | null
+}
 /** Mutation callbacks are kept independent of the query library's presentation types. */
-export interface SendCallbacks { readonly onSuccess: () => void; readonly onError: () => void }
+export interface SendCallbacks { readonly onSuccess: () => void; readonly onError: (error?: unknown) => void }
 
 /** Display member in conversation details sheet. */
 export interface ConversationMemberViewModel {

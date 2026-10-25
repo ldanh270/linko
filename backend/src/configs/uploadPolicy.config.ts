@@ -9,8 +9,11 @@ export const MULTER_ERROR_CODES = {
     FILE_COUNT_LIMIT: "LIMIT_FILE_COUNT",
 } as const
 
-export const normalizeUploadMimeType = (mimeType: string) =>
-    mimeType.split(";", 1)[0].trim().toLowerCase()
+export const normalizeUploadMimeType = (mimeType: string) => {
+    const raw = mimeType.split(";", 1)[0].trim().toLowerCase()
+    if (raw === "image/jpg" || raw === "image/pjpeg") return "image/jpeg"
+    return raw
+}
 
 const profileImageFormatByMimeType = {
     "image/jpeg": "jpeg",
@@ -36,9 +39,10 @@ export type MessageAttachmentSpec = {
 }
 
 export const MESSAGE_ATTACHMENT_SPECS: Record<string, MessageAttachmentSpec> = {
-    "image/jpeg": { extensions: [".jpg", ".jpeg"] },
+    "image/jpeg": { extensions: [".jpg", ".jpeg", ".jfif"] },
     "image/png": { extensions: [".png"] },
     "image/webp": { extensions: [".webp"] },
+    "image/gif": { extensions: [".gif"] },
     "application/pdf": { extensions: [".pdf"] },
     "text/plain": { extensions: [".txt"] },
     "text/csv": { extensions: [".csv"] },

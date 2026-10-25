@@ -40,7 +40,7 @@ export function mapTimeline({ messages, currentUserId, authors, pinnedIds }: Tim
 
 /** Prepare attachment links and human-readable sizes using safe public metadata only. */
 export function mapAttachment(file: MessageAttachmentDto, messageId: string): AttachmentViewModel {
-  return { id: file[MESSAGE_ATTACHMENT_FIELDS.ID], name: file[MESSAGE_ATTACHMENT_FIELDS.NAME] ?? CHAT_COPY.UNTITLED_FILE,
+  return { id: file[MESSAGE_ATTACHMENT_FIELDS.ID], messageId, name: file[MESSAGE_ATTACHMENT_FIELDS.NAME] ?? CHAT_COPY.UNTITLED_FILE,
     imageUrl: file[MESSAGE_ATTACHMENT_FIELDS.CONTENT_TYPE]?.startsWith("image/") ? file[MESSAGE_ATTACHMENT_FIELDS.URL] : null,
     sizeLabel: file[MESSAGE_ATTACHMENT_FIELDS.SIZE] === null ? "" : `${((file[MESSAGE_ATTACHMENT_FIELDS.SIZE] ?? 0) / 1024).toFixed(1)} KB`,
     href: buildAppRoute(APP_ROUTES.ATTACHMENT, { messageId, attachmentId: file[MESSAGE_ATTACHMENT_FIELDS.ID] }) }
