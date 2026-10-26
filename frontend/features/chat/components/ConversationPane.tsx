@@ -5,6 +5,7 @@ import { LoadingState } from "@/shared/components/LoadingState"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { useConversationPane } from "../hooks/useConversationPane"
 import { ConversationHeader } from "./ConversationHeader"
+import { ConversationSearchBar } from "./ConversationSearchBar"
 import { MessageTimeline } from "./MessageTimeline"
 import { MessageComposer } from "./MessageComposer"
 import { ConversationDetailsSheet } from "./details/ConversationDetailsSheet"
@@ -19,6 +20,21 @@ export function ConversationPane({ item }: ConversationPaneProps) {
     <div className={`conversation-layout ${state.details.isOpen ? "has-details" : ""}`}>
       <div className="conversation-pane">
         <ConversationHeader header={state.header} />
+        {state.searchState.isOpen && (
+          <ConversationSearchBar
+            query={state.searchState.query}
+            onChange={state.searchState.onChange}
+            matches={state.searchState.matches}
+            activeIndex={state.searchState.activeIndex}
+            onNext={state.searchState.onNext}
+            onPrev={state.searchState.onPrev}
+            onSelectMatch={state.searchState.onSelectMatch}
+            onClose={state.searchState.onClose}
+            hasMoreHistory={state.searchState.hasMoreHistory}
+            isLoadingMore={state.searchState.isLoadingMore}
+            onLoadMoreHistory={state.searchState.onLoadMoreHistory}
+          />
+        )}
         {state.query.isPending || state.profile.isPending ? (
           <LoadingState label="Đang tải tin nhắn" />
         ) : state.isIdentityUnavailable ? (

@@ -2,7 +2,6 @@ import type { useConversationPane } from "../hooks/useConversationPane"
 import { Avatar } from "@/shared/components/Avatar"
 import { Link } from "@/shared/components/Link"
 import { IconButton } from "@/shared/components/IconButton"
-import { SearchInput } from "@/shared/components/SearchInput"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
@@ -84,14 +83,6 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
           />
         </div>
       </header>
-      {header.isSearchOpen && (
-        <SearchInput
-          label="Tìm trong tin nhắn đã tải"
-          value={header.search}
-          stateKey={header.searchRevision}
-          onChange={header.onSearchChange}
-        />
-      )}
     </div>
   )
 }

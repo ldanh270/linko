@@ -14,6 +14,8 @@ export interface MessageViewModel {
   readonly avatarUrl: string | null; readonly createdAt: string; readonly time: string; readonly dateLabel: string
   readonly showDate: boolean; readonly isGroupEnd: boolean; readonly isPinned: boolean; readonly attachments: readonly AttachmentViewModel[]
   readonly reply: MessageReplyViewModel | null
+  readonly isSearchActive?: boolean
+  readonly searchQuery?: string
 }
 /** Safe attachment presentation removes route/size/type calculations from JSX. */
 export interface AttachmentViewModel { readonly id: string; readonly messageId: string; readonly name: string; readonly sizeLabel: string; readonly imageUrl: string | null; readonly href: string }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
@@ -89,7 +89,66 @@ export function useConversationPane(item: InboxItemDto) {
     .join(", ")
   const { value: search, setValue: setSearch, revision: searchRevision } = useQueryParamState(WORKSPACE_PARAMS.MESSAGE_SEARCH, z.string(), "")
   const [isSearchOpen, setSearchOpen] = useState(false)
-  const onSearchChange = (value: string) => setSearch(value, { history: "replace", debounceMs: 250 })
+  const onSearchChange = (value: string) => setSearch(value, { history: "replace", debounceMs: 200 })
+
+  const [activeMatchIndex, setActiveMatchIndex] = useState(0)
+
+  const searchMatches = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return []
+    return rows
+      .filter((row) => row.content.toLowerCase().includes(q))
+      .map((row) => ({
+        id: row.id,
+        content: row.content,
+        author: row.author,
+        time: row.time,
+      }))
+  }, [search, rows])
+
+  useEffect(() => {
+    setActiveMatchIndex(0)
+  }, [search])
+
+  const activeMatch = searchMatches[activeMatchIndex] ?? null
+  const activeMatchId = activeMatch?.id ?? null
+
+  useEffect(() => {
+    if (!activeMatchId) return
+    const el = document.querySelector(`[data-message-id="${activeMatchId}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" })
+    }
+  }, [activeMatchId])
+
+  const onNextMatch = useCallback(() => {
+    if (searchMatches.length === 0) return
+    setActiveMatchIndex((current) => (current + 1) % searchMatches.length)
+  }, [searchMatches.length])
+
+  const onPrevMatch = useCallback(() => {
+    if (searchMatches.length === 0) return
+    setActiveMatchIndex((current) => (current - 1 + searchMatches.length) % searchMatches.length)
+  }, [searchMatches.length])
+
+  const onSelectMatch = useCallback((index: number) => {
+    if (index >= 0 && index < searchMatches.length) {
+      setActiveMatchIndex(index)
+    }
+  }, [searchMatches.length])
+
+  const onCloseSearch = useCallback(() => {
+    setSearch("")
+    setSearchOpen(false)
+  }, [setSearch])
+
+  const onToggleSearch = useCallback(() => {
+    if (isSearchOpen || Boolean(search)) {
+      onCloseSearch()
+    } else {
+      setSearchOpen(true)
+    }
+  }, [isSearchOpen, search, onCloseSearch])
 
   const { value: isDetailsOpenRaw, setValue: setDetailsOpenRaw } = useQueryParamState(
     WORKSPACE_PARAMS.DETAILS,
@@ -121,10 +180,15 @@ export function useConversationPane(item: InboxItemDto) {
     { label: "Bạn bè", icon: ICON_NAMES.CONTACTS, onSelect: () => router.push(APP_ROUTES.PEOPLE) },
   ]
   const onPin = (messageId: string, isPinned: boolean) => pins.update.mutate({ messageId, isPinned })
-  const actionRows = rows.map((row) => ({ ...row, actions: [
-    { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => composer.onReply(row.id) },
-    ...(kind === CHAT_KIND.GROUP ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: pins.update.isPending || (!row.isPinned && pinnedIds.size >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
-  ] }))
+  const actionRows = rows.map((row) => ({
+    ...row,
+    isSearchActive: row.id === activeMatchId,
+    searchQuery: search.trim() ? search : undefined,
+    actions: [
+      { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => composer.onReply(row.id) },
+      ...(kind === CHAT_KIND.GROUP ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: pins.update.isPending || (!row.isPinned && pinnedIds.size >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
+    ],
+  }))
   const replyTargetRow = composer.replyId ? rows.find((row) => row.id === composer.replyId) : null
   const composerState = {
     ...composer,
@@ -152,14 +216,29 @@ export function useConversationPane(item: InboxItemDto) {
       backHref,
       actions,
       isSearchOpen: isSearchOpen || Boolean(search),
-      onToggleSearch: () => setSearchOpen(!isSearchOpen),
+      onToggleSearch,
       search,
       searchRevision,
       onSearchChange,
       isDetailsOpen,
       onToggleDetails,
     },
+    searchState: {
+      isOpen: isSearchOpen || Boolean(search),
+      query: search,
+      matches: searchMatches,
+      activeIndex: activeMatchIndex,
+      activeMatchId,
+      onChange: onSearchChange,
+      onNext: onNextMatch,
+      onPrev: onPrevMatch,
+      onSelectMatch,
+      onClose: onCloseSearch,
+      hasMoreHistory: Boolean(query.hasNextPage),
+      isLoadingMore: Boolean(query.isFetchingNextPage),
+      onLoadMoreHistory: () => void query.fetchNextPage(),
+    },
     typingNames,
-    rows: search ? actionRows.filter((row) => row.content.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))) : actionRows,
+    rows: actionRows,
   }
 }

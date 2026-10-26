@@ -12,11 +12,31 @@ import { MessageAttachment } from "./MessageAttachment"
 /** Prepared row with ownership, display labels and supported actions. */
 export interface MessageBubbleProps { readonly message: MessageRowViewModel }
 
+/** Helper to highlight matched search query text safely inside message bubble. */
+function renderHighlightedContent(content: string, query?: string) {
+  if (!query || !query.trim()) return content
+  const q = query.trim()
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const regex = new RegExp(`(${escaped})`, "gi")
+  const parts = content.split(regex)
+  if (parts.length <= 1) return content
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === q.toLowerCase() ? (
+      <mark key={index} className="search-match-text">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  )
+}
+
 /** Render an incoming or outgoing reference bubble with sender attribution. UI only. */
 export function MessageBubble({ message }: MessageBubbleProps) {
   return <Fragment>
     {message.showDate && <div className="message-date"><span>{message.dateLabel}</span></div>}
-    <article className={`message-row ${message.isOwn ? "message-row--own" : ""} ${message.isGroupEnd ? "" : "message-row--continuation"}`} data-owner={message.isOwn ? "self" : "peer"} data-message-id={message.id}>
+    <article className={`message-row ${message.isOwn ? "message-row--own" : ""} ${message.isGroupEnd ? "" : "message-row--continuation"} ${message.isSearchActive ? "is-search-active" : ""}`} data-owner={message.isOwn ? "self" : "peer"} data-message-id={message.id}>
       {message.isGroupEnd ? (
         message.senderId ? (
           <Link
@@ -41,7 +61,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               <p className="message-reply-content">{message.reply.content}</p>
             </div>
           )}
-          <p>{message.content}</p>
+          <p>{renderHighlightedContent(message.content, message.searchQuery)}</p>
           {message.attachments.map((file) => <MessageAttachment key={file.id} file={file} />)}
           <time className="message-time" dateTime={message.createdAt}><Icon name={ICON_NAMES.CLOCK} />{message.time}</time>
         </div><DropdownMenu label={CHAT_COPY.MESSAGE_ACTIONS} items={message.actions} />
