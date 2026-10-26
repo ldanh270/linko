@@ -7,6 +7,8 @@ import { downloadAttachment, type AttachmentDownload } from "@/features/chat/api
 import { LoadingState } from "@/shared/components/LoadingState"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { Link } from "@/shared/components/Link"
+import { Icon } from "@/shared/icons/Icon"
+import { ICON_NAMES } from "@/shared/icons/icon.constants"
 
 /** Fetch one authorized attachment and revoke its temporary URL when closed. */
 export function AttachmentViewerPage() {
@@ -32,6 +34,6 @@ export function AttachmentViewerPage() {
   const isImage = download?.blob.type.startsWith("image/") ?? false
   const fileName = "attachment"
   return <section className="mx-auto grid min-h-[60dvh] max-w-5xl content-start gap-5"><header className="flex items-center justify-between"><div><p className="text-sm font-semibold text-[var(--brand)]">Tệp riêng tư</p><h1 className="mt-1 text-2xl font-bold">Xem tệp đính kèm</h1></div><Link href="/inbox">Quay lại hộp thư</Link></header>
-    {isLoading ? <LoadingState label="Đang tải tệp an toàn" /> : hasError || !download ? <ErrorState title="Không thể mở tệp hoặc bạn không còn quyền truy cập" onRetry={retry} /> : isImage ? <figure className="grid min-h-80 place-items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"><Image src={download.objectUrl} alt="Ảnh đính kèm trong cuộc trò chuyện" width={1600} height={1200} unoptimized className="max-h-[65dvh] max-w-full object-contain" /></figure> : <section className="grid justify-items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-10 text-center"><span aria-hidden="true" className="text-5xl">↧</span><p className="text-[var(--text-secondary)]">Định dạng này được tải xuống thiết bị của bạn.</p><a href={download.objectUrl} download={fileName} className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand)] px-5 font-semibold text-[var(--brand-contrast)]">Tải tệp</a></section>}
+    {isLoading ? <LoadingState label="Đang tải tệp an toàn" /> : hasError || !download ? <ErrorState title="Không thể mở tệp hoặc bạn không còn quyền truy cập" onRetry={retry} /> : isImage ? <figure className="grid min-h-80 place-items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"><Image src={download.objectUrl} alt="Ảnh đính kèm trong cuộc trò chuyện" width={1600} height={1200} unoptimized className="max-h-[65dvh] max-w-full object-contain" /></figure> : <section className="grid justify-items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-10 text-center"><Icon name={ICON_NAMES.DOWNLOAD} className="h-12 w-12 text-[var(--brand)]" /><p className="text-[var(--text-secondary)]">Định dạng này được tải xuống thiết bị của bạn.</p><a href={download.objectUrl} download={fileName} className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand)] px-5 font-semibold text-[var(--brand-contrast)]">Tải tệp</a></section>}
   </section>
 }

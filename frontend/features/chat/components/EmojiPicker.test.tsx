@@ -11,9 +11,9 @@ describe("EmojiPicker", () => {
 
     expect(screen.getByRole("dialog", { name: "Chọn biểu tượng cảm xúc" })).toBeDefined()
     expect(screen.getByPlaceholderText("Tìm biểu tượng...")).toBeDefined()
-    expect(screen.getByText("😀 Cảm xúc")).toBeDefined()
-    expect(screen.getByText("👍 Cử chỉ & Tim")).toBeDefined()
-    expect(screen.getByText("🎉 Hoạt động & Vật phẩm")).toBeDefined()
+    expect(screen.getByText("Cảm xúc")).toBeDefined()
+    expect(screen.getByText("Cử chỉ")).toBeDefined()
+    expect(screen.getByText("Vật phẩm")).toBeDefined()
   })
 
   it("selects an emoji and triggers callbacks", () => {

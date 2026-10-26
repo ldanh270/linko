@@ -22,14 +22,14 @@ export const LANGUAGE_OPTIONS: readonly LanguageOption[] = [
     code: APP_LANGUAGE.VI,
     label: "Tiếng Việt",
     nativeLabel: "Tiếng Việt (Việt Nam)",
-    flag: "🇻🇳",
+    flag: "VN",
     description: "Ngôn ngữ mặc định của ứng dụng",
   },
   {
     code: APP_LANGUAGE.EN,
     label: "English",
     nativeLabel: "English (US)",
-    flag: "🇬🇧",
+    flag: "EN",
     description: "International English language",
   },
 ] as const

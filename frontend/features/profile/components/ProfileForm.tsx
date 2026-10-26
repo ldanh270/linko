@@ -151,7 +151,12 @@ export function ProfileForm(props: ProfileFormProps) {
       {/* Status & Feedback */}
       {state.imageError && <p role="alert" className="text-sm font-medium text-[var(--danger)]">{state.imageError}</p>}
       {state.errorMessage && <p role="alert" className="text-sm font-medium text-[var(--danger)]">{state.errorMessage}</p>}
-      {props.isSaved && <p role="status" className="text-sm font-medium text-[var(--positive)]">✓ Đã lưu thay đổi hồ sơ thành công.</p>}
+      {props.isSaved && (
+        <p role="status" className="flex items-center gap-1.5 text-sm font-medium text-[var(--positive)]">
+          <Icon name={ICON_NAMES.CHECK} className="h-4 w-4 shrink-0" />
+          <span>Đã lưu thay đổi hồ sơ thành công.</span>
+        </p>
+      )}
 
       <Button type="submit" isLoading={props.isSaving} disabled={Boolean(state.imageError)}>
         Lưu thay đổi hồ sơ

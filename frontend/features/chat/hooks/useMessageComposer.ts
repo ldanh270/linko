@@ -142,7 +142,7 @@ export function useMessageComposer({ kind, isSending, isDisabled = false, onSend
     onMention,
     onSubmit,
     onKeyDown,
-    onEmoji: () => onContentChange(`${content}😊`),
+    onEmoji: () => {},
     canSend: Boolean(content.trim() || files.length) && !fileError && !isSending && !isDisabled,
   }
 }

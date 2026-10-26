@@ -137,7 +137,7 @@ export function ConversationSearchBar({
                     title="Kết quả trước (Shift + Enter)"
                     className="flex h-6 w-6 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
                   >
-                    ▲
+                    <Icon name={ICON_NAMES.CHEVRON_UP} className="h-3 w-3" />
                   </button>
                   <button
                     type="button"
@@ -145,7 +145,7 @@ export function ConversationSearchBar({
                     title="Kết quả tiếp theo (Enter)"
                     className="flex h-6 w-6 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
                   >
-                    ▼
+                    <Icon name={ICON_NAMES.CHEVRON} className="h-3 w-3" />
                   </button>
                 </div>
               )}

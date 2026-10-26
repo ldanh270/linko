@@ -13,7 +13,8 @@ export interface EmojiItem {
 export const EMOJI_CATEGORIES = [
   {
     id: "smileys",
-    label: "😀 Cảm xúc",
+    label: "Cảm xúc",
+    icon: ICON_NAMES.EMOJI,
     emojis: [
       { char: "😀", name: "cười tươi", keywords: ["smile", "happy", "cuoi", "vui"] },
       { char: "😃", name: "cười rạng rỡ", keywords: ["smile", "happy", "cuoi"] },
@@ -81,7 +82,8 @@ export const EMOJI_CATEGORIES = [
   },
   {
     id: "gestures",
-    label: "👍 Cử chỉ & Tim",
+    label: "Cử chỉ",
+    icon: ICON_NAMES.HEART,
     emojis: [
       { char: "👍", name: "thích like", keywords: ["thumbsup", "like", "duyet", "ok"] },
       { char: "👎", name: "không thích dislike", keywords: ["thumbsdown", "dislike", "che"] },
@@ -125,7 +127,8 @@ export const EMOJI_CATEGORIES = [
   },
   {
     id: "objects",
-    label: "🎉 Hoạt động & Vật phẩm",
+    label: "Vật phẩm",
+    icon: ICON_NAMES.SPARKLE,
     emojis: [
       { char: "🎉", name: "pháo hoa ăn mừng", keywords: ["party", "tada", "chucmung"] },
       { char: "🎊", name: "bóng nổ tiệc", keywords: ["confetti", "mung"] },
@@ -238,19 +241,20 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
 
       {/* Category Tabs (only when not searching) */}
       {!search && (
-        <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--border)] bg-[var(--surface)] text-xs overflow-x-auto">
+        <div className="grid grid-cols-3 gap-1 px-3 py-2 border-b border-[var(--border)] bg-[var(--surface)] text-xs">
           {EMOJI_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               type="button"
               onClick={() => setActiveTab(cat.id)}
-              className={`rounded-lg px-2.5 py-1 font-medium transition shrink-0 ${
+              className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 px-2 font-medium transition ${
                 activeTab === cat.id
-                  ? "bg-[var(--brand-soft)] text-[var(--brand)] font-semibold"
-                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]"
+                  ? "bg-[var(--brand-soft)] text-[var(--brand)] font-semibold shadow-xs"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]"
               }`}
             >
-              {cat.label}
+              <Icon name={cat.icon} className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{cat.label}</span>
             </button>
           ))}
         </div>
