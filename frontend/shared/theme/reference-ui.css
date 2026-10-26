@@ -800,17 +800,25 @@
 .composer textarea {
   min-width: 0;
   flex: 1;
+  min-height: 42px;
   height: 42px;
-  max-height: 120px;
-  padding: 11px 14px;
-  resize: vertical;
-  border-radius: 4px;
-  background: var(--bubble-outgoing);
+  max-height: 140px;
+  padding: 10px 14px;
+  resize: none;
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
   font-size: 14px;
+  line-height: 1.45;
+  overflow-y: hidden;
+  box-sizing: border-box;
 }
 
 .composer textarea:focus-visible {
-  outline: 2px solid var(--brand);
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
 }
 
 .composer-controls>button {

@@ -192,3 +192,107 @@ body {
     transform: translateY(0);
   }
 }
+
+
+/* ==========================================================================
+   Global Scrollbar Synchronization
+   ========================================================================== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-secondary) 25%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-secondary) 25%, transparent);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-secondary) 45%, transparent);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+textarea.no-scrollbar {
+  overflow-y: hidden !important;
+}
+
+textarea.has-scrollbar {
+  overflow-y: auto !important;
+}
+
+/* ==========================================================================
+   Conversation Search Highlighting
+   ========================================================================== */
+
+.message-row.is-search-active .message-bubble {
+  box-shadow: 0 0 0 2px var(--brand), 0 0 16px color-mix(in srgb, var(--brand) 40%, transparent);
+  animation: searchHighlightPulse 2s ease-in-out;
+}
+
+.search-match-text {
+  background: color-mix(in srgb, #facc15 50%, transparent);
+  color: var(--text-primary);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+@keyframes searchHighlightPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent);
+  }
+  50% {
+    transform: scale(1.015);
+    box-shadow: 0 0 0 2px var(--brand), 0 0 16px color-mix(in srgb, var(--brand) 40%, transparent);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   Emoji Picker Popover
+   ========================================================================== */
+
+.emoji-picker-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 64px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-panel), 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  overflow: hidden;
+  animation: emojiPickerFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes emojiPickerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
