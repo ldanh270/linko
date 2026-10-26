@@ -15,6 +15,7 @@ describe("workspace navigation", () => {
   })
   it("should_treat_profile_people_and_settings_as_full_page_details", () => {
     expect(getWorkspaceLocation("/profile", null).isDetail).toBe(true)
+    expect(getWorkspaceLocation("/profile/aaaaaaaaaaaaaaaaaaaaaaaa", null).isDetail).toBe(true)
     expect(getWorkspaceLocation("/people", null).isDetail).toBe(true)
     expect(getWorkspaceLocation("/settings", null).isDetail).toBe(true)
     expect(getWorkspaceLocation("/notifications", null).isDetail).toBe(true)

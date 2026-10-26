@@ -15,6 +15,7 @@ export const APP_ROUTES = {
   PEOPLE: "/people",
   NOTIFICATIONS: "/notifications",
   PROFILE: "/profile",
+  USER_PROFILE: "/profile/:userId",
   SETTINGS: "/settings",
   ATTACHMENT: "/attachments/:messageId/:attachmentId",
   INVITATION: "/invite/:token",

@@ -15,7 +15,7 @@ export function getWorkspaceLocation(pathname: string, querySelection: string | 
   const isConversationView = segments.length === 3 && (segments[1] === "direct" || segments[1] === "groups") && segments[2] !== "new"
   const candidate = isConversationView ? segments[2] : querySelection
   const conversationId = candidate && OBJECT_ID_PATTERN.test(candidate) ? candidate : ""
-  const isFullPage = FULL_PAGE_ROUTES.has(pathname)
+  const isFullPage = FULL_PAGE_ROUTES.has(pathname) || pathname.startsWith("/profile/")
   const isDetail = isFullPage || pathname.startsWith(APP_ROUTES.ATTACHMENT.split("/:")[0]) || pathname === APP_ROUTES.GROUP_CREATE || segments.length > 3
   return { conversationId, isConversationView, isDetail }
 }

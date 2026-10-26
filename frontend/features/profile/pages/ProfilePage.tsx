@@ -9,23 +9,33 @@ import { ErrorState } from "@/shared/components/ErrorState"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
-import { useProfileEditor } from "../hooks/useProfileEditor"
+import { useUserProfile } from "../hooks/useUserProfile"
 import { ProfileAbout } from "../components/ProfileAbout"
 import { ProfileEditModal } from "../components/ProfileEditModal/ProfileEditModal"
+import { PublicProfileView } from "../components/PublicProfileView"
 
-/** Render the full-page profile with clean personal information and edit actions. UI only. */
-export function ProfilePage() {
-  const state = useProfileEditor()
-  const user = state.query.data
+export interface ProfilePageProps {
+  readonly userId?: string
+}
 
-  if (state.query.isPending) {
-    return <LoadingState label="Đang tải hồ sơ của bạn..." />
+/** Render either own profile editor or another user's public profile. UI only. */
+export function ProfilePage({ userId }: ProfilePageProps = {}) {
+  const state = useUserProfile(userId)
+
+  if (state.isLoading) {
+    return <LoadingState label="Đang tải hồ sơ..." />
   }
 
-  if (state.query.isError || !user) {
+  if (state.isError || !state.user) {
     return <ErrorState title="Không thể tải hồ sơ" onRetry={state.onRetry} />
   }
 
+  if (!state.isOwnProfile) {
+    return <PublicProfileView state={state} />
+  }
+
+  const editor = state.editor
+  const user = state.user
   const backgroundUrl = user[USER_PROFILE_FIELDS.BACKGROUND_URL]
 
   return (
@@ -35,7 +45,7 @@ export function ProfilePage() {
         title="Hồ sơ của tôi"
         description="Quản lý thông tin định danh, giới thiệu và thông tin cá nhân của bạn trên Linko."
         actions={
-          <Button variant="secondary" onClick={state.onOpenEdit}>
+          <Button variant="secondary" onClick={editor.onOpenEdit}>
             <Icon name={ICON_NAMES.EDIT} /> Chỉnh sửa hồ sơ
           </Button>
         }
@@ -59,7 +69,7 @@ export function ProfilePage() {
 
           <button
             type="button"
-            onClick={state.onOpenEdit}
+            onClick={editor.onOpenEdit}
             className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-[var(--surface)]/85 px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition hover:bg-[var(--surface)] hover:shadow"
           >
             <Icon name={ICON_NAMES.IMAGE} />
@@ -78,7 +88,7 @@ export function ProfilePage() {
               />
               <button
                 type="button"
-                onClick={state.onOpenEdit}
+                onClick={editor.onOpenEdit}
                 title="Đổi ảnh đại diện"
                 className="absolute inset-0 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-xs"
               >
@@ -87,7 +97,7 @@ export function ProfilePage() {
             </div>
 
             <div className="flex gap-2">
-              <Button size="small" variant="secondary" onClick={state.onOpenEdit}>
+              <Button size="small" variant="secondary" onClick={editor.onOpenEdit}>
                 <Icon name={ICON_NAMES.EDIT} /> Chỉnh sửa thông tin
               </Button>
             </div>
@@ -121,11 +131,11 @@ export function ProfilePage() {
               <Icon name={ICON_NAMES.PROFILE} />
               <span>Thông tin cá nhân & liên hệ</span>
             </div>
-            <Button size="small" variant="ghost" onClick={state.onOpenEdit}>
+            <Button size="small" variant="ghost" onClick={editor.onOpenEdit}>
               Sửa
             </Button>
           </div>
-          <ProfileAbout details={state.details} />
+          <ProfileAbout details={editor.details} />
         </article>
 
         {/* Account & Security Summary */}
@@ -158,7 +168,7 @@ export function ProfilePage() {
         </article>
       </div>
 
-      {state.isEditing && <ProfileEditModal state={state} onClose={state.onCloseEdit} />}
+      {editor.isEditing && <ProfileEditModal state={editor} onClose={editor.onCloseEdit} />}
     </section>
   )
 }
