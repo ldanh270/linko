@@ -8,6 +8,7 @@ import { useQueryParamState } from "@/shared/url/useQueryParamState"
 import { WORKSPACE_PARAMS } from "@/shared/layout/workspace.constants"
 import { useCurrentProfile } from "@/features/profile/hooks/useCurrentProfile"
 import { useWorkspaceNavigation } from "@/shared/layout/useWorkspaceNavigation"
+import { usePresence } from "@/shared/presence/usePresence"
 import { listInbox } from "../api/inbox.api"
 import { INBOX_QUERY_KEY, INBOX_FILTERS } from "../inbox.constants"
 import { mapConversationRow } from "../inbox.mapper"
@@ -25,9 +26,23 @@ export function useInboxPage(fixedKind?: ConversationKind) {
   const { value: search, setValue: setSearch, revision: searchRevision, cancelPending: cancelSearch } = useQueryParamState(WORKSPACE_PARAMS.SEARCH, z.string(), "")
   const effectiveKind = fixedKind ?? kind
   const query = useQuery({ queryKey: [...INBOX_QUERY_KEY, effectiveKind, cursor], queryFn: ({ signal }) => listInbox({ kind: effectiveKind, cursor: cursor || undefined, signal }) })
+  const recentPeopleQuery = useQuery({
+    queryKey: [...INBOX_QUERY_KEY, "recent-direct-people"],
+    queryFn: ({ signal }) => listInbox({ kind: CONVERSATION_KIND.DIRECT, limit: 6, signal }),
+    enabled: fixedKind !== CONVERSATION_KIND.GROUP,
+    staleTime: 30_000,
+  })
   const rows = (query.data?.items ?? []).map((item) => mapConversationRow(item, profile.data?.id ?? ""))
   const visibleRows = search ? rows.filter((row) => normalizeSearch(`${row.title} ${row.preview}`).includes(normalizeSearch(search))) : rows
-  const people = (query.data?.items ?? []).filter((item) => item.type === CONVERSATION_TYPE.DIRECT).map((item) => mapConversationRow(item, profile.data?.id ?? "")).slice(0, 6)
+  const peopleItems = recentPeopleQuery.data?.items ?? (effectiveKind !== CONVERSATION_KIND.GROUP ? (query.data?.items ?? []).filter((item) => item.type === CONVERSATION_TYPE.DIRECT) : [])
+  const people = peopleItems.map((item) => mapConversationRow(item, profile.data?.id ?? "")).slice(0, 6)
+
+  const peerIds = Array.from(new Set([
+    ...people.map((p) => p.peerId).filter((id): id is string => Boolean(id)),
+    ...visibleRows.map((r) => r.peerId).filter((id): id is string => Boolean(id)),
+  ]))
+  const presence = usePresence(peerIds)
+
   const changeKind = (value: ConversationKind) => {
     cancelSearch()
     const next = new URLSearchParams(params.toString()); next.delete(CONVERSATION_QUERY_PARAMS.CURSOR)
@@ -38,5 +53,17 @@ export function useInboxPage(fixedKind?: ConversationKind) {
   const onSearchChange = (value: string) => {
     setSearch(value, { history: "replace", debounceMs: 250, resetKeys: [CONVERSATION_QUERY_PARAMS.CURSOR] })
   }
-  return { query, rows: visibleRows, people, search, searchRevision, onSearchChange, conversationId, onRetry: () => void query.refetch(), onLoadMore: () => { cancelSearch(); setCursor(query.data?.nextCursor ?? "") }, filters: INBOX_FILTERS.map((filter) => ({ ...filter, isActive: kind === filter.value, onSelect: () => changeKind(filter.value) })) }
+  return {
+    query,
+    rows: visibleRows,
+    people,
+    search,
+    searchRevision,
+    onSearchChange,
+    conversationId,
+    onRetry: () => void query.refetch(),
+    onLoadMore: () => { cancelSearch(); setCursor(query.data?.nextCursor ?? "") },
+    filters: INBOX_FILTERS.map((filter) => ({ ...filter, isActive: kind === filter.value, onSelect: () => changeKind(filter.value) })),
+    isOnline: (peerId?: string | null) => presence.isOnline(peerId),
+  }
 }

@@ -43,7 +43,7 @@ export function InboxSidebar() {
         stateKey={state.searchRevision}
         onChange={state.onSearchChange}
       />
-      {state.people.length > 0 && <RecentPeopleStrip people={state.people} />}
+      {state.people.length > 0 && <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />}
       <h2 className="sidebar-section-label">Gần đây</h2>
       <nav aria-label="Lọc hội thoại" className="sidebar-filters">
         {state.filters.map((filter) => (
@@ -59,7 +59,11 @@ export function InboxSidebar() {
       ) : state.rows.length === 0 ? (
         <EmptyState title="Chưa có cuộc trò chuyện" description="Kết nối với bạn bè hoặc tạo nhóm để bắt đầu." />
       ) : (
-        <ConversationList rows={state.rows} activeConversationId={state.conversationId} />
+        <ConversationList
+          rows={state.rows}
+          activeConversationId={state.conversationId}
+          isOnline={state.isOnline}
+        />
       )}
       {state.search && <p className="sidebar-footnote">Tìm trong các hội thoại ở trang đã tải.</p>}
       {state.query.data?.nextCursor && (
