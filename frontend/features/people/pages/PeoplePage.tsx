@@ -3,6 +3,7 @@
 import { Button } from "@/shared/components/Button"
 import { SearchInput } from "@/shared/components/SearchInput"
 import { Avatar } from "@/shared/components/Avatar"
+import { Link } from "@/shared/components/Link"
 import { DropdownMenu } from "@/shared/components/DropdownMenu/DropdownMenu"
 import { LoadingState } from "@/shared/components/LoadingState"
 import { ErrorState } from "@/shared/components/ErrorState"
@@ -10,6 +11,7 @@ import { EmptyState } from "@/shared/components/EmptyState"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
 import { usePresence } from "@/shared/presence/usePresence"
 import { usePeoplePage } from "../hooks/usePeoplePage"
 import { AddContactModal } from "../components/AddContactModal/AddContactModal"
@@ -113,7 +115,11 @@ export function PeoplePage() {
                     key={contact.id}
                     className="surface-panel flex items-center justify-between gap-3 p-3.5 transition-shadow hover:shadow-md"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <Link
+                      href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: contact.id })}
+                      className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-85 transition-opacity"
+                      title={`Xem hồ sơ của ${contact.name}`}
+                    >
                       <Avatar label={contact.name} size="medium" isOnline={presence.isOnline(contact.id)} />
                       <div className="min-w-0">
                         <p className="font-semibold text-sm truncate" title={contact.name}>
@@ -127,7 +133,7 @@ export function PeoplePage() {
                           )}
                         </p>
                       </div>
-                    </div>
+                    </Link>
 
                     <div className="flex items-center gap-1.5 flex-none">
                       <Button

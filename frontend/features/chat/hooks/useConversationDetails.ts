@@ -138,6 +138,9 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
   const invitationsHref = isGroup
     ? buildAppRoute(APP_ROUTES.GROUP_INVITATIONS, { conversationId })
     : null
+  const profileHref = !isGroup && peer
+    ? buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: peer.id })
+    : null
 
   const onToggleMute = () => {
     if (!isGroup) return
@@ -154,6 +157,7 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
 
   return {
     isOpen,
+    peerId: isGroup ? null : (peer?.id ?? null),
     title,
     subtitle,
     description,
@@ -169,6 +173,7 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
     pins,
     manageHref,
     invitationsHref,
+    profileHref,
     onToggleSection: toggleSection,
     onToggleMute,
     onLeaveGroup,

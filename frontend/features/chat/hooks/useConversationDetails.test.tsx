@@ -111,6 +111,8 @@ describe("useConversationDetails", () => {
     expect(result.current.files).toHaveLength(1)
     expect(result.current.files[0].name).toBe("bao-cao.pdf")
     expect(result.current.manageHref).toBeNull()
+    expect(result.current.peerId).toBe("u2")
+    expect(result.current.profileHref).toBe("/profile/u2")
   })
 
   it("should_map_group_members_and_roles_and_handle_accordion_toggle", () => {
@@ -159,6 +161,8 @@ describe("useConversationDetails", () => {
     expect(result.current.pins[0].content).toBe("Nội quy nhóm")
     expect(result.current.manageHref).toBe("/groups/c2/manage")
     expect(result.current.invitationsHref).toBe("/groups/c2/invitations")
+    expect(result.current.peerId).toBeNull()
+    expect(result.current.profileHref).toBeNull()
 
     act(() => {
       result.current.onToggleSection(CHAT_DETAILS_SECTIONS.PINS)

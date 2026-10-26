@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useState, useRef, useEffect } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS, SOCKET_EVENTS } from "@linko/contracts"
@@ -10,13 +10,14 @@ import { WORKSPACE_PARAMS } from "@/shared/layout/workspace.constants"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
 import { useWorkspaceNavigation } from "@/shared/layout/useWorkspaceNavigation"
 import { useCurrentProfile } from "@/features/profile/hooks/useCurrentProfile"
+import { clearInboxItemUnreadCount } from "@/features/inbox/inbox.cache"
 import { listMembers } from "@/features/membership/api/membership.api"
 import { useConversationChat } from "./useConversationChat"
 import { useGroupPins } from "./useGroupPins"
 import { useMessageComposer } from "./useMessageComposer"
 import { useConversationDetails } from "./useConversationDetails"
 import { useTypingIndicator } from "./useTypingIndicator"
-import { createChatSocket } from "../api/chatSocket"
+import { getSharedChatSocket } from "../api/chatSocket"
 import { mapTimeline } from "../chat.mapper"
 import { CHAT_ACCESS_ERRORS, CHAT_COPY, CHAT_KIND, CHAT_QUERY_KEYS } from "../chat.constants"
 import { ApiError } from "@/shared/http/ApiError"
@@ -38,21 +39,30 @@ export function useConversationPane(item: InboxItemDto) {
   const isIdentityUnavailable = (profile.isError && !profile.data) || isIdentityAccessDenied
   const isComposerDisabled = !query.data || !profile.data || isHistoryUnavailable || isIdentityUnavailable
 
-  const socketRef = useRef<ReturnType<typeof createChatSocket> | null>(null)
+  const queryClient = useQueryClient()
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  useEffect(() => {
+    if (id) {
+      clearInboxItemUnreadCount(queryClient, id)
+    }
+    return () => {
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+      getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
+    }
+  }, [id, queryClient])
+
   const emitTyping = () => {
-    if (!socketRef.current) socketRef.current = createChatSocket()
-    socketRef.current.emit(SOCKET_EVENTS.TYPING_START, { conversationId: id })
+    getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_START, { conversationId: id })
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
     typingTimerRef.current = setTimeout(() => {
-      socketRef.current?.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
+      getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
     }, 2500)
   }
 
   const stopTyping = () => {
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-    socketRef.current?.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
+    getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
   }
 
   const composer = useMessageComposer({

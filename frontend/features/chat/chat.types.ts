@@ -10,6 +10,7 @@ export interface MessageReplyViewModel { readonly id: string; readonly author: s
 /** Presentation-only message fields avoid deriving business state inside JSX. */
 export interface MessageViewModel {
   readonly id: string; readonly content: string; readonly isOwn: boolean; readonly author: string
+  readonly senderId?: string
   readonly avatarUrl: string | null; readonly createdAt: string; readonly time: string; readonly dateLabel: string
   readonly showDate: boolean; readonly isGroupEnd: boolean; readonly isPinned: boolean; readonly attachments: readonly AttachmentViewModel[]
   readonly reply: MessageReplyViewModel | null
@@ -52,6 +53,7 @@ export interface ConversationPinViewModel {
 /** View model powering the conversation details sheet. */
 export interface ConversationDetailsViewModel {
   readonly isOpen: boolean
+  readonly peerId: string | null
   readonly title: string
   readonly subtitle: string
   readonly description: string
@@ -67,6 +69,7 @@ export interface ConversationDetailsViewModel {
   readonly pins: readonly ConversationPinViewModel[]
   readonly manageHref: string | null
   readonly invitationsHref: string | null
+  readonly profileHref: string | null
   readonly onToggleSection: (section: string) => void
   readonly onToggleMute: () => void
   readonly onLeaveGroup: () => void

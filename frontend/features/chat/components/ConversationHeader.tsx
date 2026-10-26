@@ -5,6 +5,7 @@ import { IconButton } from "@/shared/components/IconButton"
 import { SearchInput } from "@/shared/components/SearchInput"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
 import { usePresence } from "@/shared/presence/usePresence"
 import { CHAT_DETAILS_COPY } from "../chat.constants"
 
@@ -17,6 +18,9 @@ export interface ConversationHeaderProps {
 export function ConversationHeader({ header }: ConversationHeaderProps) {
   const presence = usePresence(header.peerId ? [header.peerId] : [])
   const isPeerOnline = header.peerId ? presence.isOnline(header.peerId) : undefined
+  const peerProfileHref = header.peerId
+    ? buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: header.peerId })
+    : null
 
   return (
     <div>
@@ -25,9 +29,23 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
           <Link href={header.backHref} aria-label="Về danh sách tin nhắn" className="conversation-mobile-back">
             <Icon name={ICON_NAMES.BACK} />
           </Link>
-          <Avatar label={header.title} src={header.avatarUrl} isOnline={isPeerOnline} />
+          {peerProfileHref ? (
+            <Link href={peerProfileHref} title="Xem trang cá nhân" className="hover:opacity-85 transition-opacity">
+              <Avatar label={header.title} src={header.avatarUrl} isOnline={isPeerOnline} />
+            </Link>
+          ) : (
+            <Avatar label={header.title} src={header.avatarUrl} isOnline={isPeerOnline} />
+          )}
           <div className="min-w-0">
-            <h2>{header.title}</h2>
+            {peerProfileHref ? (
+              <h2>
+                <Link href={peerProfileHref} className="hover:underline">
+                  {header.title}
+                </Link>
+              </h2>
+            ) : (
+              <h2>{header.title}</h2>
+            )}
             {isPeerOnline !== undefined && (
               <p className="text-xs text-[var(--text-secondary)]">
                 {isPeerOnline ? (

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { SOCKET_EVENTS, type TypingEventDto } from "@linko/contracts"
-import { createChatSocket } from "../api/chatSocket"
+import { getSharedChatSocket } from "../api/chatSocket"
 
 /** Realtime typing hook tracks users typing in the active conversation. */
 export function useTypingIndicator(conversationId: string, currentUserId?: string) {
@@ -10,7 +10,7 @@ export function useTypingIndicator(conversationId: string, currentUserId?: strin
   const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   useEffect(() => {
-    const socket = createChatSocket()
+    const socket = getSharedChatSocket()
     const timeouts = timeoutsRef.current
 
     const clearUserTimeout = (id: string) => {

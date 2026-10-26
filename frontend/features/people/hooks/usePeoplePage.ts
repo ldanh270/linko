@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { FRIEND_REQUEST_DIRECTION, USER_SEARCH_MODE, USER_SEARCH_QUERY_PARAMS } from "@linko/contracts"
 import { useQueryParamState } from "@/shared/url/useQueryParamState"
 import { OBJECT_ID_PATTERN, WORKSPACE_PARAMS } from "@/shared/layout/workspace.constants"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
 import { getPublicUser } from "@/features/profile/api/profile.api"
 import { listFriends, listFriendRequests, searchPeople } from "../api/people.api"
 import { PEOPLE_LIMITS, PEOPLE_PARAMS, PEOPLE_QUERY_KEYS } from "../people.constants"
@@ -15,6 +17,7 @@ import { useFriendActions } from "./useFriendActions"
 
 /** Coordinate contacts, search, requests and URL-selected public profile views. */
 export function usePeoplePage() {
+  const router = useRouter()
   const actions = useFriendActions()
   const [isAdding, setAdding] = useState(false)
   const { value: search, setValue: setSearch, revision: searchRevision } = useQueryParamState(WORKSPACE_PARAMS.SEARCH, z.string(), "")
@@ -27,7 +30,10 @@ export function usePeoplePage() {
   const groups = groupContacts(friends.data ?? [], search).map((group) => ({ ...group, contacts: group.contacts.map((person) => ({
     id: person.id, name: person.displayName || person.username, onOpen: () => actions.openChat.mutate(person.id),
     isOpening: actions.openChat.isPending,
-    menu: [{ label: "Nhắn tin", icon: ICON_NAMES.CHAT, disabled: actions.openChat.isPending, onSelect: () => actions.openChat.mutate(person.id) }, { label: "Xem hồ sơ", icon: ICON_NAMES.PROFILE, onSelect: () => setUserId(person.id) }],
+    menu: [
+      { label: "Nhắn tin", icon: ICON_NAMES.CHAT, disabled: actions.openChat.isPending, onSelect: () => actions.openChat.mutate(person.id) },
+      { label: "Xem hồ sơ", icon: ICON_NAMES.PROFILE, onSelect: () => router.push(buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: person.id })) },
+    ],
   })) }))
   const searchRows = [...new Map((results.data ?? []).map((person) => [person.id, person])).values()].map((person) => ({
     ...person, isRequested: actions.requestedIds.has(person.id), isFriend: friends.data?.some((friend) => friend.id === person.id) ?? false,
