@@ -6,6 +6,7 @@ import {
 } from "@linko/contracts"
 import { createElement, type ReactNode } from "react"
 import { act, renderHook, waitFor } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { Socket } from "socket.io-client"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -14,7 +15,10 @@ const { createChatSocketMock, getPreferenceMock } = vi.hoisted(() => ({
     getPreferenceMock: vi.fn(),
 }))
 
-vi.mock("../../chat/api/chatSocket", () => ({ createChatSocket: createChatSocketMock }))
+vi.mock("../../chat/api/chatSocket", () => ({
+    createChatSocket: createChatSocketMock,
+    getSharedChatSocket: createChatSocketMock,
+}))
 vi.mock("../api/notification.api", () => ({ getGroupNotificationPreference: getPreferenceMock }))
 
 import { ToastContext, type ToastState } from "../../../shared/components/useToast"
@@ -127,8 +131,11 @@ function createToastState(): ToastState {
 }
 
 function withToast(toast: ToastState) {
+    const queryClient = new QueryClient()
     const Wrapper = ({ children }: { children: ReactNode }) =>
-        createElement(ToastContext.Provider, { value: toast }, children)
+        createElement(QueryClientProvider, { client: queryClient },
+            createElement(ToastContext.Provider, { value: toast }, children),
+        )
     Wrapper.displayName = "NotificationToastTestProvider"
     return Wrapper
 }

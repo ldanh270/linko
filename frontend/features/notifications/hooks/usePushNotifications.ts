@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
-import { createChatSocket } from "@/features/chat/api/chatSocket"
+import { getSharedChatSocket } from "@/features/chat/api/chatSocket"
+import { notificationSound } from "@/shared/sound/notificationSound"
 
 /** Realtime browser push notification integration. */
 export function usePushNotifications() {
@@ -41,13 +42,16 @@ export function usePushNotifications() {
   // Listen to background messages when document is hidden
   useEffect(() => {
     if (typeof window === "undefined" || !("Notification" in window)) return
-    const socket = createChatSocket()
+    const socket = getSharedChatSocket()
 
     const onMessage = (message: MessageDto) => {
-      if (document.hidden && Notification.permission === "granted") {
-        sendPushNotification("Linko: Tin nhắn mới", {
-          body: message.content || "Bạn vừa nhận được một tệp đính kèm mới.",
-        })
+      if (document.hidden) {
+        if (Notification.permission === "granted") {
+          sendPushNotification("Linko: Tin nhắn mới", {
+            body: message.content || "Bạn vừa nhận được một tệp đính kèm mới.",
+          })
+        }
+        notificationSound.play()
       }
     }
 

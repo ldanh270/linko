@@ -49,7 +49,7 @@ export function useNotificationsPage() {
   })
 
   const inboxQuery = useQuery({
-    queryKey: [INBOX_QUERY_KEY],
+    queryKey: [...INBOX_QUERY_KEY],
     queryFn: () => listInbox(),
   })
 
