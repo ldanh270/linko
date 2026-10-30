@@ -39,6 +39,8 @@ export const ICON_NAMES = {
   GLOBE: "global-line",
   HEART: "heart-line",
   SPARKLE: "sparkling-line",
+  EYE: "eye-line",
+  EYE_OFF: "eye-off-line",
 } as const
 
 /** Valid icon names prevent feature code from inventing unsupported glyphs. */

@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { login, signup } from "../api/auth.api"
 import type { LoginInput, SignupInput } from "@linko/contracts"
-import { AUTH_QUERY_PARAMS } from "../auth.constants"
+import { AUTH_FORM_COPY, AUTH_QUERY_PARAMS } from "../auth.constants"
 import { APP_ROUTES } from "@/shared/layout/route.constants"
 import { ApiError } from "@/shared/http/ApiError"
 import { Button } from "@/shared/components/Button"
 import { Input } from "@/shared/components/Input"
 import { Link } from "@/shared/components/Link"
+import { Icon } from "@/shared/icons/Icon"
+import { ICON_NAMES } from "@/shared/icons/icon.constants"
 
 /** Render the account form and own its local submission state. */
 export function AuthForm({ mode }: { readonly mode: "login" | "signup" }) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string; email?: string; displayName?: string }>({})
   const [values, setValues] = useState({ username: "", password: "", email: "", displayName: "" })
@@ -64,7 +67,32 @@ export function AuthForm({ mode }: { readonly mode: "login" | "signup" }) {
       <Input id="email" label="Email" error={fieldErrors.email} type="email" autoComplete="email" required value={values.email} onChange={(event) => { setFieldErrors({ ...fieldErrors, email: undefined }); setValues({ ...values, email: event.target.value }) }} />
     </>}
     <Input id="username" label="Tên đăng nhập" error={fieldErrors.username} autoComplete="username" required minLength={3} maxLength={30} value={values.username} onChange={(event) => { setFieldErrors({ ...fieldErrors, username: undefined }); setValues({ ...values, username: event.target.value }) }} />
-    <Input id="password" label="Mật khẩu" error={fieldErrors.password} type="password" autoComplete={isSignup ? "new-password" : "current-password"} required minLength={8} value={values.password} onChange={(event) => { setFieldErrors({ ...fieldErrors, password: undefined }); setValues({ ...values, password: event.target.value }) }} />
+    <Input
+      id="password"
+      label="Mật khẩu"
+      error={fieldErrors.password}
+      type={showPassword ? "text" : "password"}
+      autoComplete={isSignup ? "new-password" : "current-password"}
+      required
+      minLength={8}
+      value={values.password}
+      onChange={(event) => {
+        setFieldErrors({ ...fieldErrors, password: undefined })
+        setValues({ ...values, password: event.target.value })
+      }}
+      endAdornment={
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          onMouseDown={(event) => event.preventDefault()}
+          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+          aria-label={showPassword ? AUTH_FORM_COPY.HIDE_PASSWORD : AUTH_FORM_COPY.SHOW_PASSWORD}
+          title={showPassword ? AUTH_FORM_COPY.HIDE_PASSWORD : AUTH_FORM_COPY.SHOW_PASSWORD}
+        >
+          <Icon name={showPassword ? ICON_NAMES.EYE_OFF : ICON_NAMES.EYE} />
+        </button>
+      }
+    />
     {isSignup && <p className="-mt-3 text-xs text-[var(--text-secondary)]">Mật khẩu cần có ít nhất 8 ký tự.</p>}
     {error && <p role="alert" className="text-sm text-[var(--danger)]">{error}</p>}
     <Button type="submit" isLoading={isLoading} className="mt-2 w-full">{isSignup ? "Tạo tài khoản" : "Đăng nhập"}</Button>

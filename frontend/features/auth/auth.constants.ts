@@ -23,3 +23,9 @@ export const AUTH_STATUS_MESSAGES = {
     LOADING: "Checking your session…",
     UNAUTHENTICATED: "Redirecting to sign in…",
 } as const
+
+/** Accessible action copy for authentication inputs and controls. */
+export const AUTH_FORM_COPY = {
+    SHOW_PASSWORD: "Hiện mật khẩu",
+    HIDE_PASSWORD: "Ẩn mật khẩu",
+} as const

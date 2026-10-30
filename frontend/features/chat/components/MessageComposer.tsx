@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type FormEvent } from "react"
 import { MESSAGE_LIMITS } from "@linko/contracts"
 import { Button } from "@/shared/components/Button"
 import { IconButton } from "@/shared/components/IconButton"
@@ -26,6 +26,20 @@ export function MessageComposer({ state }: MessageComposerProps) {
   const { preferences } = useChatPreferences()
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const prevSendingRef = useRef(state.composer.isSending)
+
+  // Maintain focus on the input after a message send operation completes
+  useEffect(() => {
+    if (prevSendingRef.current && !state.composer.isSending) {
+      textareaRef.current?.focus()
+    }
+    prevSendingRef.current = state.composer.isSending
+  }, [state.composer.isSending])
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    state.composer.onSubmit(event)
+    textareaRef.current?.focus()
+  }
 
   const placeholder = preferences.sendOnEnter
     ? copy.chat.placeholderSendOnEnter
@@ -62,7 +76,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
   }
 
   return (
-    <form onSubmit={state.composer.onSubmit} className="composer" aria-label="Soạn tin nhắn">
+    <form onSubmit={handleSubmit} className="composer" aria-label="Soạn tin nhắn">
       {state.composer.replyId && (
         <ReplyPreview
           author={state.composer.replyTarget?.author}
@@ -104,7 +118,8 @@ export function MessageComposer({ state }: MessageComposerProps) {
           onChange={state.composer.onInputChange}
           onKeyDown={state.composer.onKeyDown}
           placeholder={placeholder}
-          disabled={state.composer.isSending || state.isComposerDisabled}
+          disabled={state.isComposerDisabled}
+          readOnly={state.composer.isSending}
         />
         <IconButton
           className="emoji-action"
@@ -132,6 +147,12 @@ export function MessageComposer({ state }: MessageComposerProps) {
           isLoading={state.composer.isSending}
           disabled={!state.composer.canSend || state.isComposerDisabled}
           title={copy.chat.sendBtn}
+          onMouseDown={(event) => {
+            event.preventDefault()
+          }}
+          onClick={() => {
+            textareaRef.current?.focus()
+          }}
         >
           <Icon name={ICON_NAMES.SEND} />
         </Button>
