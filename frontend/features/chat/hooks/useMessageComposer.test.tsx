@@ -46,4 +46,23 @@ describe("message composer", () => {
     expect(result.current.files).toHaveLength(1)
     expect(result.current.files[0].name).toBe("doc.pdf")
   })
+  it("should_clear_draft_immediately_on_send_and_restore_on_error", () => {
+    let capturedCallbacks: SendCallbacks | null = null
+    const onSend = vi.fn((_input: ComposerRequest, callbacks: SendCallbacks) => {
+      capturedCallbacks = callbacks
+    })
+    const { result } = renderHook(() => useMessageComposer({ onSend, isSending: false, kind: "direct" }))
+    act(() => result.current.onContentChange("Tin tức thì"))
+    act(() => result.current.onSubmit({ preventDefault: vi.fn() }))
+
+    // Content is cleared immediately (0ms delay)
+    expect(result.current.content).toBe("")
+
+    // On error, draft is restored so user doesn't lose input
+    act(() => {
+      if (capturedCallbacks) capturedCallbacks.onError(new Error("Lỗi mạng"))
+    })
+    expect(result.current.content).toBe("Tin tức thì")
+    expect(result.current.sendError).toBe("Lỗi mạng")
+  })
 })

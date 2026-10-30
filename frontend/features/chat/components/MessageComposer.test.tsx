@@ -68,12 +68,12 @@ describe("MessageComposer", () => {
     expect(mousedownEvent.defaultPrevented).toBe(true)
   })
 
-  it("sets readOnly without disabling the textarea when isSending is true", () => {
+  it("keeps textarea enabled for typing next message immediately while isSending is true", () => {
     const state = createMockState({ composer: { isSending: true } })
     render(<MessageComposer state={state} />)
 
     const textarea = screen.getByRole("textbox", { name: "Soạn tin nhắn" }) as HTMLTextAreaElement
-    expect(textarea.readOnly).toBe(true)
+    expect(textarea.readOnly).toBe(false)
     expect(textarea.disabled).toBe(false)
   })
 

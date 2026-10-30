@@ -119,7 +119,6 @@ export function MessageComposer({ state }: MessageComposerProps) {
           onKeyDown={state.composer.onKeyDown}
           placeholder={placeholder}
           disabled={state.isComposerDisabled}
-          readOnly={state.composer.isSending}
         />
         <IconButton
           className="emoji-action"
@@ -144,7 +143,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         <Button
           type="submit"
           aria-label={copy.chat.sendBtn}
-          isLoading={state.composer.isSending}
+          isLoading={state.composer.isSending && state.composer.files.length > 0}
           disabled={!state.composer.canSend || state.isComposerDisabled}
           title={copy.chat.sendBtn}
           onMouseDown={(event) => {

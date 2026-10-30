@@ -83,17 +83,30 @@ export function useMessageComposer({ kind, isSending, isDisabled = false, onSend
     retryId.current ??= crypto.randomUUID()
     sending.current = true
     setSendError(null)
-    onSend({ clientMessageId: retryId.current, content: content.trim(), files, mentions, ...(replyId ? { replyTo: replyId } : {}) }, {
+
+    const submittedContent = content.trim()
+    const submittedFiles = files
+    const submittedMentions = mentions
+    const submittedReplyId = replyId
+
+    // Optimistically clear the draft immediately for instant 0ms response
+    setContent("")
+    setFiles([])
+    setMentions([])
+    setReplyId(null)
+
+    onSend({ clientMessageId: retryId.current, content: submittedContent, files: submittedFiles, mentions: submittedMentions, ...(submittedReplyId ? { replyTo: submittedReplyId } : {}) }, {
       onSuccess: () => {
         sending.current = false
-        setContent("")
-        setFiles([])
-        setMentions([])
-        setReplyId(null)
         retryId.current = null
       },
       onError: (error?: unknown) => {
         sending.current = false
+        // Restore draft so user never loses message content on failure
+        setContent(submittedContent)
+        setFiles(submittedFiles)
+        setMentions(submittedMentions)
+        setReplyId(submittedReplyId)
         const message = error instanceof Error && error.message && error.message !== "HTTP_ERROR" ? error.message : CHAT_COPY.SEND_ERROR
         setSendError(message)
       },
