@@ -1,3 +1,5 @@
+import { USER_PROFILE_PATTERNS } from "@linko/contracts"
+
 /**
  * Fields regex
  */
@@ -6,7 +8,7 @@ export const REGEX = {
     MONGO_ID: /^[0-9a-fA-F]{24}$/,
 
     // Only contain lowercase letters, numbers, and underscores (_) and dots (.)
-    USERNAME: /^[a-z0-9_.]+$/,
+    USERNAME: USER_PROFILE_PATTERNS.USERNAME,
 
     // Minimum 8 characters, including at least 1 uppercase, 1 lowercase, 1 number and 1 special character.
     PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,

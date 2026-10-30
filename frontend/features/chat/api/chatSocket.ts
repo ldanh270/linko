@@ -8,10 +8,10 @@ import {
 import { io } from "socket.io-client"
 
 import { getAccessToken } from "../../auth/api/auth.api"
+import { API_ORIGIN } from "@/shared/http/apiOrigin"
 import { listMessages } from "./messages.api"
 
 /** Socket listener subset needed for conversation subscription and tests. */
-/** Narrow the transport to the event operations consumed by chat features. */
 export interface ChatSocket {
     readonly connected: boolean
     emit<Args extends readonly unknown[]>(event: string, ...args: Args): void
@@ -26,13 +26,31 @@ export interface ConversationSubscriptionOptions {
     readonly onSyncError?: (error: unknown) => void
 }
 
+let sharedSocketInstance: ChatSocket | null = null
+
 /** Open an authenticated Socket.IO connection using the current in-memory access token. */
 export function createChatSocket(): ChatSocket {
-    return io(undefined, {
+    return io(API_ORIGIN || undefined, {
         auth: (completeHandshake) => completeHandshake({
             [SOCKET_AUTH_FIELDS.TOKEN]: getAccessToken(),
         }),
     }) as unknown as ChatSocket
+}
+
+/** Return the shared authenticated Socket.IO connection for the active session. */
+export function getSharedChatSocket(): ChatSocket {
+    if (!sharedSocketInstance) {
+        sharedSocketInstance = createChatSocket()
+    }
+    return sharedSocketInstance
+}
+
+/** Disconnect and reset the shared socket connection upon user logout. */
+export function resetSharedChatSocket(): void {
+    if (sharedSocketInstance) {
+        sharedSocketInstance.disconnect()
+        sharedSocketInstance = null
+    }
 }
 
 /** Subscribe once, authorize the room, and recover messages missed while disconnected.
@@ -95,10 +113,30 @@ export function subscribeToConversation(
     }
 }
 
-/** Merge an API response or socket event into a chronological, message-ID-unique list. */
+/** Merge an API response or socket event into a chronological, message-ID-unique list.
+ *
+ * Optimistic temporary messages are replaced in-place when matching clientMessageId arrives.
+ */
 export function mergeMessageById(messages: readonly MessageDto[], incoming: MessageDto): MessageDto[] {
-    if (messages.some((message) => message[MESSAGE_FIELDS.ID] === incoming[MESSAGE_FIELDS.ID])) return [...messages]
-    return [...messages, incoming].sort(compareMessages)
+    const next = [...messages]
+    const index = next.findIndex((item) => {
+        if (item[MESSAGE_FIELDS.ID] === incoming[MESSAGE_FIELDS.ID]) return true
+        if (
+            item[MESSAGE_FIELDS.ID].startsWith("temp-")
+            && Boolean(item[MESSAGE_FIELDS.CLIENT_MESSAGE_ID])
+            && item[MESSAGE_FIELDS.CLIENT_MESSAGE_ID] === incoming[MESSAGE_FIELDS.CLIENT_MESSAGE_ID]
+        ) {
+            return true
+        }
+        return false
+    })
+
+    if (index >= 0) {
+        next[index] = incoming
+    } else {
+        next.push(incoming)
+    }
+    return next.sort(compareMessages)
 }
 
 function compareMessages(left: MessageDto, right: MessageDto | null): number {

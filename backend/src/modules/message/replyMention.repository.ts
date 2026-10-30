@@ -41,7 +41,9 @@ export class MongooseReplyMentionRepository implements ReplyMentionRepository {
         if (!sender) return null
 
         return {
-            joinedAt: sender[PARTICIPANT_FIELDS.JOINED_AT] ?? conversation[CONVERSATION_FIELDS.CREATED_AT],
+            joinedAt: sender[PARTICIPANT_FIELDS.JOINED_AT]
+                ?? (sender as unknown as { joinAt?: Date }).joinAt
+                ?? conversation[CONVERSATION_FIELDS.CREATED_AT],
             activeMemberIds: participants.map((participant) => participant[PARTICIPANT_FIELDS.USER_ID]),
         }
     }

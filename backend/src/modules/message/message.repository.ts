@@ -65,7 +65,9 @@ export class MongooseMessageRepository implements MessageRepository {
             status: conversation[MESSAGE_CONVERSATION_FIELDS.STATUS] ?? CONVERSATION_STATUS.ACTIVE,
             participantIds: activeParticipants.map((participant) => participant[MESSAGE_PARTICIPANT_FIELDS.USER_ID]),
             joinedAt: currentParticipant
-                ? currentParticipant[MESSAGE_PARTICIPANT_FIELDS.JOINED_AT] ?? conversation[MESSAGE_CONVERSATION_FIELDS.CREATED_AT]
+                ? currentParticipant[MESSAGE_PARTICIPANT_FIELDS.JOINED_AT]
+                    ?? (currentParticipant as unknown as { joinAt?: Date }).joinAt
+                    ?? conversation[MESSAGE_CONVERSATION_FIELDS.CREATED_AT]
                 : null,
         }
     }
@@ -163,7 +165,7 @@ export class MongooseMessageRepository implements MessageRepository {
             ? await Message.findOne({
                 [MESSAGE_MODEL_FIELDS.ID]: input.afterMessageId,
                 [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: input.conversationId,
-                [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gte: input.joinedAt },
+                ...(input.joinedAt ? { [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gte: input.joinedAt } } : {}),
                 [MESSAGE_MODEL_FIELDS.DEL_FLAG]: false,
             }).session(transaction?.session ?? null).exec()
             : null
@@ -171,7 +173,9 @@ export class MongooseMessageRepository implements MessageRepository {
 
         const filter: QueryFilter<MessageType> = {
             [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: input.conversationId,
-            [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gte: input.joinedAt },
+        }
+        if (input.joinedAt) {
+            filter[MESSAGE_MODEL_FIELDS.CREATED_AT] = { $gte: input.joinedAt }
         }
         if (afterMessage) {
             filter.$or = createForwardCursorFilter({

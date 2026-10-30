@@ -41,7 +41,9 @@ export class MongooseReadStateRepository implements ReadStateRepository {
         return {
             conversationId: conversation[CONVERSATION_FIELDS.ID],
             userId: participant[PARTICIPANT_FIELDS.USER_ID],
-            joinedAt: participant[PARTICIPANT_FIELDS.JOINED_AT] ?? conversation[CONVERSATION_FIELDS.CREATED_AT],
+            joinedAt: participant[PARTICIPANT_FIELDS.JOINED_AT]
+                ?? (participant as unknown as { joinAt?: Date }).joinAt
+                ?? conversation[CONVERSATION_FIELDS.CREATED_AT],
             lastReadAt: participant[PARTICIPANT_FIELDS.LAST_READ_AT] ?? null,
             lastReadMessageId: participant[PARTICIPANT_FIELDS.LAST_READ_MESSAGE_ID] ?? null,
         }

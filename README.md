@@ -5,6 +5,11 @@ Run commands from the repository root. Configure MongoDB in `backend/.env` with
 
 ## Frontend
 
+The frontend sends HTTP and Socket.IO traffic to the backend at
+`http://localhost:5000` during development. Set `NEXT_PUBLIC_API_URL` in the
+frontend build environment when the deployed frontend and backend use separate
+origins; keep the backend's `CLIENT_URL` set to the frontend origin.
+
 | Command                 | Action                                  |
 | ----------------------- | --------------------------------------- |
 | `pnpm run fe:dev`       | Start Next.js in development mode       |

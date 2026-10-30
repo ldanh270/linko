@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 import { z } from "zod"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { useQueryParamState } from "./useQueryParamState"
 
@@ -21,8 +21,24 @@ beforeEach(() => {
     navigation.push.mockClear()
     navigation.replace.mockClear()
 })
+afterEach(() => vi.useRealTimers())
 
 describe("useQueryParamState", () => {
+    it("should_cancel_a_pending_search_when_filter_or_history_navigation_changes_the_url", () => {
+        vi.useFakeTimers()
+        const { result, rerender } = renderHook(() => useQueryParamState("q", z.string(), ""))
+        act(() => result.current.setValue("An", { debounceMs: 250 }))
+        navigation.search = "kind=group"
+        rerender()
+        act(() => vi.advanceTimersByTime(300))
+        expect(navigation.replace).not.toHaveBeenCalled()
+    })
+    it("should_clear_cursor_when_search_changes_without_losing_the_selected_chat", () => {
+        navigation.search = "cursor=older&conversation=abc"
+        const { result } = renderHook(() => useQueryParamState("q", z.string(), ""))
+        act(() => result.current.setValue("An", { resetKeys: ["cursor"] }))
+        expect(navigation.push).toHaveBeenCalledWith("/inbox?conversation=abc&q=An", { scroll: false })
+    })
     it("falls back to the default for invalid values", () => {
         navigation.search = "page=-2"
         const { result } = renderHook(() => useQueryParamState("page", z.coerce.number().int().positive(), 1))

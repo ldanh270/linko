@@ -11,5 +11,7 @@ yarn.lock
 
 node_modules
 .pnpm-store/
-frontend/test-results/
+frontend/test-results*/
 frontend/playwright-report/
+frontend/.next-parity/
+frontend/.next-verify/

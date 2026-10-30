@@ -1,52 +1,24 @@
-:root,
-:root[data-theme="light"] {
-  --background: #faf9f6;
-  --surface: #ffffff;
-  --surface-subtle: #f4f2ee;
-  --text-primary: #252525;
-  --text-secondary: #6b6b73;
-  --brand: #4f46e5;
-  --brand-hover: #4338ca;
-  --brand-contrast: #ffffff;
-  --brand-soft: #edebff;
-  --border: #e9e7e2;
-  --positive: #147d64;
-  --danger: #c2410c;
-  --danger-contrast: #ffffff;
+:root {
+  --font-family-sans: "Public Sans", "Be Vietnam Pro", system-ui, sans-serif;
+  --font-size-body: 0.9375rem; --line-height-body: 1.5;
+  --rail-width: 75px; --sidebar-width: 380px;
+  --radius-control: .25rem; --radius-panel: .25rem; --radius-bubble: .5rem;
+  --shadow-panel: 0 2px 4px rgb(15 34 58 / .04); --shadow-brand: none;
+  --background: #f5f7fb; --surface: #fff; --surface-subtle: #f5f7fb;
+  --input-surface: #e6ebf5; --bubble-outgoing: #eff2f7;
+  --text-primary: #343a40; --text-secondary: #74788d;
+  --brand: #7269ef; --brand-hover: #6159d5; --brand-contrast: #fff; --brand-soft: #7269ef1a;
+  --border: #e1e4ea; --positive: #06d6a0; --danger: #c83c3c; --danger-contrast: #fff;
+  --badge-background: #f9d9df; --badge-text: #ef476f; color-scheme: light;
 }
-
 :root[data-theme="dark"] {
-  color-scheme: dark;
-  --background: #17171c;
-  --surface: #24242b;
-  --surface-subtle: #2c2c34;
-  --text-primary: #f5f4f2;
-  --text-secondary: #b8b7c0;
-  --brand: #a69dff;
-  --brand-hover: #b8b0ff;
-  --brand-contrast: #17171c;
-  --brand-soft: #373257;
-  --border: #383840;
-  --positive: #67d4ac;
-  --danger: #ff9b82;
-  --danger-contrast: #17171c;
+  --background: #303841; --surface: #262e35; --surface-subtle: #303841;
+  --input-surface: #36404a; --bubble-outgoing: #36404a;
+  --text-primary: #e1e9f1; --text-secondary: #a6b0cf;
+  --brand-hover: #8880f5; --brand-soft: #7269ef26; --border: #36404a;
+  --badge-background: #ef476f26; --badge-text: #ff91a8;
+  --danger: #ff8179; --danger-contrast: #262e35; color-scheme: dark;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    color-scheme: dark;
-    --background: #17171c;
-    --surface: #24242b;
-    --surface-subtle: #2c2c34;
-    --text-primary: #f5f4f2;
-    --text-secondary: #b8b7c0;
-    --brand: #a69dff;
-    --brand-hover: #b8b0ff;
-    --brand-contrast: #17171c;
-    --brand-soft: #373257;
-    --border: #383840;
-    --positive: #67d4ac;
-    --danger: #ff9b82;
-    --danger-contrast: #17171c;
-  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

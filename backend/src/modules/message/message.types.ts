@@ -53,7 +53,7 @@ export interface MessageCursor {
 /** Message query arguments after service membership authorization. */
 export interface ListMessageRecordsInput {
     readonly conversationId: ObjectId
-    readonly joinedAt: Date
+    readonly joinedAt: Date | null
     readonly cursor: MessageCursor | null
     readonly afterMessageId: ObjectId | null
     readonly limit: number

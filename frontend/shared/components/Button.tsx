@@ -13,10 +13,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     isLoading?: boolean
 }
 
-const BASE_STYLES = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 font-semibold cursor-pointer transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:transform-none"
+const BASE_STYLES = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 font-semibold cursor-pointer transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:transform-none"
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
-    primary: "bg-[var(--brand)] text-[var(--brand-contrast)] hover:bg-[var(--brand-hover)]",
-    secondary: "border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]",
+    primary: "bg-[var(--brand)] text-[var(--brand-contrast)] shadow-[var(--shadow-brand)] hover:bg-[var(--brand-hover)]",
+    secondary: "border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] shadow-sm hover:bg-[var(--surface-subtle)]",
     ghost: "text-[var(--brand)] hover:bg-[var(--brand-soft)]",
     danger: "bg-[var(--danger)] text-[var(--danger-contrast)] hover:brightness-90",
 }

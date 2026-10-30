@@ -40,7 +40,9 @@ export class MongooseAttachmentRepository implements AttachmentRepository {
             objectKey: storedId.slice(ATTACHMENT_STORAGE.ID_PREFIX.length),
             messageCreatedAt: message[MESSAGE_MODEL_FIELDS.CREATED_AT],
             joinedAt: participant
-                ? participant[PARTICIPANT_FIELDS.JOINED_AT] ?? conversation[CONVERSATION_FIELDS.CREATED_AT]
+                ? participant[PARTICIPANT_FIELDS.JOINED_AT]
+                    ?? (participant as unknown as { joinAt?: Date }).joinAt
+                    ?? conversation[CONVERSATION_FIELDS.CREATED_AT]
                 : null,
             name: attachment[ATTACHMENT_FIELDS.NAME] ?? "attachment",
             contentType: attachment[ATTACHMENT_FIELDS.CONTENT_TYPE] ?? "",

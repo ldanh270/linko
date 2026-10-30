@@ -1,12 +1,298 @@
 @import "tailwindcss";
 @import "../shared/theme/tokens.css";
+@import "../shared/theme/reference-fonts.css";
+@import "../shared/theme/reference-ui.css";
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--text-primary);
-  --font-sans: "Be Vietnam Pro", sans-serif;
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-border: var(--border);
+  --color-positive: var(--positive);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-family-sans);
 }
 
-html { min-width: 320px; }
-body { background: var(--background); color: var(--text-primary); font-family: "Be Vietnam Pro", sans-serif; }
+html { min-width: 320px; min-height: 100%; }
+body {
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-variant-numeric: tabular-nums;
+}
 * { box-sizing: border-box; }
+
+::selection { background: var(--brand-soft); color: var(--text-primary); }
+
+.surface-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.page-eyebrow {
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.page-title {
+  font-size: clamp(1.5rem, 1.15rem + 1vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+
+.avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.avatar--small { width: 2.25rem; height: 2.25rem; font-size: 0.75rem; }
+.avatar--medium { width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
+.avatar--large { width: 5rem; height: 5rem; font-size: 1.5rem; }
+
+
+.rail-account-link {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+
+.rail-account-link:hover {
+  opacity: 0.85;
+}
+
+.rail-account-link.is-active {
+  box-shadow: 0 0 0 2px var(--brand);
+}
+
+.avatar-status-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.avatar-status--online {
+  background-color: var(--positive);
+}
+
+.avatar-status--offline {
+  background-color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.avatar-status--small {
+  width: 9px;
+  height: 9px;
+}
+
+.avatar-status--medium {
+  width: 11px;
+  height: 11px;
+}
+
+.avatar-status--large {
+  width: 15px;
+  height: 15px;
+  border-width: 3px;
+}
+
+/* ==========================================================================
+   Typing Indicator Bubble Styles
+   ========================================================================== */
+
+.typing-bubble-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding-left: 2px;
+  animation: typingFadeIn 0.2s ease-out;
+}
+
+.typing-bubble-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 6px 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.typing-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--brand);
+  animation: typingWave 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.typing-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+@keyframes typingWave {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes typingFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ==========================================================================
+   Global Scrollbar Synchronization
+   ========================================================================== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-secondary) 25%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-secondary) 25%, transparent);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-secondary) 45%, transparent);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+textarea.no-scrollbar {
+  overflow-y: hidden !important;
+}
+
+textarea.has-scrollbar {
+  overflow-y: auto !important;
+}
+
+/* ==========================================================================
+   Conversation Search Highlighting
+   ========================================================================== */
+
+.message-row.is-search-active .message-bubble {
+  box-shadow: 0 0 0 2px var(--brand), 0 0 16px color-mix(in srgb, var(--brand) 40%, transparent);
+  animation: searchHighlightPulse 2s ease-in-out;
+}
+
+.search-match-text {
+  background: color-mix(in srgb, #facc15 50%, transparent);
+  color: var(--text-primary);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+@keyframes searchHighlightPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent);
+  }
+  50% {
+    transform: scale(1.015);
+    box-shadow: 0 0 0 2px var(--brand), 0 0 16px color-mix(in srgb, var(--brand) 40%, transparent);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   Emoji Picker Popover
+   ========================================================================== */
+
+.emoji-picker-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 64px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-panel), 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  overflow: hidden;
+  animation: emojiPickerFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes emojiPickerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

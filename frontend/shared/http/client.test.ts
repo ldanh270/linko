@@ -1,10 +1,30 @@
+import { API_ROUTES, AUTH_ROUTE_PATHS } from "@linko/contracts"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { ApiClient } from "./client"
 import { ApiError } from "./ApiError"
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 
 describe("ApiClient", () => {
+  it("routes default development API requests to the backend server", async () => {
+    vi.stubEnv("NODE_ENV", "development")
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "")
+    vi.resetModules()
+    const { ApiClient: DevelopmentApiClient } = await import("./client")
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ success: true, data: null, error: null, meta: null }), { status: 200 }),
+    )
+    vi.stubGlobal("fetch", fetchMock)
+    const client = new DevelopmentApiClient()
+
+    await client.request({ path: `${API_ROUTES.AUTH}${AUTH_ROUTE_PATHS.SIGNUP}` })
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:5000/api/auth/signup", expect.any(Object))
+  })
+
   it("unwraps success data and accepts injected auth headers", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: true, data: { id: "507f1f77bcf86cd799439011" }, error: null, meta: null }), { status: 200 }))
     vi.stubGlobal("fetch", fetchMock)

@@ -356,6 +356,13 @@ export const SOCKET_EVENTS = {
     MESSAGE_CREATED: "message:created",
     CONVERSATION_UPDATED: "conversation:updated",
     MEMBERSHIP_CHANGED: "membership:changed",
+    PRESENCE_ONLINE: "presence:online",
+    PRESENCE_OFFLINE: "presence:offline",
+    PRESENCE_QUERY: "presence:query",
+    PRESENCE_STATE: "presence:state",
+    TYPING_START: "typing:start",
+    TYPING_STOP: "typing:stop",
+    TYPING_UPDATE: "typing:update",
 } as const
 
 /** Socket handshake fields shared by the authenticated transport boundary. */
