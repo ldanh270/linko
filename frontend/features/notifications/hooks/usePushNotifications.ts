@@ -7,13 +7,12 @@ import { notificationSound } from "@/shared/sound/notificationSound"
 
 /** Realtime browser push notification integration. */
 export function usePushNotifications() {
-  const [permission, setPermission] = useState<NotificationPermission>("default")
-
-  useEffect(() => {
+  const [permission, setPermission] = useState<NotificationPermission>(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
-      setPermission(Notification.permission)
+      return Notification.permission
     }
-  }, [])
+    return "default"
+  })
 
   const requestPermission = async (): Promise<boolean> => {
     if (typeof window === "undefined" || !("Notification" in window)) return false

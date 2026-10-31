@@ -49,13 +49,14 @@ function getPresenceSocket(): ChatSocket {
 /** Subscribe to realtime presence updates and query user statuses. */
 export function usePresence(userIds: readonly string[] = []) {
   const [presence, setPresence] = useState<Record<string, boolean>>(() => currentPresence)
+  const userIdsKey = userIds.join(",")
 
   useEffect(() => {
     const notify = (updated: Record<string, boolean>) => setPresence(updated)
     listeners.add(notify)
 
     userIds.forEach((id) => trackedIds.add(id))
-    const socket = getPresenceSocket()
+    getPresenceSocket()
 
     if (userIds.length > 0) {
       queryBatch(userIds)
@@ -64,7 +65,7 @@ export function usePresence(userIds: readonly string[] = []) {
     return () => {
       listeners.delete(notify)
     }
-  }, [userIds.join(",")])
+  }, [userIdsKey, userIds])
 
   return {
     isOnline: (userId?: string | null) => Boolean(userId && presence[userId]),

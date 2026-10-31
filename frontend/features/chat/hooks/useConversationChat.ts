@@ -32,7 +32,9 @@ export function useConversationChat(conversationId: string) {
   const profile = useCurrentProfile()
   const currentUserId = profile.data?.id
   const currentUserIdRef = useRef(currentUserId)
-  currentUserIdRef.current = currentUserId
+  useEffect(() => {
+    currentUserIdRef.current = currentUserId
+  }, [currentUserId])
 
   const queryClient = useQueryClient()
   const queryKey = useMemo(() => [CHAT_QUERY_KEYS.MESSAGES, conversationId] as const, [conversationId])

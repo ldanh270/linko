@@ -31,6 +31,7 @@ export function ComposerFilePreviews({ previews, onRemove }: ComposerFilePreview
             }`}
           >
             {isImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={item.previewUrl} alt={item.name} className="w-full h-full object-cover block" />
             ) : (
               <div className="flex items-center gap-2.5 min-w-0">

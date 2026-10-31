@@ -92,6 +92,11 @@ export function useConversationPane(item: InboxItemDto) {
   const onSearchChange = (value: string) => setSearch(value, { history: "replace", debounceMs: 200 })
 
   const [activeMatchIndex, setActiveMatchIndex] = useState(0)
+  const [prevSearch, setPrevSearch] = useState(search)
+  if (prevSearch !== search) {
+    setPrevSearch(search)
+    setActiveMatchIndex(0)
+  }
 
   const searchMatches = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -105,10 +110,6 @@ export function useConversationPane(item: InboxItemDto) {
         time: row.time,
       }))
   }, [search, rows])
-
-  useEffect(() => {
-    setActiveMatchIndex(0)
-  }, [search])
 
   const activeMatch = searchMatches[activeMatchIndex] ?? null
   const activeMatchId = activeMatch?.id ?? null

@@ -20,6 +20,7 @@ export function useComposerFilePreviews(files: readonly File[]): readonly Compos
   const [previews, setPreviews] = useState<readonly ComposerFilePreview[]>([])
 
   useEffect(() => {
+    let isActive = true
     const created: string[] = []
 
     const items: ComposerFilePreview[] = files.map((file, index) => {
@@ -43,9 +44,14 @@ export function useComposerFilePreviews(files: readonly File[]): readonly Compos
       }
     })
 
-    setPreviews(items)
+    queueMicrotask(() => {
+      if (isActive) {
+        setPreviews(items)
+      }
+    })
 
     return () => {
+      isActive = false
       for (const url of created) {
         if (typeof URL !== "undefined") {
           URL.revokeObjectURL(url)

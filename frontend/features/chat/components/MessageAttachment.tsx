@@ -33,6 +33,7 @@ export function MessageAttachment({ file }: MessageAttachmentProps) {
           aria-label={`Xem ảnh ${file.name}`}
         >
           {thumbnail.objectUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               className="block max-h-[180px] max-w-full w-auto rounded-[var(--radius-md)] object-contain transition-all group-hover:opacity-95 group-hover:scale-[1.01]"
               src={thumbnail.objectUrl}

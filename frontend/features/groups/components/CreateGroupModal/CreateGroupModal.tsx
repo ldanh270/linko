@@ -8,7 +8,7 @@ import { Badge } from "@/shared/components/Badge"
 import { SearchInput } from "@/shared/components/SearchInput"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
-import { useCreateGroupModal, type UseCreateGroupModalOptions } from "./useCreateGroupModal"
+import { useCreateGroupModal } from "./useCreateGroupModal"
 
 export interface CreateGroupModalProps {
   readonly isOpen?: boolean

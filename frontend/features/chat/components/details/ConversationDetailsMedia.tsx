@@ -36,6 +36,7 @@ function ConversationPhotoThumb({ photo, onSelect }: ConversationPhotoThumbProps
       aria-label={`Xem ảnh ${photo.name}`}
     >
       {thumbnail.objectUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={thumbnail.objectUrl}
           alt={photo.name}

@@ -61,6 +61,7 @@ export function ImageLightbox({ src, alt, name, onClose }: ImageLightboxProps) {
           onClick={handleBackdropClick}
           role="presentation"
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={alt}

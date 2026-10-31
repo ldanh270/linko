@@ -13,15 +13,12 @@ export interface AppShellProps {
 
 /** Compose the reference rail with workspace or secondary detail pages. UI only. */
 export function AppShell({ children, account }: AppShellProps) {
-  const { links, mobileLinks, toggleTheme, toggleLanguage, language, isDetail } = useAppShell()
+  const { links, mobileLinks, isDetail } = useAppShell()
 
   return (
     <div className="h-dvh overflow-hidden lg:grid lg:grid-cols-[var(--rail-width)_minmax(0,1fr)]">
       <NavigationRail
         links={links}
-        onToggleTheme={toggleTheme}
-        onToggleLanguage={toggleLanguage}
-        language={language}
         account={account}
       />
       <main

@@ -42,12 +42,18 @@ export function useCreateGroupModal({ isOpen = true, onClose }: UseCreateGroupMo
   // Manage object URL for avatar preview
   useEffect(() => {
     if (!avatarFile) {
-      setAvatarPreview(null)
       return
     }
+    let isActive = true
     const objectUrl = URL.createObjectURL(avatarFile)
-    setAvatarPreview(objectUrl)
-    return () => URL.revokeObjectURL(objectUrl)
+    queueMicrotask(() => {
+      if (isActive) setAvatarPreview(objectUrl)
+    })
+    return () => {
+      isActive = false
+      URL.revokeObjectURL(objectUrl)
+      setAvatarPreview(null)
+    }
   }, [avatarFile])
 
   // Fetch current user's friends for the checklist
@@ -57,7 +63,7 @@ export function useCreateGroupModal({ isOpen = true, onClose }: UseCreateGroupMo
     enabled: isOpen,
   })
 
-  const friends: readonly FriendDto[] = friendsQuery.data ?? []
+  const friends = useMemo<readonly FriendDto[]>(() => friendsQuery.data ?? [], [friendsQuery.data])
 
   // Filter friends according to the in-modal search box
   const filteredFriends = useMemo(() => {

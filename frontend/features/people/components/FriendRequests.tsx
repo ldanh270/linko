@@ -1,13 +1,13 @@
 import { ErrorState } from "@/shared/components/ErrorState"
 import { FriendRequestsSkeleton } from "@/shared/components/Skeleton"
-import { FriendRequestRow } from "./FriendRequestRow"
+import { FriendRequestRow, type FriendRequestRowProps } from "./FriendRequestRow"
 export interface FriendRequestsState {
   readonly requests: {
     readonly isPending: boolean
     readonly isError: boolean
     readonly refetch: () => void | Promise<unknown>
   }
-  readonly requestRows: readonly any[]
+  readonly requestRows: readonly FriendRequestRowProps["request"][]
   readonly actions: {
     readonly accept: { readonly isPending: boolean }
     readonly decline: { readonly isPending: boolean }

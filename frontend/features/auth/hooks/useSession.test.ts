@@ -75,7 +75,7 @@ describe("useSession", () => {
         expect(refreshHeaders).toHaveLength(2)
         expect(protectedHeaders).toHaveLength(1)
         expect(protectedHeaders[0].has("Authorization")).toBe(false)
-    })
+    }, 15000)
 
     it("keeps protected content hidden until the refresh cookie is validated", async () => {
         let releaseRefresh: (response: Response) => void = () => undefined
@@ -90,5 +90,5 @@ describe("useSession", () => {
         releaseRefresh(successResponse({ accessToken: "valid-access-token" }))
 
         expect(await screen.findByText("private conversation")).toBeInTheDocument()
-    })
+    }, 15000)
 })

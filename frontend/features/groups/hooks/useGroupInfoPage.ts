@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ROLE } from "@linko/contracts"
 import { listMembers } from "@/features/membership/api/membership.api"
 import { listPins } from "../api/pins.api"
 import { getGroupNotificationPreference, setGroupMuted } from "@/features/settings/api/notification.api"

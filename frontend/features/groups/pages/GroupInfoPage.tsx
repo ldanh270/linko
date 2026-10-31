@@ -20,7 +20,6 @@ export function GroupInfoPage() {
     group,
     membersQuery,
     members,
-    pinsQuery,
     pins,
     isMuted,
     isMutePending,
