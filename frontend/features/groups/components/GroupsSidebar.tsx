@@ -13,9 +13,10 @@ import { useGroupsSidebar } from "../hooks/useGroupsSidebar"
 import { GroupListRow } from "./GroupListRow"
 import { CreateGroupModal } from "./CreateGroupModal"
 
-/** Render the Groups reference panel with in-place group creation modal dialog. UI only. */
+/** Render the Groups reference panel with in-place group creation and search mode. UI only. */
 export function GroupsSidebar() {
   const state = useGroupsSidebar()
+
   return (
     <>
       <SidebarPanel
@@ -35,20 +36,43 @@ export function GroupsSidebar() {
           />
         }
       >
-        <SearchInput
-          label="Tìm nhóm đã tải"
-          placeholder="Tìm nhóm"
-          value={state.search}
-          stateKey={state.searchRevision}
-          onChange={state.onSearchChange}
-          className="mx-6 mb-4"
-        />
+        <div className="flex items-center gap-2 mx-6 mb-4">
+          {Boolean(state.search) && (
+            <button
+              type="button"
+              onClick={() => state.onSearchChange("")}
+              aria-label="Xóa bộ lọc nhóm"
+              className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
+            >
+              <Icon name={ICON_NAMES.BACK} />
+            </button>
+          )}
+          <SearchInput
+            label="Tìm nhóm"
+            placeholder="Tìm kiếm nhóm..."
+            value={state.search}
+            stateKey={state.searchRevision}
+            onChange={state.onSearchChange}
+            onClear={() => state.onSearchChange("")}
+            className="flex-1"
+          />
+        </div>
+
         {state.query.isPending ? (
           <ConversationListSkeleton />
         ) : state.query.isError ? (
           <ErrorState title="Không thể tải nhóm" onRetry={state.onRetry} />
         ) : state.rows.length ? (
-          <ul>{state.rows.map((group) => <GroupListRow key={group.id} group={group} />)}</ul>
+          <ul>
+            {state.rows.map((group) => (
+              <GroupListRow key={group.id} group={group} />
+            ))}
+          </ul>
+        ) : state.search ? (
+          <EmptyState
+            title="Không tìm thấy nhóm nào"
+            description={`Không có nhóm nào khớp với "${state.search}".`}
+          />
         ) : (
           <EmptyState
             title="Chưa có nhóm nào"
@@ -59,8 +83,8 @@ export function GroupsSidebar() {
             }
           />
         )}
-        {state.search && <p className="px-6 py-3 text-xs text-[var(--text-secondary)]">Tìm trong các nhóm ở trang đã tải.</p>}
-        {state.query.data?.nextCursor && (
+
+        {!state.search && state.query.data?.nextCursor && (
           <Button className="m-4" variant="ghost" onClick={state.onLoadMore} isLoading={state.query.isFetching}>
             Trang tiếp theo
           </Button>

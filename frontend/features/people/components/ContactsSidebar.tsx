@@ -15,13 +15,70 @@ import { ContactGroup } from "./ContactGroup"
 import { AddContactModal } from "./AddContactModal/AddContactModal"
 import { PersonProfilePanel } from "./PersonProfilePanel"
 
-/** Render the alphabetical Contacts reference and preserve real friend actions. UI only. */
+/** Render the alphabetical Contacts reference with clear search results. UI only. */
 export function ContactsSidebar() {
   const state = usePeoplePage()
-  return <SidebarPanel header={<SidebarHeader title="Danh bạ" action={<IconButton label="Thêm bạn bè" icon={<Icon name={ICON_NAMES.ADD_CONTACT} />} onClick={state.onOpenAdd} />} />}>
-    <SearchInput label="Tìm trong danh bạ" placeholder="Tìm người dùng..." value={state.search} stateKey={state.searchRevision} onChange={state.onSearchChange} />
-    {state.requestRows.length > 0 && <Button className="mx-6 mb-4" variant="ghost" onClick={state.onOpenAdd}>Lời mời kết bạn ({state.requestRows.length})</Button>}
-    {state.friends.isPending ? <ContactsListSkeleton /> : state.friends.isError ? <ErrorState title="Không thể tải danh bạ" onRetry={state.onRetry} /> : state.groups.length ? state.groups.map((group) => <ContactGroup key={group.letter} group={group} />) : <EmptyState title="Chưa có liên hệ" description="Thêm bạn bè để bắt đầu trò chuyện." />}
-    {state.isAdding && <AddContactModal state={state} />}{state.userId && <PersonProfilePanel state={state} />}
-  </SidebarPanel>
+
+  return (
+    <SidebarPanel
+      header={
+        <SidebarHeader
+          title="Danh bạ"
+          action={
+            <IconButton
+              label="Thêm bạn bè"
+              icon={<Icon name={ICON_NAMES.ADD_CONTACT} />}
+              onClick={state.onOpenAdd}
+            />
+          }
+        />
+      }
+    >
+      <div className="flex items-center gap-2 mx-6 mb-4">
+        {Boolean(state.search) && (
+          <button
+            type="button"
+            onClick={() => state.onSearchChange("")}
+            aria-label="Xóa bộ lọc danh bạ"
+            className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
+          >
+            <Icon name={ICON_NAMES.BACK} />
+          </button>
+        )}
+        <SearchInput
+          label="Tìm trong danh bạ"
+          placeholder="Tìm kiếm danh bạ..."
+          value={state.search}
+          stateKey={state.searchRevision}
+          onChange={state.onSearchChange}
+          onClear={() => state.onSearchChange("")}
+          className="flex-1"
+        />
+      </div>
+
+      {state.requestRows.length > 0 && !state.search && (
+        <Button className="mx-6 mb-4" variant="ghost" onClick={state.onOpenAdd}>
+          Lời mời kết bạn ({state.requestRows.length})
+        </Button>
+      )}
+
+      {state.friends.isPending ? (
+        <ContactsListSkeleton />
+      ) : state.friends.isError ? (
+        <ErrorState title="Không thể tải danh bạ" onRetry={state.onRetry} />
+      ) : state.groups.length ? (
+        state.groups.map((group) => <ContactGroup key={group.letter} group={group} />)
+      ) : state.search ? (
+        <EmptyState
+          title="Không tìm thấy liên hệ nào"
+          description={`Không có người dùng nào khớp với "${state.search}".`}
+        />
+      ) : (
+        <EmptyState title="Chưa có liên hệ" description="Thêm bạn bè để bắt đầu trò chuyện." />
+      )}
+
+      {state.isAdding && <AddContactModal state={state} />}
+      {state.userId && <PersonProfilePanel state={state} />}
+    </SidebarPanel>
+  )
 }

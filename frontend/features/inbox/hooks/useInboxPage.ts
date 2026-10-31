@@ -56,6 +56,7 @@ export function useInboxPage(fixedKind?: ConversationKind) {
   return {
     query,
     rows: visibleRows,
+    allRows: rows,
     people,
     search,
     searchRevision,
