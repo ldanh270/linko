@@ -6,7 +6,7 @@ export interface SidebarHeaderProps { readonly title: string; readonly action?: 
 /** Render the consistent title/action spacing of reference sidebars. UI only. */
 export function SidebarHeader({ title, action }: SidebarHeaderProps) {
   return (
-    <header className="flex min-h-[var(--header-height)] items-center justify-between gap-3 px-4 py-3.5">
+    <header className="flex min-h-(--header-height) items-center justify-between gap-3 px-4 py-3.5">
       <h1 className="text-xl font-semibold leading-tight text-text-primary">{title}</h1>
       {action}
     </header>

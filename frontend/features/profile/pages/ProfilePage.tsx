@@ -57,7 +57,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
       {/* Main Identity Banner Card */}
       <article className="border border-border rounded-panel bg-surface shadow-panel overflow-hidden">
         {/* Cover visual banner */}
-        <div className="relative h-44 w-full bg-gradient-to-r from-brand/20 via-brand-soft to-surface-subtle border-b border-border overflow-hidden">
+        <div className="relative h-44 w-full bg-linear-to-r from-brand/20 via-brand-soft to-surface-subtle border-b border-border overflow-hidden">
           {backgroundUrl ? (
             <Image
               src={backgroundUrl}
@@ -151,7 +151,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
             icon={<Icon name={ICON_NAMES.SETTINGS} />}
           />
           <CardContent>
-            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-text-secondary [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-text-primary">
+            <dl className="grid gap-5 wrap-anywhere [&_dt]:text-xs [&_dt]:text-text-secondary [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-text-primary">
               <div>
                 <dt>Tên người dùng</dt>
                 <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>

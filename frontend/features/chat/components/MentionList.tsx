@@ -8,7 +8,7 @@ export interface MentionListProps { readonly members: readonly MemberDto[]; read
 export function MentionList({ members, onSelect }: MentionListProps) {
   return (
     <ul
-      className="absolute bottom-full left-6 max-h-[200px] overflow-y-auto bg-surface border border-border rounded-sm shadow-panel z-20 p-1 flex flex-col gap-0.5 list-none"
+      className="absolute bottom-full left-6 max-h-50 overflow-y-auto bg-surface border border-border rounded-sm shadow-panel z-20 p-1 flex flex-col gap-0.5 list-none"
       aria-label="Chọn người được nhắc tên"
     >
       {members.map((member) => (

@@ -13,7 +13,7 @@ export function NavigationItem({ label, destination, icon, isActive }: Navigatio
       title={label}
       aria-label={label}
       aria-current={isActive ? "page" : undefined}
-      className={`grid place-items-center w-[52px] h-[52px] rounded-lg text-2xl transition-colors ${
+      className={`grid place-items-center w-13 h-13 rounded-lg text-2xl transition-colors ${
         isActive
           ? "text-brand bg-brand-soft"
           : "text-text-secondary hover:text-brand hover:bg-brand-subtle"

@@ -21,7 +21,7 @@ export function ProfileSidebar() {
       {state.query.isError && <p role="alert" className="text-xs text-danger px-4 mt-2">Không thể làm mới hồ sơ.</p>}
       <ProfileIdentity name={state.query.data[USER_PROFILE_FIELDS.DISPLAY_NAME]} username={state.query.data[USER_PROFILE_FIELDS.USERNAME]} avatarUrl={state.query.data[USER_PROFILE_FIELDS.AVATAR_URL]} />
       <div className="p-4">
-        <p className="mb-4 text-text-secondary leading-normal [overflow-wrap:anywhere]">{state.query.data[USER_PROFILE_FIELDS.BIO] || "Chưa có giới thiệu."}</p>
+        <p className="mb-4 text-text-secondary leading-normal wrap-anywhere">{state.query.data[USER_PROFILE_FIELDS.BIO] || "Chưa có giới thiệu."}</p>
         <div className="border border-border rounded-md bg-surface overflow-hidden">
           <div className="flex items-center gap-2.5 w-full text-sm font-medium text-text-primary px-4 py-3 border-b border-border">
             <Icon name={ICON_NAMES.PROFILE} />

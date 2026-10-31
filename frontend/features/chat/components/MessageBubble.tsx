@@ -68,10 +68,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div className="max-w-[min(78%,600px)] min-w-0">
           <div className={`flex items-start gap-1 ${message.isOwn ? "flex-row-reverse" : ""}`}>
             <div
-              className={`relative px-4 py-2.5 rounded-lg min-w-[70px] ${
+              className={`relative px-4 py-2.5 rounded-lg min-w-17.5 ${
                 message.isOwn
-                  ? "rounded-br-none bg-bubble-outgoing text-text-primary after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-bubble-outgoing after:border-r-bubble-outgoing after:right-0 after:-bottom-[9px]"
-                  : "rounded-bl-none bg-brand text-brand-contrast after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-brand after:border-l-brand after:left-0 after:-bottom-[9px]"
+                  ? "rounded-br-none bg-bubble-outgoing text-text-primary after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-bubble-outgoing after:border-r-bubble-outgoing after:right-0 after:-bottom-2.25"
+                  : "rounded-bl-none bg-brand text-brand-contrast after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-brand after:border-l-brand after:left-0 after:-bottom-2.25"
               }`}
             >
               {message.isPinned && (
@@ -91,14 +91,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   <p className="truncate opacity-85 m-0 text-xs">{message.reply.content}</p>
                 </div>
               )}
-              <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-sm leading-normal">
+              <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-normal">
                 {renderHighlightedContent(message.content, message.searchQuery)}
               </p>
               {message.attachments.map((file) => (
                 <MessageAttachment key={file.id} file={file} />
               ))}
               <time
-                className={`flex items-center gap-[3px] mt-1 text-xs ${
+                className={`flex items-center gap-0.75 mt-1 text-xs ${
                   message.isOwn ? "justify-start text-text-secondary opacity-100" : "justify-end opacity-65"
                 }`}
                 dateTime={message.createdAt}

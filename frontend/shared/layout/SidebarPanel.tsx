@@ -8,7 +8,7 @@ export function SidebarPanel({ header, children }: SidebarPanelProps) {
   return (
     <section className="flex flex-col h-full min-h-0 bg-background">
       {header}
-      <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#a2adb755_transparent]">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin [scrollbar-color:#a2adb755_transparent]">
         {children}
       </div>
     </section>

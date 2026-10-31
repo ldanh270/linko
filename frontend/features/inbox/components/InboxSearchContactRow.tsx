@@ -27,7 +27,7 @@ export function InboxSearchContactRow({
         type="button"
         onClick={() => onSelect(person)}
         disabled={isLoading}
-        className="w-full flex items-center min-h-[64px] gap-3 px-5 py-2.5 rounded-md mb-0.5 text-left transition-colors hover:bg-input-surface cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
+        className="w-full flex items-center min-h-16 gap-3 px-5 py-2.5 rounded-md mb-0.5 text-left transition-colors hover:bg-input-surface cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
       >
         <Avatar label={displayName} src={person.avatarUrl} size="small" isOnline={isOnline} />
         <span className="flex flex-col flex-1 min-w-0">

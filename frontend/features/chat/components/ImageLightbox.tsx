@@ -17,7 +17,7 @@ export function ImageLightbox({ src, alt, name, onClose }: ImageLightboxProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col bg-black/90 backdrop-blur-md animate-[lightboxFadeIn_0.2s_ease-out]"
+      className="fixed inset-0 z-9999 flex flex-col bg-black/90 backdrop-blur-md animate-[lightboxFadeIn_0.2s_ease-out]"
       onClick={handleBackdropClick}
       role="presentation"
     >

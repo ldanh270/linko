@@ -10,7 +10,7 @@ export function ConversationPaneSkeleton() {
       aria-label="Đang mở cuộc trò chuyện"
     >
       {/* Header Skeleton */}
-      <header className="flex min-h-[var(--header-height)] items-center justify-between gap-4 border-b border-border px-4 py-3.5 bg-surface">
+      <header className="flex min-h-(--header-height) items-center justify-between gap-4 border-b border-border px-4 py-3.5 bg-surface">
         <div className="flex items-center gap-3">
           <Skeleton circle className="w-9 h-9 shrink-0" />
           <div className="space-y-1.5">

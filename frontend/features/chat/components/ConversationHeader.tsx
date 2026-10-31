@@ -24,7 +24,7 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
 
   return (
     <div>
-      <header className="relative z-10 flex min-h-[var(--header-height)] items-center justify-between gap-3 px-4 py-3.5 border-b border-border bg-surface">
+      <header className="relative z-10 flex min-h-(--header-height) items-center justify-between gap-3 px-4 py-3.5 border-b border-border bg-surface">
         <div className="flex items-center gap-3 min-w-0">
           <Link href={header.backHref} aria-label="Về danh sách tin nhắn" className="lg:hidden mr-1 flex-none text-text-secondary hover:text-brand">
             <Icon name={ICON_NAMES.BACK} />

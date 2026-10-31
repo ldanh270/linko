@@ -22,9 +22,9 @@ const AVATAR_SIZE_CLASSES: Record<AvatarSize, string> = {
 }
 
 const STATUS_SIZE_CLASSES: Record<AvatarSize, string> = {
-  small: "w-[11px] h-[11px] border-2",
-  medium: "w-[13px] h-[13px] border-2",
-  large: "w-[17px] h-[17px] border-[3px]",
+  small: "w-2.75 h-2.75 border-2",
+  medium: "w-3.25 h-3.25 border-2",
+  large: "w-4.25 h-4.25 border-[3px]",
 }
 
 const STATUS_COLOR_CLASSES = {

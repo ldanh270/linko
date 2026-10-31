@@ -30,7 +30,7 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
   return (
     <div
       ref={popoverRef}
-      className="absolute bottom-[calc(100%+0.5rem)] right-16 w-80 max-w-[calc(100vw-32px)] max-h-[380px] bg-surface border border-border rounded-xl shadow-dropdown flex flex-col z-50 overflow-hidden animate-[emojiPickerFadeIn_0.15s_cubic-bezier(0.16,1,0.3,1)]"
+      className="absolute bottom-[calc(100%+0.5rem)] right-16 w-80 max-w-[calc(100vw-32px)] max-h-95 bg-surface border border-border rounded-xl shadow-dropdown flex flex-col z-50 overflow-hidden animate-[emojiPickerFadeIn_0.15s_cubic-bezier(0.16,1,0.3,1)]"
       role="dialog"
       aria-label="Chọn biểu tượng cảm xúc"
     >

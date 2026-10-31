@@ -63,7 +63,7 @@ export function ConversationSearchBar({
     <div className="relative border-b border-border bg-surface px-4 py-2.5 shadow-xs z-30">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Search input field */}
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w-50">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none flex items-center">
             <Icon name={ICON_NAMES.SEARCH} className="h-4 w-4" />
           </span>

@@ -151,7 +151,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                     size="small"
                     className="w-4 h-4 text-[9px]"
                   />
-                  <span className="truncate max-w-[120px]">
+                  <span className="truncate max-w-30">
                     {friend.displayName || friend.username}
                   </span>
                   <button

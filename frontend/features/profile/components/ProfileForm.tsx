@@ -29,7 +29,7 @@ export function ProfileForm(props: ProfileFormProps) {
       {/* Cover and Avatar Visual Area */}
       <div className="relative rounded-xl border border-border bg-surface-subtle overflow-hidden">
         {/* Cover Preview */}
-        <div className="relative h-28 w-full bg-gradient-to-r from-brand/20 via-brand-soft to-surface-subtle flex items-center justify-center overflow-hidden">
+        <div className="relative h-28 w-full bg-linear-to-r from-brand/20 via-brand-soft to-surface-subtle flex items-center justify-center overflow-hidden">
           {state.backgroundPreview ? (
             <Image
               src={state.backgroundPreview}

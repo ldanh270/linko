@@ -15,7 +15,7 @@ export function Accordion({ title, id, icon, isOpen, onToggle, children }: Accor
     <section className="border-b border-border">
       <Button
         variant="ghost"
-        className="w-full flex items-center justify-between px-4 py-3.5 text-base font-medium text-text-primary rounded-none min-h-[52px]"
+        className="w-full flex items-center justify-between px-4 py-3.5 text-base font-medium text-text-primary rounded-none min-h-13"
         aria-expanded={isOpen}
         aria-controls={id}
         onClick={onToggle}

@@ -17,7 +17,7 @@ export function ConversationListRow({ row, isActive, isOnline }: ConversationLis
       <Link
         href={row.href}
         aria-current={isActive ? "page" : undefined}
-        className={`flex items-center min-h-[72px] gap-3 px-5 py-3 rounded-md mb-0.5 transition-colors ${
+        className={`flex items-center min-h-18 gap-3 px-5 py-3 rounded-md mb-0.5 transition-colors ${
           isActive
             ? "bg-input-surface text-text-primary"
             : "hover:bg-input-surface text-text-primary"

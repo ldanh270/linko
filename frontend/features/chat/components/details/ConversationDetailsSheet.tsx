@@ -24,10 +24,10 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
   const isGroup = details.kind === CHAT_KIND.GROUP
   return (
     <aside
-      className="w-[var(--details-width)] border-l border-border bg-surface flex flex-col h-full min-h-0"
+      className="w-(--details-width) border-l border-border bg-surface flex flex-col h-full min-h-0"
       aria-label={CHAT_DETAILS_COPY.SHEET_TITLE}
     >
-      <header className="flex min-h-[var(--header-height)] items-center justify-between px-4 py-3.5 border-b border-border">
+      <header className="flex min-h-(--header-height) items-center justify-between px-4 py-3.5 border-b border-border">
         <h2 className="text-lg font-semibold text-text-primary">{CHAT_DETAILS_COPY.SHEET_TITLE}</h2>
         <IconButton
           label={CHAT_DETAILS_COPY.CLOSE}
@@ -36,7 +36,7 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
         />
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#a2adb755_transparent] p-4 flex flex-col gap-4">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin [scrollbar-color:#a2adb755_transparent] p-4 flex flex-col gap-4">
         <ConversationDetailsIdentity details={details} />
 
         {details.description && (
