@@ -1,4 +1,5 @@
 import { Avatar } from "@/shared/components/Avatar"
+import { Badge } from "@/shared/components/Badge"
 import { Link } from "@/shared/components/Link"
 import type { ConversationRowViewModel } from "../inbox.types"
 
@@ -35,12 +36,14 @@ export function ConversationListRow({ row, isActive, isOnline }: ConversationLis
           <span className="flex items-center justify-between mt-1 gap-2 text-sm text-[var(--text-secondary)]">
             <span className="truncate">{row.preview}</span>
             {row.unreadCount > 0 && (
-              <span
-                className="inline-grid place-items-center bg-[var(--badge-background)] text-[var(--badge-text)] text-[10px] font-bold min-w-5 min-h-5 px-1.5 rounded-full"
+              <Badge
+                variant="danger"
+                shape="pill"
+                size="sm"
                 aria-label={`${row.unreadCount} tin chưa đọc`}
               >
                 {row.unreadCount}
-              </span>
+              </Badge>
             )}
           </span>
         </span>

@@ -1,4 +1,5 @@
 import { Avatar } from "@/shared/components/Avatar"
+import { Badge } from "@/shared/components/Badge"
 import { Link } from "@/shared/components/Link"
 import type { ConversationRowViewModel } from "@/features/inbox/inbox.types"
 
@@ -16,9 +17,9 @@ export function GroupListRow({ group }: GroupListRowProps) {
         <Avatar label={group.title} src={group.avatarUrl} size="small" />
         <span className="flex-1 min-w-0 truncate font-medium">#{group.title}</span>
         {group.unreadCount > 0 && (
-          <span className="inline-grid place-items-center bg-[var(--badge-background)] text-[var(--badge-text)] text-[10px] font-bold min-w-5 min-h-5 px-1.5 rounded-full">
+          <Badge variant="danger" shape="pill" size="sm">
             +{group.unreadCount}
-          </span>
+          </Badge>
         )}
       </Link>
     </li>

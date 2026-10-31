@@ -4,6 +4,9 @@ import Image from "next/image"
 import { USER_PROFILE_FIELDS } from "@linko/contracts"
 import { Button } from "@/shared/components/Button"
 import { Avatar } from "@/shared/components/Avatar"
+import { Badge } from "@/shared/components/Badge"
+import { Card, CardHeader, CardContent } from "@/shared/components/Card"
+import { PresenceIndicator } from "@/shared/components/PresenceIndicator"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
@@ -92,25 +95,15 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-2xl font-bold">{user[USER_PROFILE_FIELDS.DISPLAY_NAME]}</h2>
-              <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--brand)]">
+              <Badge variant="brand" shape="pill">
                 @{user[USER_PROFILE_FIELDS.USERNAME]}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                  state.isOnline
-                    ? "border-[var(--status-online)]/40 bg-[var(--status-online)]/10 text-[var(--status-online)]"
-                    : "border-[var(--status-offline)]/40 bg-[var(--status-offline)]/10 text-[var(--status-offline)]"
-                }`}
-              >
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    state.isOnline
-                      ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
-                      : "bg-[var(--status-offline)]"
-                  }`}
-                />
-                {state.isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}
-              </span>
+              </Badge>
+              <PresenceIndicator
+                isOnline={state.isOnline}
+                variant="badge"
+                labelOnline="Đang trực tuyến"
+                labelOffline="Ngoại tuyến"
+              />
             </div>
 
             <p className="mt-2.5 text-sm text-[var(--text-secondary)] whitespace-pre-wrap max-w-2xl leading-relaxed">
@@ -121,60 +114,54 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
       </article>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <article className="surface-panel p-6">
-          <div className="flex items-center gap-2 mb-4 text-base font-semibold border-b border-[var(--border)] pb-3">
-            <Icon name={ICON_NAMES.PROFILE} />
-            <span>Thông tin người dùng</span>
-          </div>
-          <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
-            <div>
-              <dt>Tên hiển thị</dt>
-              <dd>{user[USER_PROFILE_FIELDS.DISPLAY_NAME]}</dd>
-            </div>
-            <div>
-              <dt>Tên người dùng</dt>
-              <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>
-            </div>
-            <div>
-              <dt>Trạng thái</dt>
-              <dd className="flex items-center gap-2">
-                <span
-                  className={`inline-block h-2 w-2 rounded-full ${
-                    state.isOnline
-                      ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
-                      : "bg-[var(--status-offline)]"
-                  }`}
-                />
-                <span className={state.isOnline ? "text-[var(--status-online)] font-semibold" : "text-[var(--status-offline)] font-medium"}>
-                  {state.isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}
-                </span>
-              </dd>
-            </div>
-          </dl>
-        </article>
+        <Card>
+          <CardHeader title="Thông tin người dùng" icon={<Icon name={ICON_NAMES.PROFILE} />} />
+          <CardContent>
+            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+              <div>
+                <dt>Tên hiển thị</dt>
+                <dd>{user[USER_PROFILE_FIELDS.DISPLAY_NAME]}</dd>
+              </div>
+              <div>
+                <dt>Tên người dùng</dt>
+                <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>
+              </div>
+              <div>
+                <dt>Trạng thái</dt>
+                <dd>
+                  <PresenceIndicator
+                    isOnline={state.isOnline}
+                    variant="text"
+                    labelOnline="Đang trực tuyến"
+                    labelOffline="Ngoại tuyến"
+                  />
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
 
-        <article className="surface-panel p-6">
-          <div className="flex items-center gap-2 mb-4 text-base font-semibold border-b border-[var(--border)] pb-3">
-            <Icon name={ICON_NAMES.CONTACTS} />
-            <span>Mối quan hệ & Kết nối</span>
-          </div>
-          <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
-            <div>
-              <dt>Quan hệ kết nối</dt>
-              <dd>
-                {state.isFriend
-                  ? "Bạn bè"
-                  : state.isRequested
-                    ? "Đã gửi lời mời kết bạn"
-                    : "Chưa kết bạn"}
-              </dd>
-            </div>
-            <div>
-              <dt>Trò chuyện</dt>
-              <dd>Hỗ trợ nhắn tin trực tiếp và gửi tệp tin</dd>
-            </div>
-          </dl>
-        </article>
+        <Card>
+          <CardHeader title="Mối quan hệ & Kết nối" icon={<Icon name={ICON_NAMES.CONTACTS} />} />
+          <CardContent>
+            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+              <div>
+                <dt>Quan hệ kết nối</dt>
+                <dd>
+                  {state.isFriend
+                    ? "Bạn bè"
+                    : state.isRequested
+                      ? "Đã gửi lời mời kết bạn"
+                      : "Chưa kết bạn"}
+                </dd>
+              </div>
+              <div>
+                <dt>Trò chuyện</dt>
+                <dd>Hỗ trợ nhắn tin trực tiếp và gửi tệp tin</dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
       </div>
     </section>
   )

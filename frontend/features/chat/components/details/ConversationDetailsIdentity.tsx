@@ -1,4 +1,5 @@
 import { Avatar } from "@/shared/components/Avatar"
+import { PresenceIndicator } from "@/shared/components/PresenceIndicator"
 import { IconButton } from "@/shared/components/IconButton"
 import { Link } from "@/shared/components/Link"
 import { Icon } from "@/shared/icons/Icon"
@@ -40,17 +41,12 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
       </h3>
       {isPeerOnline !== undefined ? (
         <div className="flex items-center justify-center gap-1.5 text-xs mb-4">
-          <span
-            className={`inline-block w-2 h-2 rounded-full ${
-              isPeerOnline
-                ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
-                : "bg-[var(--status-offline)]"
-            }`}
-            aria-hidden="true"
+          <PresenceIndicator
+            isOnline={isPeerOnline}
+            variant="text"
+            labelOnline="Đang hoạt động"
+            labelOffline="Ngoại tuyến"
           />
-          <span className={isPeerOnline ? "text-[var(--status-online)] font-semibold" : "text-[var(--text-secondary)] font-medium"}>
-            {isPeerOnline ? "Đang hoạt động" : "Ngoại tuyến"}
-          </span>
           <span className="text-[var(--text-muted)]">·</span>
           <span className="text-[var(--text-secondary)]">{details.subtitle}</span>
         </div>

@@ -4,6 +4,9 @@ import Image from "next/image"
 import { USER_PROFILE_FIELDS } from "@linko/contracts"
 import { Button } from "@/shared/components/Button"
 import { Avatar } from "@/shared/components/Avatar"
+import { Badge } from "@/shared/components/Badge"
+import { Card, CardHeader, CardContent } from "@/shared/components/Card"
+import { PresenceIndicator } from "@/shared/components/PresenceIndicator"
 import { ProfilePageSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { PageHeader } from "@/shared/components/PageHeader"
@@ -106,13 +109,14 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-2xl font-bold">{user[USER_PROFILE_FIELDS.DISPLAY_NAME]}</h2>
-              <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--brand)]">
+              <Badge variant="brand" shape="pill">
                 @{user[USER_PROFILE_FIELDS.USERNAME]}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-online)]/40 bg-[var(--status-online)]/10 px-2.5 py-0.5 text-xs font-semibold text-[var(--status-online)]">
-                <span className="h-2 w-2 rounded-full bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]" />
-                Đang trực tuyến
-              </span>
+              </Badge>
+              <PresenceIndicator
+                isOnline
+                variant="badge"
+                labelOnline="Đang trực tuyến"
+              />
             </div>
 
             <p className="mt-2.5 text-sm text-[var(--text-secondary)] whitespace-pre-wrap max-w-2xl leading-relaxed">
@@ -125,47 +129,51 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
       {/* Details Grid */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Personal Details */}
-        <article className="surface-panel p-6">
-          <div className="flex items-center justify-between gap-2 mb-4 border-b border-[var(--border)] pb-3">
-            <div className="flex items-center gap-2 text-base font-semibold">
-              <Icon name={ICON_NAMES.PROFILE} />
-              <span>Thông tin cá nhân & liên hệ</span>
-            </div>
-            <Button size="small" variant="ghost" onClick={editor.onOpenEdit}>
-              Sửa
-            </Button>
-          </div>
-          <ProfileAbout details={editor.details} />
-        </article>
+        <Card>
+          <CardHeader
+            title="Thông tin cá nhân & liên hệ"
+            icon={<Icon name={ICON_NAMES.PROFILE} />}
+            action={
+              <Button size="small" variant="ghost" onClick={editor.onOpenEdit}>
+                Sửa
+              </Button>
+            }
+          />
+          <CardContent>
+            <ProfileAbout details={editor.details} />
+          </CardContent>
+        </Card>
 
         {/* Account & Security Summary */}
-        <article className="surface-panel p-6">
-          <div className="flex items-center gap-2 mb-4 text-base font-semibold border-b border-[var(--border)] pb-3">
-            <Icon name={ICON_NAMES.SETTINGS} />
-            <span>Tài khoản & Trạng thái bảo mật</span>
-          </div>
-          <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
-            <div>
-              <dt>Tên người dùng</dt>
-              <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>
-            </div>
-            <div>
-              <dt>Email đăng ký</dt>
-              <dd>{user[USER_PROFILE_FIELDS.EMAIL]}</dd>
-            </div>
-            <div>
-              <dt>Trạng thái tài khoản</dt>
-              <dd className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-[var(--positive)]" />
-                <span>Hoạt động bình thường</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Phiên làm việc</dt>
-              <dd>Được mã hóa & bảo vệ an toàn</dd>
-            </div>
-          </dl>
-        </article>
+        <Card>
+          <CardHeader
+            title="Tài khoản & Trạng thái bảo mật"
+            icon={<Icon name={ICON_NAMES.SETTINGS} />}
+          />
+          <CardContent>
+            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+              <div>
+                <dt>Tên người dùng</dt>
+                <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>
+              </div>
+              <div>
+                <dt>Email đăng ký</dt>
+                <dd>{user[USER_PROFILE_FIELDS.EMAIL]}</dd>
+              </div>
+              <div>
+                <dt>Trạng thái tài khoản</dt>
+                <dd className="flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--positive)]" />
+                  <span>Hoạt động bình thường</span>
+                </dd>
+              </div>
+              <div>
+                <dt>Phiên làm việc</dt>
+                <dd>Được mã hóa & bảo vệ an toàn</dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
       </div>
 
       {editor.isEditing && <ProfileEditModal state={editor} onClose={editor.onCloseEdit} />}
