@@ -15,3 +15,4 @@ frontend/test-results*/
 frontend/playwright-report/
 frontend/.next-parity/
 frontend/.next-verify/
+*.zip
