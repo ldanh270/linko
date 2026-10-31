@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { ROLE, type InboxItemDto, type MessageDto, INBOX_FIELDS } from "@linko/contracts"
@@ -49,9 +49,9 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
   const [section, setSection] = useState<string>(
     isGroup ? CHAT_DETAILS_SECTIONS.MEMBERS : CHAT_DETAILS_SECTIONS.MEDIA
   )
-  const toggleSection = (id: string) => {
+  const toggleSection = useCallback((id: string) => {
     setSection((current) => (current === id ? "" : id))
-  }
+  }, [])
 
   const preference = useQuery({
     queryKey: [CHAT_QUERY_KEYS.PREFERENCE, conversationId],
@@ -79,8 +79,9 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
   const avatarUrl = isGroup ? item.group?.avatarUrl ?? null : peer?.avatarUrl ?? null
   const description = item.group?.description ?? ""
 
-  const members: ConversationMemberViewModel[] = isGroup
-    ? (membersData ?? []).map((member) => {
+  const members: ConversationMemberViewModel[] = useMemo(() => {
+    if (isGroup) {
+      return (membersData ?? []).map((member) => {
         const matchedAuthor = authors.find((author) => author.id === member.userId)
         return {
           id: member.userId,
@@ -95,7 +96,8 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
           isOwner: member.role === ROLE.OWNER,
         }
       })
-    : peer
+    }
+    return peer
       ? [
           {
             id: peer.id,
@@ -106,31 +108,37 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
           },
         ]
       : []
+  }, [isGroup, membersData, authors, peer])
 
   const subtitle = isGroup ? `${members.length} thành viên` : "Trò chuyện trực tiếp"
 
-  const photos: AttachmentViewModel[] = []
-  const files: AttachmentViewModel[] = []
-  for (const message of messages) {
-    for (const attachment of message.attachments ?? []) {
-      const mapped = mapAttachment(attachment, message.id)
-      if (attachment.contentType?.startsWith("image/")) {
-        photos.push(mapped)
-      } else {
-        files.push(mapped)
+  const { photos, files } = useMemo(() => {
+    const photosList: AttachmentViewModel[] = []
+    const filesList: AttachmentViewModel[] = []
+    for (const message of messages) {
+      for (const attachment of message.attachments ?? []) {
+        const mapped = mapAttachment(attachment, message.id)
+        if (attachment.contentType?.startsWith("image/")) {
+          photosList.push(mapped)
+        } else {
+          filesList.push(mapped)
+        }
       }
     }
-  }
+    return { photos: photosList, files: filesList }
+  }, [messages])
 
-  const pins: ConversationPinViewModel[] = (pinsData ?? []).map((pin) => {
-    const author = authors.find((a) => a.id === pin.senderId)?.name ?? CHAT_COPY.MEMBER
-    return {
-      id: pin.id,
-      content: pin.content ?? (pin.attachments?.length ? "Tệp đính kèm" : ""),
-      createdAt: new Date(pin.createdAt).toLocaleDateString("vi-VN"),
-      author,
-    }
-  })
+  const pins: ConversationPinViewModel[] = useMemo(() => {
+    return (pinsData ?? []).map((pin) => {
+      const author = authors.find((a) => a.id === pin.senderId)?.name ?? CHAT_COPY.MEMBER
+      return {
+        id: pin.id,
+        content: pin.content ?? (pin.attachments?.length ? "Tệp đính kèm" : ""),
+        createdAt: new Date(pin.createdAt).toLocaleDateString("vi-VN"),
+        author,
+      }
+    })
+  }, [pinsData, authors])
 
   const manageHref = isGroup
     ? buildAppRoute(APP_ROUTES.GROUP_MANAGE, { conversationId })
@@ -142,18 +150,18 @@ export function useConversationDetails(input: UseConversationDetailsInput): Conv
     ? buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: peer.id })
     : null
 
-  const onToggleMute = () => {
+  const onToggleMute = useCallback(() => {
     if (!isGroup) return
     const currentMuted = Boolean(preference.data?.isMuted)
     muteMutation.mutate(!currentMuted)
-  }
+  }, [isGroup, preference.data?.isMuted, muteMutation])
 
-  const onLeaveGroup = () => {
+  const onLeaveGroup = useCallback(() => {
     if (!isGroup) return
     if (window.confirm(CHAT_DETAILS_COPY.LEAVE_CONFIRM)) {
       leaveMutation.mutate()
     }
-  }
+  }, [isGroup, leaveMutation])
 
   return {
     isOpen,

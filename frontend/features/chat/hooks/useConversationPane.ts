@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { z } from "zod"
 import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS, SOCKET_EVENTS } from "@linko/contracts"
 import { useQueryParamState } from "@/shared/url/useQueryParamState"
@@ -75,11 +75,34 @@ export function useConversationPane(item: InboxItemDto) {
       send.mutate(req, cb)
     },
   })
-  const pinnedIds = new Set(pins.query.data?.map((message) => message.id) ?? [])
-  const authors = item.participants.map((person) => ({ id: person.id, name: person.displayName ?? CHAT_COPY.MEMBER, avatarUrl: person.avatarUrl }))
-  if (profile.data) authors.push({ id: profile.data[USER_PROFILE_FIELDS.ID], name: profile.data[USER_PROFILE_FIELDS.DISPLAY_NAME], avatarUrl: profile.data[USER_PROFILE_FIELDS.AVATAR_URL] })
-  for (const member of members.data ?? []) if (!authors.some((author) => author.id === member.userId)) authors.push({ id: member.userId, name: member.displayName ?? CHAT_COPY.MEMBER, avatarUrl: null })
-  const rows = mapTimeline({ messages, currentUserId: profile.data?.id ?? "", authors, pinnedIds })
+  const pinnedIds = useMemo(
+    () => new Set(pins.query.data?.map((message) => message.id) ?? []),
+    [pins.query.data]
+  )
+  const authors = useMemo(() => {
+    const list = item.participants.map((person) => ({
+      id: person.id,
+      name: person.displayName ?? CHAT_COPY.MEMBER,
+      avatarUrl: person.avatarUrl,
+    }))
+    if (profile.data) {
+      list.push({
+        id: profile.data[USER_PROFILE_FIELDS.ID],
+        name: profile.data[USER_PROFILE_FIELDS.DISPLAY_NAME],
+        avatarUrl: profile.data[USER_PROFILE_FIELDS.AVATAR_URL],
+      })
+    }
+    for (const member of members.data ?? []) {
+      if (!list.some((author) => author.id === member.userId)) {
+        list.push({ id: member.userId, name: member.displayName ?? CHAT_COPY.MEMBER, avatarUrl: null })
+      }
+    }
+    return list
+  }, [item.participants, profile.data, members.data])
+
+  const rows = useMemo(() => {
+    return mapTimeline({ messages, currentUserId: profile.data?.id ?? "", authors, pinnedIds })
+  }, [messages, profile.data, authors, pinnedIds])
   const peer = item.participants.find((person) => person.id !== profile.data?.id)
   const title = item.group?.name ?? peer?.displayName ?? CHAT_COPY.PRIVATE
   const avatarUrl = kind === CHAT_KIND.GROUP ? item.group?.avatarUrl ?? null : peer?.avatarUrl
@@ -151,14 +174,42 @@ export function useConversationPane(item: InboxItemDto) {
     }
   }, [isSearchOpen, search, onCloseSearch])
 
-  const { value: isDetailsOpenRaw, setValue: setDetailsOpenRaw } = useQueryParamState(
-    WORKSPACE_PARAMS.DETAILS,
-    z.enum(["true", "false", "1", "0"]),
-    "false"
+  const searchParams = useSearchParams()
+  const urlDetailsParam = searchParams.get(WORKSPACE_PARAMS.DETAILS)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(
+    urlDetailsParam === "true" || urlDetailsParam === "1"
   )
-  const isDetailsOpen = isDetailsOpenRaw === "true" || isDetailsOpenRaw === "1"
-  const onToggleDetails = () => setDetailsOpenRaw(isDetailsOpen ? "false" : "true")
-  const onCloseDetails = () => setDetailsOpenRaw("false")
+
+  useEffect(() => {
+    const isParamOpen = urlDetailsParam === "true" || urlDetailsParam === "1"
+    setIsDetailsOpen(isParamOpen)
+  }, [urlDetailsParam])
+
+  const syncDetailsToUrl = useCallback((nextOpen: boolean) => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    if (nextOpen) {
+      params.set(WORKSPACE_PARAMS.DETAILS, "true")
+    } else {
+      params.delete(WORKSPACE_PARAMS.DETAILS)
+    }
+    const qs = params.toString()
+    const nextUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}`
+    window.history.replaceState(null, "", nextUrl)
+  }, [])
+
+  const onToggleDetails = useCallback(() => {
+    setIsDetailsOpen((prev) => {
+      const next = !prev
+      syncDetailsToUrl(next)
+      return next
+    })
+  }, [syncDetailsToUrl])
+
+  const onCloseDetails = useCallback(() => {
+    setIsDetailsOpen(false)
+    syncDetailsToUrl(false)
+  }, [syncDetailsToUrl])
 
   const details = useConversationDetails({
     item,
@@ -173,24 +224,39 @@ export function useConversationPane(item: InboxItemDto) {
     onOpenSearch: () => setSearchOpen(true),
   })
 
-  const actions = kind === CHAT_KIND.GROUP ? [
-    { label: "Thông tin nhóm", icon: ICON_NAMES.GROUP, onSelect: onToggleDetails },
-    { label: "Lời mời", icon: ICON_NAMES.ADD_CONTACT, onSelect: () => router.push(buildAppRoute(APP_ROUTES.GROUP_INVITATIONS, { conversationId: id })) },
-  ] : [
-    { label: "Chi tiết cuộc trò chuyện", icon: ICON_NAMES.PROFILE, onSelect: onToggleDetails },
-    { label: "Bạn bè", icon: ICON_NAMES.CONTACTS, onSelect: () => router.push(APP_ROUTES.PEOPLE) },
-  ]
-  const onPin = (messageId: string, isPinned: boolean) => pins.update.mutate({ messageId, isPinned })
-  const actionRows = rows.map((row) => ({
-    ...row,
-    isSearchActive: row.id === activeMatchId,
-    searchQuery: search.trim() ? search : undefined,
-    actions: [
-      { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => composer.onReply(row.id) },
-      ...(kind === CHAT_KIND.GROUP ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: pins.update.isPending || (!row.isPinned && pinnedIds.size >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
-    ],
-  }))
-  const replyTargetRow = composer.replyId ? rows.find((row) => row.id === composer.replyId) : null
+  const actions = useMemo(() => {
+    return kind === CHAT_KIND.GROUP ? [
+      { label: "Thông tin nhóm", icon: ICON_NAMES.GROUP, onSelect: onToggleDetails },
+      { label: "Lời mời", icon: ICON_NAMES.ADD_CONTACT, onSelect: () => router.push(buildAppRoute(APP_ROUTES.GROUP_INVITATIONS, { conversationId: id })) },
+    ] : [
+      { label: "Chi tiết cuộc trò chuyện", icon: ICON_NAMES.PROFILE, onSelect: onToggleDetails },
+      { label: "Bạn bè", icon: ICON_NAMES.CONTACTS, onSelect: () => router.push(APP_ROUTES.PEOPLE) },
+    ]
+  }, [kind, onToggleDetails, router, id])
+
+  const onPin = useCallback(
+    (messageId: string, isPinned: boolean) => pins.update.mutate({ messageId, isPinned }),
+    [pins.update]
+  )
+  const isPinPending = pins.update.isPending
+  const pinnedCount = pinnedIds.size
+  const onReplyMessage = composer.onReply
+
+  const actionRows = useMemo(() => {
+    return rows.map((row) => ({
+      ...row,
+      isSearchActive: row.id === activeMatchId,
+      searchQuery: search.trim() ? search : undefined,
+      actions: [
+        { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => onReplyMessage(row.id) },
+        ...(kind === CHAT_KIND.GROUP ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: isPinPending || (!row.isPinned && pinnedCount >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
+      ],
+    }))
+  }, [rows, activeMatchId, search, onReplyMessage, kind, isPinPending, pinnedCount, onPin])
+
+  const replyTargetRow = useMemo(() => {
+    return composer.replyId ? rows.find((row) => row.id === composer.replyId) : null
+  }, [composer.replyId, rows])
   const composerState = {
     ...composer,
     replyTarget: replyTargetRow ? {
