@@ -4,17 +4,20 @@ import { Skeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import type { usePeoplePage } from "../../hooks/usePeoplePage"
+import type { useAddContactModal } from "../../hooks/useAddContactModal"
 import { PEOPLE_LIMITS } from "../../people.constants"
 import { FriendRequests } from "../FriendRequests"
 import { SearchPersonRow } from "../SearchPersonRow"
 
-/** Shared page-owned contact dialog state. */
-export interface AddContactModalProps { readonly state: ReturnType<typeof usePeoplePage> }
+/** Shared contact dialog state satisfied by either usePeoplePage or useAddContactModal. */
+export interface AddContactModalProps {
+  readonly state: ReturnType<typeof usePeoplePage> | ReturnType<typeof useAddContactModal>
+}
 
 /** Render friend requests and public contact search without removing existing features. UI only. */
 export function AddContactModal({ state }: AddContactModalProps) {
   return <Modal title="Thêm bạn bè" onClose={state.onCloseAdd}><FriendRequests state={state} /><h3 className="mb-4 font-semibold">Tìm người dùng</h3>
-    <SearchInput label="Tên hoặc tên đăng nhập" value={state.keyword} stateKey={state.keywordRevision} onChange={state.onKeywordChange} />
+    <SearchInput label="Tên hoặc tên đăng nhập" value={state.keyword} stateKey={String(state.keywordRevision)} onChange={state.onKeywordChange} />
     {state.keyword.trim().length < PEOPLE_LIMITS.MIN_SEARCH_LENGTH ? (
       <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
     ) : state.results.isPending ? (

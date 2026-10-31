@@ -1,10 +1,21 @@
 import { ErrorState } from "@/shared/components/ErrorState"
 import { FriendRequestsSkeleton } from "@/shared/components/Skeleton"
-import type { usePeoplePage } from "../hooks/usePeoplePage"
 import { FriendRequestRow } from "./FriendRequestRow"
+export interface FriendRequestsState {
+  readonly requests: {
+    readonly isPending: boolean
+    readonly isError: boolean
+    readonly refetch: () => void | Promise<unknown>
+  }
+  readonly requestRows: readonly any[]
+  readonly actions: {
+    readonly accept: { readonly isPending: boolean }
+    readonly decline: { readonly isPending: boolean }
+  }
+}
 
 /** Request state is supplied by the page hook to avoid duplicate fetching. */
-export interface FriendRequestsProps { readonly state: ReturnType<typeof usePeoplePage> }
+export interface FriendRequestsProps { readonly state: FriendRequestsState }
 
 /** Render the incoming request section inside the contact dialog. UI only. */
 export function FriendRequests({ state }: FriendRequestsProps) {

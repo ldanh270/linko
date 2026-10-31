@@ -1,16 +1,26 @@
-import { useQuery } from "@tanstack/react-query"
-import { CONVERSATION_KIND } from "@linko/contracts"
-import { listInbox } from "../api/inbox.api"
-import { INBOX_QUERY_KEY } from "../inbox.constants"
+"use client"
+
+import { useState, useCallback } from "react"
+import { useInboxPage } from "./useInboxPage"
+import { useAddContactModal } from "@/features/people/hooks/useAddContactModal"
 
 /**
- * Load the first inbox page for the persistent conversation sidebar.
- *
- * @returns The query state used to render conversation rows and retry failures.
+ * Coordinate state for the inbox sidebar panel, including search filters
+ * and trigger state for the Add Contact and Create Group popup modals.
  */
 export function useInboxSidebar() {
-  return useQuery({
-    queryKey: [...INBOX_QUERY_KEY, CONVERSATION_KIND.ALL, ""],
-    queryFn: ({ signal }) => listInbox({ kind: CONVERSATION_KIND.ALL, signal }),
-  })
+  const pageState = useInboxPage()
+  const [isCreateGroupOpen, setCreateGroupOpen] = useState(false)
+  const addContact = useAddContactModal()
+
+  const openCreateGroup = useCallback(() => setCreateGroupOpen(true), [])
+  const closeCreateGroup = useCallback(() => setCreateGroupOpen(false), [])
+
+  return {
+    ...pageState,
+    isCreateGroupOpen,
+    openCreateGroup,
+    closeCreateGroup,
+    addContact,
+  }
 }
