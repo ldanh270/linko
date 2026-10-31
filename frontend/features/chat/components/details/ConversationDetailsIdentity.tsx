@@ -1,10 +1,10 @@
+"use client"
+
 import { Avatar } from "@/shared/components/Avatar"
 import { PresenceIndicator } from "@/shared/components/PresenceIndicator"
-import { IconButton } from "@/shared/components/IconButton"
 import { Link } from "@/shared/components/Link"
 import { Icon } from "@/shared/icons/Icon"
-import { ICON_NAMES } from "@/shared/icons/icon.constants"
-import { APP_ROUTES } from "@/shared/layout/route.constants"
+import { ICON_NAMES, type IconName } from "@/shared/icons/icon.constants"
 import { usePresence } from "@/shared/presence/usePresence"
 import { CHAT_DETAILS_COPY, CHAT_KIND } from "../../chat.constants"
 import type { ConversationDetailsViewModel } from "../../chat.types"
@@ -13,7 +13,54 @@ export interface ConversationDetailsIdentityProps {
   readonly details: ConversationDetailsViewModel
 }
 
-/** Render conversation header identity and Messenger-style quick action buttons. UI only. */
+interface QuickActionItemProps {
+  readonly icon: IconName
+  readonly label: string
+  readonly onClick?: () => void
+  readonly href?: string
+  readonly disabled?: boolean
+}
+
+/** Render a single circular Messenger-style quick action button or link. */
+function QuickActionItem({ icon, label, onClick, href, disabled }: QuickActionItemProps) {
+  const content = (
+    <>
+      <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
+        <Icon name={icon} />
+      </span>
+      <span className="text-xs text-[var(--text-secondary)]">{label}</span>
+    </>
+  )
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer no-underline"
+        aria-label={label}
+      >
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer bg-transparent border-none disabled:opacity-50 disabled:cursor-not-allowed"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+    >
+      {content}
+    </button>
+  )
+}
+
+/**
+ * Render conversation header identity, avatar with online presence,
+ * and Messenger-style circular quick action buttons. UI presentation only.
+ */
 export function ConversationDetailsIdentity({ details }: ConversationDetailsIdentityProps) {
   const isGroup = details.kind === CHAT_KIND.GROUP
   const presence = usePresence(details.peerId ? [details.peerId] : [])
@@ -22,7 +69,11 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
   return (
     <div className="flex flex-col items-center text-center py-2.5">
       {details.profileHref ? (
-        <Link href={details.profileHref} className="hover:opacity-85 transition-opacity inline-block mb-3" title="Xem trang cá nhân">
+        <Link
+          href={details.profileHref}
+          className="hover:opacity-85 transition-opacity inline-block mb-3"
+          title="Xem trang cá nhân"
+        >
           <Avatar label={details.title} src={details.avatarUrl} size="large" isOnline={isPeerOnline} />
         </Link>
       ) : (
@@ -30,6 +81,7 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
           <Avatar label={details.title} src={details.avatarUrl} size="large" isOnline={isPeerOnline} />
         </div>
       )}
+
       <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
         {details.profileHref ? (
           <Link href={details.profileHref} className="hover:underline">
@@ -39,6 +91,7 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
           details.title
         )}
       </h3>
+
       {isPeerOnline !== undefined ? (
         <div className="flex items-center justify-center gap-1.5 text-xs mb-4">
           <PresenceIndicator
@@ -54,58 +107,37 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
         <p className="text-sm text-[var(--text-secondary)] mb-4">{details.subtitle}</p>
       )}
 
+      {/* Quick Action Buttons Row */}
       <div className="flex items-center justify-center gap-4 w-full">
-        {details.invitationsHref ? (
-          <Link
+        {details.invitationsHref && (
+          <QuickActionItem
+            icon={ICON_NAMES.ADD_CONTACT}
+            label={CHAT_DETAILS_COPY.ADD_MEMBER}
             href={details.invitationsHref}
-            className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer no-underline"
-            aria-label={CHAT_DETAILS_COPY.ADD_MEMBER}
-          >
-            <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
-              <Icon name={ICON_NAMES.ADD_CONTACT} />
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">{CHAT_DETAILS_COPY.ADD_MEMBER}</span>
-          </Link>
-        ) : details.profileHref ? (
-          <Link
-            href={details.profileHref}
-            className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer no-underline"
-            aria-label={CHAT_DETAILS_COPY.PROFILE}
-          >
-            <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
-              <Icon name={ICON_NAMES.PROFILE} />
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">{CHAT_DETAILS_COPY.PROFILE}</span>
-          </Link>
-        ) : null}
+          />
+        )}
 
-        <button
-          type="button"
-          className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
+        {!details.invitationsHref && details.profileHref && (
+          <QuickActionItem
+            icon={ICON_NAMES.PROFILE}
+            label={CHAT_DETAILS_COPY.PROFILE}
+            href={details.profileHref}
+          />
+        )}
+
+        <QuickActionItem
+          icon={ICON_NAMES.SEARCH}
+          label={CHAT_DETAILS_COPY.SEARCH}
           onClick={details.onOpenSearch}
-          aria-label={CHAT_DETAILS_COPY.SEARCH}
-        >
-          <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
-            <Icon name={ICON_NAMES.SEARCH} />
-          </span>
-          <span className="text-xs text-[var(--text-secondary)]">{CHAT_DETAILS_COPY.SEARCH}</span>
-        </button>
+        />
 
         {isGroup && (
-          <button
-            type="button"
-            className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
+          <QuickActionItem
+            icon={details.isMuted ? ICON_NAMES.SUN : ICON_NAMES.MOON}
+            label={details.isMuted ? CHAT_DETAILS_COPY.UNMUTE : CHAT_DETAILS_COPY.MUTE}
             onClick={details.onToggleMute}
             disabled={details.isMuteLoading}
-            aria-label={details.isMuted ? CHAT_DETAILS_COPY.UNMUTE : CHAT_DETAILS_COPY.MUTE}
-          >
-            <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
-              <Icon name={details.isMuted ? ICON_NAMES.SUN : ICON_NAMES.MOON} />
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              {details.isMuted ? CHAT_DETAILS_COPY.UNMUTE : CHAT_DETAILS_COPY.MUTE}
-            </span>
-          </button>
+          />
         )}
       </div>
     </div>
