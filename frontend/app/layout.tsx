@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
+import { cookies } from "next/headers"
 import "@fontsource/be-vietnam-pro/400.css"
 import "@fontsource/be-vietnam-pro/400-italic.css"
 import "@fontsource/be-vietnam-pro/500.css"
@@ -21,10 +22,13 @@ export const metadata: Metadata = {
   },
 }
 
-/** Mount global theme, i18n, query and notification providers once. */
-export default function RootLayout({ children }: { children: ReactNode }) {
+/** Mount global theme, i18n, query and notification providers with server-rendered language attribute. */
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies()
+  const initialLang = cookieStore.get("linko_language")?.value === "en" ? "en" : "vi"
+
   return (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang={initialLang} suppressHydrationWarning>
       <body>
         <I18nProvider>
           <ThemeProvider>

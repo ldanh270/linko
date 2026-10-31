@@ -9,25 +9,27 @@ import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { useI18n } from "@/shared/i18n/useI18n"
 import { useGroupsSidebar } from "../hooks/useGroupsSidebar"
 import { GroupListRow } from "./GroupListRow"
 import { CreateGroupModal } from "./CreateGroupModal"
 
-/** Render the Groups reference panel with in-place group creation and search mode. UI only. */
+/** Render the Groups reference panel with localized copy, in-place group creation, and search mode. UI only. */
 export function GroupsSidebar() {
   const state = useGroupsSidebar()
+  const { copy } = useI18n()
 
   return (
     <>
       <SidebarPanel
         header={
           <SidebarHeader
-            title="Nhóm"
+            title={copy.groups.title}
             action={
               <button
                 type="button"
                 onClick={state.openCreateGroup}
-                aria-label="Tạo nhóm"
+                aria-label={copy.groups.createGroupBtn}
                 className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer"
               >
                 <Icon name={ICON_NAMES.GROUP} />
@@ -41,15 +43,15 @@ export function GroupsSidebar() {
             <button
               type="button"
               onClick={() => state.onSearchChange("")}
-              aria-label="Xóa bộ lọc nhóm"
+              aria-label={copy.inbox.clearSearch}
               className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
             >
               <Icon name={ICON_NAMES.BACK} />
             </button>
           )}
           <SearchInput
-            label="Tìm nhóm"
-            placeholder="Tìm kiếm nhóm..."
+            label={copy.groups.title}
+            placeholder={copy.groups.searchPlaceholder}
             value={state.search}
             stateKey={state.searchRevision}
             onChange={state.onSearchChange}
@@ -70,15 +72,15 @@ export function GroupsSidebar() {
           </ul>
         ) : state.search ? (
           <EmptyState
-            title="Không tìm thấy nhóm nào"
-            description={`Không có nhóm nào khớp với "${state.search}".`}
+            title={copy.inbox.searchEmptyTitle}
+            description={`${copy.inbox.searchEmptyDesc} "${state.search}".`}
           />
         ) : (
           <EmptyState
-            title="Chưa có nhóm nào"
+            title={copy.groups.emptyGroupsTitle}
             action={
               <Button variant="secondary" size="small" onClick={state.openCreateGroup}>
-                Tạo nhóm đầu tiên
+                {copy.groups.createFirstGroup}
               </Button>
             }
           />
@@ -86,7 +88,7 @@ export function GroupsSidebar() {
 
         {!state.search && state.query.data?.nextCursor && (
           <Button className="m-4" variant="ghost" onClick={state.onLoadMore} isLoading={state.query.isFetching}>
-            Trang tiếp theo
+            {copy.inbox.nextPage}
           </Button>
         )}
       </SidebarPanel>

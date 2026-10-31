@@ -8,6 +8,7 @@ import { APP_LANGUAGE, LANGUAGE_STORAGE_KEY } from "./i18n.constants"
 describe("useI18n", () => {
   beforeEach(() => {
     localStorage.clear()
+    document.cookie = "linko_language=; max-age=0"
     document.documentElement.lang = "vi"
   })
 
@@ -31,5 +32,24 @@ describe("useI18n", () => {
     expect(result.current.copy.navigation.inbox).toBe("Messages")
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe(APP_LANGUAGE.EN)
     expect(document.documentElement.lang).toBe(APP_LANGUAGE.EN)
+  })
+
+  it("toggles between Vietnamese and English back and forth", () => {
+    const wrapper = ({ children }: { children: ReactNode }) => <I18nProvider>{children}</I18nProvider>
+    const { result } = renderHook(() => useI18n(), { wrapper })
+
+    expect(result.current.language).toBe(APP_LANGUAGE.VI)
+
+    act(() => {
+      result.current.toggleLanguage()
+    })
+    expect(result.current.language).toBe(APP_LANGUAGE.EN)
+    expect(result.current.copy.navigation.inbox).toBe("Messages")
+
+    act(() => {
+      result.current.toggleLanguage()
+    })
+    expect(result.current.language).toBe(APP_LANGUAGE.VI)
+    expect(result.current.copy.navigation.inbox).toBe("Tin nhắn")
   })
 })

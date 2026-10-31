@@ -9,6 +9,7 @@ import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { useI18n } from "@/shared/i18n/useI18n"
 import { useInboxSidebar } from "../hooks/useInboxSidebar"
 import { ConversationList } from "./ConversationList"
 import { RecentPeopleStrip } from "./RecentPeopleStrip"
@@ -17,12 +18,13 @@ import { CreateGroupModal } from "@/features/groups/components/CreateGroupModal"
 import { AddContactModal } from "@/features/people/components/AddContactModal/AddContactModal"
 
 /**
- * Render the Chats reference panel with Messenger-style search transition.
+ * Render the Chats reference panel with localized copy and Messenger-style search transition.
  * When search is focused or active, the panel replaces category tabs and people strips
  * with live conversation & contact search results. UI only.
  */
 export function InboxSidebar() {
   const state = useInboxSidebar()
+  const { copy } = useI18n()
   const { searchState } = state
 
   return (
@@ -30,13 +32,13 @@ export function InboxSidebar() {
       <SidebarPanel
         header={
           <SidebarHeader
-            title="Tin nhắn"
+            title={copy.inbox.chatsTitle}
             action={
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={state.openCreateGroup}
-                  aria-label="Tạo nhóm"
+                  aria-label={copy.inbox.createGroup}
                   className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer"
                 >
                   <Icon name={ICON_NAMES.GROUP} />
@@ -44,7 +46,7 @@ export function InboxSidebar() {
                 <button
                   type="button"
                   onClick={state.addContact.onOpen}
-                  aria-label="Tìm bạn bè"
+                  aria-label={copy.inbox.findFriends}
                   className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer"
                 >
                   <Icon name={ICON_NAMES.ADD_CONTACT} />
@@ -60,15 +62,15 @@ export function InboxSidebar() {
             <button
               type="button"
               onClick={searchState.handleExitSearch}
-              aria-label="Quay lại danh sách hội thoại"
+              aria-label={copy.inbox.backToConversations}
               className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
             >
               <Icon name={ICON_NAMES.BACK} />
             </button>
           )}
           <SearchInput
-            label="Tìm tin nhắn hoặc người dùng"
-            placeholder="Tìm kiếm trên Linko"
+            label={copy.inbox.searchInboxPlaceholder}
+            placeholder={copy.inbox.searchPlaceholder}
             value={state.search}
             stateKey={state.searchRevision}
             onChange={state.onSearchChange}
@@ -100,7 +102,9 @@ export function InboxSidebar() {
               <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />
             ) : null}
 
-            <h2 className="mx-6 mt-4 mb-3 text-base font-semibold text-[var(--text-primary)]">Gần đây</h2>
+            <h2 className="mx-6 mt-4 mb-3 text-base font-semibold text-[var(--text-primary)]">
+              {copy.inbox.recent}
+            </h2>
 
             <nav aria-label="Lọc hội thoại" className="flex gap-1 px-6 pb-2">
               {state.filters.map((filter) => (
@@ -115,7 +119,7 @@ export function InboxSidebar() {
             ) : state.query.isError ? (
               <ErrorState title="Không thể tải hộp thư" onRetry={state.onRetry} />
             ) : state.rows.length === 0 ? (
-              <EmptyState title="Chưa có cuộc trò chuyện" description="Kết nối với bạn bè hoặc tạo nhóm để bắt đầu." />
+              <EmptyState title={copy.inbox.emptyTitle} description={copy.inbox.emptyDescription} />
             ) : (
               <ConversationList
                 rows={state.rows}
@@ -126,7 +130,7 @@ export function InboxSidebar() {
 
             {state.query.data?.nextCursor && (
               <Button className="m-4" variant="ghost" onClick={state.onLoadMore} isLoading={state.query.isFetching}>
-                Trang tiếp theo
+                {copy.inbox.nextPage}
               </Button>
             )}
           </>

@@ -1,8 +1,7 @@
 "use client"
 
 import { Avatar } from "@/shared/components/Avatar"
-import { Icon } from "@/shared/icons/Icon"
-import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { useI18n } from "@/shared/i18n/useI18n"
 import type { FriendDto } from "@linko/contracts"
 
 export interface InboxSearchContactRowProps {
@@ -19,6 +18,7 @@ export function InboxSearchContactRow({
   isLoading,
   onSelect,
 }: InboxSearchContactRowProps) {
+  const { copy } = useI18n()
   const displayName = person.displayName || person.username
 
   return (
@@ -42,7 +42,7 @@ export function InboxSearchContactRow({
               />
             ) : (
               <span className="opacity-0 group-hover:opacity-100 text-xs text-[var(--brand)] font-medium transition-opacity">
-                Nhắn tin
+                {copy.inbox.sendDirectMessage}
               </span>
             )}
           </span>

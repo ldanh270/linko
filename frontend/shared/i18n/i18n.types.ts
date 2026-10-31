@@ -9,7 +9,64 @@ export interface TranslationDictionary {
     readonly profile: string
     readonly logout: string
     readonly toggleTheme: string
+    readonly toggleLanguage: string
     readonly brandLogo: string
+  }
+  readonly inbox: {
+    readonly chatsTitle: string
+    readonly createGroup: string
+    readonly findFriends: string
+    readonly searchPlaceholder: string
+    readonly searchInboxPlaceholder: string
+    readonly recent: string
+    readonly recentConversations: string
+    readonly conversationsMatch: string
+    readonly peopleMatch: string
+    readonly searchEmptyTitle: string
+    readonly searchEmptyDesc: string
+    readonly backToConversations: string
+    readonly clearSearch: string
+    readonly emptyTitle: string
+    readonly emptyDescription: string
+    readonly filterAll: string
+    readonly filterGroups: string
+    readonly filterFriends: string
+    readonly nextPage: string
+    readonly welcomeTitle: string
+    readonly welcomeDescription: string
+    readonly sendDirectMessage: string
+    readonly searchingPeople: string
+  }
+  readonly groups: {
+    readonly title: string
+    readonly searchPlaceholder: string
+    readonly createGroupModalTitle: string
+    readonly groupName: string
+    readonly groupNamePlaceholder: string
+    readonly groupDescription: string
+    readonly groupDescriptionPlaceholder: string
+    readonly optional: string
+    readonly addFriends: string
+    readonly selected: string
+    readonly searchFriendsPlaceholder: string
+    readonly noFriends: string
+    readonly createGroupBtn: string
+    readonly emptyGroupsTitle: string
+    readonly createFirstGroup: string
+  }
+  readonly people: {
+    readonly title: string
+    readonly searchPlaceholder: string
+    readonly friendRequests: string
+    readonly emptyContacts: string
+    readonly emptyContactsDesc: string
+    readonly addContactModalTitle: string
+    readonly accept: string
+    readonly decline: string
+    readonly searchUsers: string
+    readonly minSearchLength: string
+    readonly searching: string
+    readonly noUserFound: string
   }
   readonly settings: {
     readonly title: string
@@ -87,5 +144,6 @@ export interface TranslationDictionary {
 export interface I18nState {
   readonly language: AppLanguage
   readonly setLanguage: (language: AppLanguage) => void
+  readonly toggleLanguage: () => void
   readonly copy: TranslationDictionary
 }
