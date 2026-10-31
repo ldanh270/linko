@@ -6,7 +6,7 @@ export interface ProfileAboutProps { readonly details: readonly ReturnType<typeo
 /** Render the reference definition-list spacing for account details. UI only. */
 export function ProfileAbout({ details }: ProfileAboutProps) {
   return (
-    <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+    <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-text-secondary [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-text-primary">
       {details.map((detail) => (
         <div key={detail.label}>
           <dt>{detail.label}</dt>

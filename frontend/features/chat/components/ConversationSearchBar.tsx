@@ -60,11 +60,11 @@ export function ConversationSearchBar({
   })
 
   return (
-    <div className="relative border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 shadow-xs z-30">
+    <div className="relative border-b border-border bg-surface px-4 py-2.5 shadow-xs z-30">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Search input field */}
         <div className="relative flex-1 min-w-[200px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none flex items-center">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none flex items-center">
             <Icon name={ICON_NAMES.SEARCH} className="h-4 w-4" />
           </span>
           <input
@@ -74,13 +74,13 @@ export function ConversationSearchBar({
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleInputKeyDown}
             placeholder="Tìm tin nhắn trong cuộc trò chuyện (Enter để nhảy tiếp)..."
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] pl-9 pr-8 py-1.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-secondary)] transition focus:border-[var(--brand)] focus:bg-[var(--surface)] focus:outline-hidden focus:ring-1 focus:ring-[var(--brand)]"
+            className="w-full rounded-lg border border-border bg-surface-subtle pl-9 pr-8 py-1.5 text-xs text-text-primary placeholder-text-secondary transition focus:border-brand focus:bg-surface focus:outline-hidden focus:ring-1 focus:ring-brand"
           />
           {query && (
             <button
               type="button"
               onClick={() => onChange("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-secondary hover:text-text-primary p-0.5"
               title="Xóa từ khóa"
             >
               <Icon name={ICON_NAMES.CLOSE} className="h-3.5 w-3.5" />
@@ -91,11 +91,11 @@ export function ConversationSearchBar({
         {/* Match Navigation & Controls */}
         <div className="flex items-center gap-2 shrink-0">
           {query.trim() && (
-            <div className="flex items-center gap-1.5 bg-[var(--surface-subtle)] border border-[var(--border)] rounded-lg px-2.5 py-1">
-              <span className="text-xs font-medium text-[var(--text-secondary)] tabular-nums">
+            <div className="flex items-center gap-1.5 bg-surface-subtle border border-border rounded-lg px-2.5 py-1">
+              <span className="text-xs font-medium text-text-secondary tabular-nums">
                 {matchCount > 0 ? (
                   <span>
-                    <strong className="text-[var(--brand)] font-semibold">{currentPosition}</strong> / {matchCount}
+                    <strong className="text-brand font-semibold">{currentPosition}</strong> / {matchCount}
                   </span>
                 ) : (
                   <span>0 kết quả</span>
@@ -103,12 +103,12 @@ export function ConversationSearchBar({
               </span>
 
               {matchCount > 0 && (
-                <div className="flex items-center gap-0.5 ml-1 border-l border-[var(--border)] pl-1.5">
+                <div className="flex items-center gap-0.5 ml-1 border-l border-border pl-1.5">
                   <button
                     type="button"
                     onClick={onPrev}
                     title="Kết quả trước (Shift + Enter)"
-                    className="flex h-6 w-6 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
+                    className="flex h-6 w-6 items-center justify-center rounded text-xs text-text-secondary hover:bg-surface hover:text-text-primary transition"
                   >
                     <Icon name={ICON_NAMES.CHEVRON_UP} className="h-3 w-3" />
                   </button>
@@ -116,7 +116,7 @@ export function ConversationSearchBar({
                     type="button"
                     onClick={onNext}
                     title="Kết quả tiếp theo (Enter)"
-                    className="flex h-6 w-6 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
+                    className="flex h-6 w-6 items-center justify-center rounded text-xs text-text-secondary hover:bg-surface hover:text-text-primary transition"
                   >
                     <Icon name={ICON_NAMES.CHEVRON} className="h-3 w-3" />
                   </button>
@@ -133,8 +133,8 @@ export function ConversationSearchBar({
                 onClick={toggleDropdown}
                 className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
                   isDropdownOpen
-                    ? "border-[var(--brand)] bg-[var(--brand-soft)]/20 text-[var(--brand)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]"
+                    ? "border-brand bg-brand-soft/20 text-brand"
+                    : "border-border bg-surface text-text-secondary hover:bg-surface-subtle"
                 }`}
               >
                 <span>Danh sách kết quả</span>
@@ -145,8 +145,8 @@ export function ConversationSearchBar({
 
               {/* Match list dropdown */}
               {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-80 max-h-72 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-lg z-50">
-                  <p className="px-2.5 py-1 text-[11px] font-semibold text-[var(--text-secondary)] border-b border-[var(--border)]">
+                <div className="absolute right-0 top-full mt-1.5 w-80 max-h-72 overflow-y-auto rounded-xl border border-border bg-surface p-1.5 shadow-lg z-50">
+                  <p className="px-2.5 py-1 text-[11px] font-semibold text-text-secondary border-b border-border">
                     Nhấn vào tin nhắn để nhảy đến vị trí
                   </p>
                   <div className="grid gap-1 mt-1">
@@ -159,19 +159,19 @@ export function ConversationSearchBar({
                           onClick={() => selectMatch(idx)}
                           className={`w-full rounded-lg p-2 text-left transition ${
                             isSelected
-                              ? "bg-[var(--brand-soft)]/30 border border-[var(--brand)]/40"
-                              : "hover:bg-[var(--surface-subtle)] border border-transparent"
+                              ? "bg-brand-soft/30 border border-brand/40"
+                              : "hover:bg-surface-subtle border border-transparent"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2 mb-0.5">
-                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                            <span className="text-xs font-semibold text-text-primary truncate">
                               {match.author}
                             </span>
-                            <span className="text-[10px] text-[var(--text-secondary)] shrink-0">
+                            <span className="text-[10px] text-text-secondary shrink-0">
                               {match.time}
                             </span>
                           </div>
-                          <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
+                          <p className="text-xs text-text-secondary line-clamp-2">
                             {match.content}
                           </p>
                         </button>
@@ -189,7 +189,7 @@ export function ConversationSearchBar({
               type="button"
               onClick={onLoadMoreHistory}
               disabled={isLoadingMore}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] transition disabled:opacity-50"
+              className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-subtle transition disabled:opacity-50"
               title="Tải thêm lịch sử tin nhắn cũ hơn để tìm kiếm"
             >
               {isLoadingMore ? "Đang tải..." : "Tìm trong tin cũ"}
@@ -200,7 +200,7 @@ export function ConversationSearchBar({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)] transition"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-secondary hover:bg-surface-subtle hover:text-text-primary transition"
             title="Đóng tìm kiếm"
           >
             <Icon name={ICON_NAMES.CLOSE} className="h-4 w-4" />

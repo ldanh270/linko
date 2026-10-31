@@ -28,8 +28,8 @@ const STATUS_SIZE_CLASSES: Record<AvatarSize, string> = {
 }
 
 const STATUS_COLOR_CLASSES = {
-  online: "bg-[var(--status-online)] shadow-[0_0_0_1.5px_var(--surface),0_0_8px_var(--status-online-glow)]",
-  offline: "bg-[var(--status-offline)] opacity-100 shadow-[0_0_0_1.5px_var(--surface)]",
+  online: "bg-status-online shadow-[0_0_0_1.5px_var(--surface),0_0_8px_var(--status-online-glow)]",
+  offline: "bg-status-offline opacity-100 shadow-[0_0_0_1.5px_var(--surface)]",
 }
 
 /** Render initials consistently when a profile image is not available with presence status. UI only. */
@@ -38,7 +38,7 @@ export function Avatar({ label, src, size = "medium", className = "", isOnline }
   return (
     <span className={`relative inline-grid place-items-center ${className}`.trim()}>
       <span
-        className={`avatar inline-grid flex-none place-items-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)] font-bold leading-none overflow-hidden select-none ${AVATAR_SIZE_CLASSES[size]}`}
+        className={`avatar inline-grid flex-none place-items-center rounded-full bg-brand-soft text-brand font-bold leading-none overflow-hidden select-none ${AVATAR_SIZE_CLASSES[size]}`}
       >
         {imageSource ? (
           <Image
@@ -56,7 +56,7 @@ export function Avatar({ label, src, size = "medium", className = "", isOnline }
       </span>
       {isOnline !== undefined && (
         <span
-          className={`avatar-status-badge absolute bottom-0 right-0 rounded-full border-[var(--surface)] z-2 transition-all duration-150 ${STATUS_SIZE_CLASSES[size]} ${
+          className={`avatar-status-badge absolute bottom-0 right-0 rounded-full border-surface z-2 transition-all duration-150 ${STATUS_SIZE_CLASSES[size]} ${
             isOnline ? STATUS_COLOR_CLASSES.online : STATUS_COLOR_CLASSES.offline
           }`}
           title={isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}

@@ -11,7 +11,7 @@ export function ConversationListSkeleton({ count = 6 }: ConversationListSkeleton
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-3.5 px-3 py-3 rounded-[var(--radius-lg)]"
+          className="flex items-center gap-3.5 px-3 py-3 rounded-lg"
         >
           <Skeleton circle className="w-10 h-10 shrink-0" />
           <div className="min-w-0 flex-1 space-y-2">

@@ -11,20 +11,20 @@ export function ChatSettingsSection() {
   const { copy } = useI18n()
 
   return (
-    <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 grid gap-6">
-      <div className="border-b border-[var(--border)] pb-3">
+    <article className="border border-border rounded-panel bg-surface shadow-panel p-4 sm:p-5 grid gap-6">
+      <div className="border-b border-border pb-3">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Icon name={ICON_NAMES.CHAT} className="text-[var(--brand)]" />
+          <Icon name={ICON_NAMES.CHAT} className="text-brand" />
           <span>{copy.settings.chatTitle}</span>
         </h2>
-        <p className="text-sm text-[var(--text-secondary)]">{copy.settings.chatDescription}</p>
+        <p className="text-sm text-text-secondary">{copy.settings.chatDescription}</p>
       </div>
 
       {/* Send on Enter toggle */}
       <div className="grid gap-3">
         <div>
-          <label className="text-sm font-semibold text-[var(--text)]">{copy.settings.sendOnEnterLabel}</label>
-          <p className="text-xs text-[var(--text-secondary)]">{copy.settings.sendOnEnterDescription}</p>
+          <label className="text-sm font-semibold text-text-primary">{copy.settings.sendOnEnterLabel}</label>
+          <p className="text-xs text-text-secondary">{copy.settings.sendOnEnterDescription}</p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
@@ -33,8 +33,8 @@ export function ChatSettingsSection() {
             onClick={() => setPreference("sendOnEnter", true)}
             className={`flex items-start gap-3 rounded-xl border p-3.5 text-left transition ${
               preferences.sendOnEnter
-                ? "border-[var(--brand)] bg-[var(--brand-soft)]/20 shadow-xs"
-                : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-subtle)]"
+                ? "border-brand bg-brand-soft/20 shadow-xs"
+                : "border-border bg-surface hover:bg-surface-subtle"
             }`}
           >
             <input
@@ -42,11 +42,11 @@ export function ChatSettingsSection() {
               name="sendOnEnter"
               checked={preferences.sendOnEnter}
               onChange={() => setPreference("sendOnEnter", true)}
-              className="mt-0.5 text-[var(--brand)]"
+              className="mt-0.5 text-brand"
             />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-[var(--text)]">{copy.settings.sendOnEnterOptionEnter}</p>
-              <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Tiêu chuẩn chat nhanh</p>
+              <p className="text-xs font-semibold text-text-primary">{copy.settings.sendOnEnterOptionEnter}</p>
+              <p className="text-[11px] text-text-secondary mt-0.5">Tiêu chuẩn chat nhanh</p>
             </div>
           </button>
 
@@ -55,8 +55,8 @@ export function ChatSettingsSection() {
             onClick={() => setPreference("sendOnEnter", false)}
             className={`flex items-start gap-3 rounded-xl border p-3.5 text-left transition ${
               !preferences.sendOnEnter
-                ? "border-[var(--brand)] bg-[var(--brand-soft)]/20 shadow-xs"
-                : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-subtle)]"
+                ? "border-brand bg-brand-soft/20 shadow-xs"
+                : "border-border bg-surface hover:bg-surface-subtle"
             }`}
           >
             <input
@@ -64,22 +64,22 @@ export function ChatSettingsSection() {
               name="sendOnEnter"
               checked={!preferences.sendOnEnter}
               onChange={() => setPreference("sendOnEnter", false)}
-              className="mt-0.5 text-[var(--brand)]"
+              className="mt-0.5 text-brand"
             />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-[var(--text)]">{copy.settings.sendOnEnterOptionCtrlEnter}</p>
-              <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Tiện cho tin nhắn nhiều dòng</p>
+              <p className="text-xs font-semibold text-text-primary">{copy.settings.sendOnEnterOptionCtrlEnter}</p>
+              <p className="text-[11px] text-text-secondary mt-0.5">Tiện cho tin nhắn nhiều dòng</p>
             </div>
           </button>
         </div>
       </div>
 
-      <div className="border-t border-[var(--border)] pt-4 grid gap-4">
+      <div className="border-t border-border pt-4 grid gap-4">
         {/* Typing indicator switch */}
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium">{copy.settings.typingIndicatorLabel}</p>
-            <p className="text-xs text-[var(--text-secondary)]">{copy.settings.typingIndicatorDescription}</p>
+            <p className="text-xs text-text-secondary">{copy.settings.typingIndicatorDescription}</p>
           </div>
           <button
             type="button"
@@ -87,7 +87,7 @@ export function ChatSettingsSection() {
             aria-checked={preferences.showTypingIndicator}
             onClick={() => setPreference("showTypingIndicator", !preferences.showTypingIndicator)}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-              preferences.showTypingIndicator ? "bg-[var(--brand)]" : "bg-[var(--surface-subtle)] border-[var(--border)]"
+              preferences.showTypingIndicator ? "bg-brand" : "bg-surface-subtle border-border"
             }`}
           >
             <span
@@ -102,7 +102,7 @@ export function ChatSettingsSection() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium">{copy.settings.autoScrollLabel}</p>
-            <p className="text-xs text-[var(--text-secondary)]">{copy.settings.autoScrollDescription}</p>
+            <p className="text-xs text-text-secondary">{copy.settings.autoScrollDescription}</p>
           </div>
           <button
             type="button"
@@ -110,7 +110,7 @@ export function ChatSettingsSection() {
             aria-checked={preferences.autoScroll}
             onClick={() => setPreference("autoScroll", !preferences.autoScroll)}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-              preferences.autoScroll ? "bg-[var(--brand)]" : "bg-[var(--surface-subtle)] border-[var(--border)]"
+              preferences.autoScroll ? "bg-brand" : "bg-surface-subtle border-border"
             }`}
           >
             <span
@@ -125,7 +125,7 @@ export function ChatSettingsSection() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium">{copy.settings.previewToastLabel}</p>
-            <p className="text-xs text-[var(--text-secondary)]">{copy.settings.previewToastDescription}</p>
+            <p className="text-xs text-text-secondary">{copy.settings.previewToastDescription}</p>
           </div>
           <button
             type="button"
@@ -133,7 +133,7 @@ export function ChatSettingsSection() {
             aria-checked={preferences.previewToast}
             onClick={() => setPreference("previewToast", !preferences.previewToast)}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-              preferences.previewToast ? "bg-[var(--brand)]" : "bg-[var(--surface-subtle)] border-[var(--border)]"
+              preferences.previewToast ? "bg-brand" : "bg-surface-subtle border-border"
             }`}
           >
             <span

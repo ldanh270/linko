@@ -12,7 +12,7 @@ export function GroupListRow({ group }: GroupListRowProps) {
     <li>
       <Link
         href={group.href}
-        className="flex items-center gap-3.5 min-h-[64px] px-3 py-3 text-base rounded-[var(--radius-md)] mb-0.5 transition-colors hover:bg-[var(--input-surface)] text-[var(--text-primary)]"
+        className="flex items-center gap-3.5 min-h-[64px] px-3 py-3 text-base rounded-md mb-0.5 transition-colors hover:bg-input-surface text-text-primary"
       >
         <Avatar label={group.title} src={group.avatarUrl} size="small" />
         <span className="flex-1 min-w-0 truncate font-medium">#{group.title}</span>

@@ -14,7 +14,7 @@ export function WelcomePage() {
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-[var(--brand)]"
+          className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-brand"
         >
           <Image
             src="/logo.png"
@@ -25,13 +25,13 @@ export function WelcomePage() {
             priority
           />
           <span>
-            linko<span className="text-[var(--text-primary)]">.</span>
+            linko<span className="text-text-primary">.</span>
           </span>
         </Link>
         <Link href="/login">Đăng nhập</Link>
       </header>
       <WelcomeHero />
-      <footer className="mx-auto flex w-full max-w-6xl items-center justify-between border-t border-[var(--border)] py-5 text-sm text-[var(--text-secondary)]">
+      <footer className="mx-auto flex w-full max-w-6xl items-center justify-between border-t border-border py-5 text-sm text-text-secondary">
         <span>Riêng tư theo mặc định. Gần gũi mỗi ngày.</span>
         <span>© Linko</span>
       </footer>

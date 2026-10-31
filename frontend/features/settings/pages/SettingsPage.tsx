@@ -49,19 +49,19 @@ export function SettingsPage() {
       <SoundNotificationSection />
 
       {/* Appearance Section */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 grid gap-4">
-        <div className="border-b border-[var(--border)] pb-3">
+      <article className="border border-border rounded-panel bg-surface shadow-panel p-4 sm:p-5 grid gap-4">
+        <div className="border-b border-border pb-3">
           <h2 className="text-lg font-semibold">{copy.settings.appearanceTitle}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">{copy.settings.appearanceDescription}</p>
+          <p className="text-sm text-text-secondary">{copy.settings.appearanceDescription}</p>
         </div>
         <AppearanceSection options={state.themeOptions} />
       </article>
 
       {/* Privacy, Security & Help Explanations */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 grid gap-4">
-        <div className="border-b border-[var(--border)] pb-3">
+      <article className="border border-border rounded-panel bg-surface shadow-panel p-4 sm:p-5 grid gap-4">
+        <div className="border-b border-border pb-3">
           <h2 className="text-lg font-semibold">{copy.settings.privacyTitle}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">{copy.settings.privacyDescription}</p>
+          <p className="text-sm text-text-secondary">{copy.settings.privacyDescription}</p>
         </div>
         <div className="grid gap-3">
           {state.explanations.map((section) => (
@@ -71,10 +71,10 @@ export function SettingsPage() {
       </article>
 
       {/* Session / Danger Zone */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 border-[var(--danger)]/40 bg-[var(--danger)]/5 grid gap-4">
+      <article className="border border-border rounded-panel bg-surface shadow-panel p-4 sm:p-5 border-danger/40 bg-danger/5 grid gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--danger)]">{copy.settings.logoutTitle}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">
+          <h2 className="text-lg font-semibold text-danger">{copy.settings.logoutTitle}</h2>
+          <p className="text-sm text-text-secondary">
             {copy.settings.logoutDescription}
           </p>
         </div>

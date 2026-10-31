@@ -37,7 +37,7 @@ export function FriendRequests({ state }: FriendRequestsProps) {
           ))}
         </ul>
       ) : (
-        <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mt-2">Không có lời mời mới.</p>
+        <p className="text-[13px] text-text-secondary leading-relaxed mt-2">Không có lời mời mới.</p>
       )}
     </section>
   )

@@ -12,10 +12,10 @@ export interface AccordionProps {
 /** Render one reference-style disclosure without owning feature state. UI only. */
 export function Accordion({ title, id, icon, isOpen, onToggle, children }: AccordionProps) {
   return (
-    <section className="border-b border-[var(--border)]">
+    <section className="border-b border-border">
       <Button
         variant="ghost"
-        className="w-full flex items-center justify-between px-4 py-3.5 text-base font-medium text-[var(--text-primary)] rounded-none min-h-[52px]"
+        className="w-full flex items-center justify-between px-4 py-3.5 text-base font-medium text-text-primary rounded-none min-h-[52px]"
         aria-expanded={isOpen}
         aria-controls={id}
         onClick={onToggle}

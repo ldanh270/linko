@@ -51,7 +51,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
         <div className="flex items-center gap-4">
           {/* Avatar Picker */}
           <div className="relative group shrink-0">
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--surface-subtle)] border-2 border-dashed border-[var(--border)] flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-surface-subtle border-2 border-dashed border-border flex items-center justify-center">
               {avatarPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -60,7 +60,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Icon name={ICON_NAMES.GROUP} className="w-7 h-7 text-[var(--text-secondary)]" />
+                <Icon name={ICON_NAMES.GROUP} className="w-7 h-7 text-text-secondary" />
               )}
             </div>
             <label
@@ -81,7 +81,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
               <button
                 type="button"
                 onClick={removeAvatar}
-                className="absolute -top-1 -right-1 bg-[var(--danger)] text-white rounded-full p-0.5 shadow-sm text-xs hover:opacity-90 cursor-pointer"
+                className="absolute -top-1 -right-1 bg-danger text-white rounded-full p-0.5 shadow-sm text-xs hover:opacity-90 cursor-pointer"
                 title="Xóa ảnh"
               >
                 <Icon name={ICON_NAMES.CLOSE} className="w-3 h-3" />
@@ -108,9 +108,9 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
         <div>
           <label
             htmlFor="group-description"
-            className="block text-xs font-medium text-[var(--text-secondary)] mb-1"
+            className="block text-xs font-medium text-text-secondary mb-1"
           >
-            Mô tả nhóm <span className="text-[var(--text-muted)]">(không bắt buộc)</span>
+            Mô tả nhóm <span className="text-text-muted">(không bắt buộc)</span>
           </label>
           <textarea
             id="group-description"
@@ -119,14 +119,14 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
             rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--input-surface)] p-2.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--brand)] transition-colors resize-none"
+            className="w-full rounded-control border border-border bg-input-surface p-2.5 text-xs text-text-primary placeholder:text-text-secondary focus-visible:outline-2 focus-visible:outline-brand transition-colors resize-none"
           />
         </div>
 
         {/* Friend Selection Section ("cho chọn bạn đồ vô cho dễ") */}
-        <div className="border-t border-[var(--border)] pt-4">
+        <div className="border-t border-border pt-4">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-sm font-semibold text-[var(--text-primary)]">
+            <span className="text-sm font-semibold text-text-primary">
               Thêm bạn bè vào nhóm
             </span>
             <Badge
@@ -140,11 +140,11 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
 
           {/* Selected Friends Chips */}
           {selectedFriends.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 p-2 mb-3 bg-[var(--surface-subtle)] rounded-lg max-h-24 overflow-y-auto">
+            <div className="flex flex-wrap gap-1.5 p-2 mb-3 bg-surface-subtle rounded-lg max-h-24 overflow-y-auto">
               {selectedFriends.map((friend) => (
                 <span
                   key={friend.id}
-                  className="inline-flex items-center gap-1.5 bg-[var(--brand-soft)] text-[var(--brand)] text-xs font-medium pl-1.5 pr-2 py-0.5 rounded-full"
+                  className="inline-flex items-center gap-1.5 bg-brand-soft text-brand text-xs font-medium pl-1.5 pr-2 py-0.5 rounded-full"
                 >
                   <Avatar
                     label={friend.displayName || friend.username}
@@ -157,7 +157,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                   <button
                     type="button"
                     onClick={() => toggleFriend(friend.id)}
-                    className="text-[var(--text-secondary)] hover:text-[var(--danger)] cursor-pointer"
+                    className="text-text-secondary hover:text-danger cursor-pointer"
                     title={`Bỏ chọn ${friend.displayName || friend.username}`}
                   >
                     <Icon name={ICON_NAMES.CLOSE} className="w-3 h-3" />
@@ -178,17 +178,17 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
           </div>
 
           {/* Friends Checklist */}
-          <div className="max-h-52 overflow-y-auto border border-[var(--border)] rounded-lg divide-y divide-[var(--border-subtle)] bg-[var(--surface)]">
+          <div className="max-h-52 overflow-y-auto border border-border rounded-lg divide-y divide-border-subtle bg-surface">
             {friendsQuery.isPending ? (
-              <div className="p-4 space-y-2 text-center text-xs text-[var(--text-secondary)]">
+              <div className="p-4 space-y-2 text-center text-xs text-text-secondary">
                 Đang tải danh sách bạn bè...
               </div>
             ) : friends.length === 0 ? (
-              <div className="p-4 text-center text-xs text-[var(--text-secondary)]">
+              <div className="p-4 text-center text-xs text-text-secondary">
                 Bạn chưa có bạn bè nào. Bạn vẫn có thể tạo nhóm và chia sẻ liên kết mời sau!
               </div>
             ) : filteredFriends.length === 0 ? (
-              <div className="p-4 text-center text-xs text-[var(--text-secondary)]">
+              <div className="p-4 text-center text-xs text-text-secondary">
                 Không tìm thấy bạn bè nào khớp với &quot;{searchQuery}&quot;.
               </div>
             ) : (
@@ -198,17 +198,17 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                 return (
                   <label
                     key={friend.id}
-                    className={`flex items-center justify-between gap-3 p-2.5 transition-colors cursor-pointer hover:bg-[var(--surface-subtle)] ${
-                      isSelected ? "bg-[var(--brand-soft)]/20" : ""
+                    className={`flex items-center justify-between gap-3 p-2.5 transition-colors cursor-pointer hover:bg-surface-subtle ${
+                      isSelected ? "bg-brand-soft/20" : ""
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Avatar label={displayName} src={friend.avatarUrl} size="small" />
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                        <p className="text-xs font-semibold text-text-primary truncate">
                           {displayName}
                         </p>
-                        <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                        <p className="text-[11px] text-text-secondary truncate">
                           @{friend.username}
                         </p>
                       </div>
@@ -217,7 +217,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleFriend(friend.id)}
-                      className="w-4 h-4 rounded-sm text-[var(--brand)] border-[var(--border)] focus:ring-[var(--brand)] cursor-pointer"
+                      className="w-4 h-4 rounded-sm text-brand border-border focus:ring-brand cursor-pointer"
                     />
                   </label>
                 )
@@ -227,13 +227,13 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
         </div>
 
         {error && (
-          <p role="alert" className="text-xs text-[var(--danger)]">
+          <p role="alert" className="text-xs text-danger">
             {error}
           </p>
         )}
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <Button type="button" variant="ghost" onClick={handleClose} disabled={isSubmitting}>
             Hủy
           </Button>

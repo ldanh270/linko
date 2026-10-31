@@ -42,7 +42,7 @@ export function InboxSearchResults({
   if (!trimmed) {
     return (
       <div className="flex-1 overflow-y-auto px-1 py-1">
-        <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+        <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">
           {copy.inbox.recent}
         </h3>
         {recentConversations.length > 0 ? (
@@ -57,7 +57,7 @@ export function InboxSearchResults({
             ))}
           </ul>
         ) : (
-          <p className="px-5 py-6 text-center text-xs text-[var(--text-secondary)]">
+          <p className="px-5 py-6 text-center text-xs text-text-secondary">
             {copy.inbox.welcomeDescription}
           </p>
         )}
@@ -72,14 +72,14 @@ export function InboxSearchResults({
   // 2. No results match
   if (hasNoResults) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center text-[var(--text-secondary)]">
-        <div className="w-12 h-12 rounded-full bg-[var(--surface-subtle)] flex items-center justify-center mb-3">
-          <Icon name={ICON_NAMES.SEARCH} className="w-6 h-6 text-[var(--text-secondary)]" />
+      <div className="flex flex-col items-center justify-center p-8 text-center text-text-secondary">
+        <div className="w-12 h-12 rounded-full bg-surface-subtle flex items-center justify-center mb-3">
+          <Icon name={ICON_NAMES.SEARCH} className="w-6 h-6 text-text-secondary" />
         </div>
-        <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-1">
+        <h4 className="text-sm font-semibold text-text-primary mb-1">
           {copy.inbox.searchEmptyTitle}
         </h4>
-        <p className="text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed">
+        <p className="text-xs text-text-secondary max-w-xs leading-relaxed">
           {copy.inbox.searchEmptyDesc} &quot;{trimmed}&quot;.
         </p>
       </div>
@@ -92,7 +92,7 @@ export function InboxSearchResults({
       {/* Conversations Section */}
       {hasConversations && (
         <section aria-label="Cuộc trò chuyện phù hợp" className="mb-3">
-          <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+          <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">
             {copy.inbox.conversationsMatch} ({matchingConversations.length})
           </h3>
           <ul>
@@ -111,7 +111,7 @@ export function InboxSearchResults({
       {/* People / Contacts Section */}
       {(hasPeople || isSearchingPeople) && (
         <section aria-label="Người dùng phù hợp">
-          <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+          <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">
             {copy.inbox.peopleMatch} {hasPeople ? `(${matchingPeople.length})` : ""}
           </h3>
           {hasPeople && (
@@ -129,8 +129,8 @@ export function InboxSearchResults({
           )}
           {isSearchingPeople && (
             <div className="flex items-center gap-3 px-5 py-3">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--brand)] border-r-transparent" />
-              <span className="text-xs text-[var(--text-secondary)]">{copy.inbox.searchingPeople}</span>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand border-r-transparent" />
+              <span className="text-xs text-text-secondary">{copy.inbox.searchingPeople}</span>
             </div>
           )}
         </section>

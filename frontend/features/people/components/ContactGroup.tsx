@@ -8,7 +8,7 @@ export interface ContactGroupProps { readonly group: ReturnType<typeof usePeople
 export function ContactGroup({ group }: ContactGroupProps) {
   return (
     <section className="px-4 pb-3">
-      <h2 className="px-3 pb-3 text-[var(--brand)] text-base font-semibold">{group.letter}</h2>
+      <h2 className="px-3 pb-3 text-brand text-base font-semibold">{group.letter}</h2>
       <ul>{group.contacts.map((contact) => <ContactRow key={contact.id} contact={contact} />)}</ul>
     </section>
   )

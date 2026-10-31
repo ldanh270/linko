@@ -10,14 +10,14 @@ export function MessengerWorkspace({ sidebar, conversation, isConversationView =
       className="h-full min-w-0 min-h-0 pb-[calc(65px+env(safe-area-inset-bottom))] lg:pb-0 lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)]"
     >
       <aside
-        className={`h-full min-h-0 bg-[var(--background)] ${
+        className={`h-full min-h-0 bg-background ${
           isConversationView ? "hidden lg:block" : "block"
         }`}
       >
         {sidebar}
       </aside>
       <section
-        className={`h-full min-w-0 min-h-0 overflow-hidden bg-[var(--surface)] ${
+        className={`h-full min-w-0 min-h-0 overflow-hidden bg-surface ${
           isConversationView ? "block" : "hidden lg:block"
         }`}
         aria-label="Cuộc trò chuyện"

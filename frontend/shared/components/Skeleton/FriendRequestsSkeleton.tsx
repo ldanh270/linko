@@ -5,7 +5,7 @@ export function FriendRequestsSkeleton() {
   return (
     <div className="space-y-2.5 my-2" role="status" aria-label="Đang tải lời mời kết bạn">
       {Array.from({ length: 2 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 py-2 border-b border-[var(--border)]">
+        <div key={i} className="flex items-center gap-3 py-2 border-b border-border">
           <Skeleton circle className="w-9 h-9 shrink-0" />
           <div className="space-y-1 flex-1">
             <Skeleton className="h-4 w-28 rounded-xs" />

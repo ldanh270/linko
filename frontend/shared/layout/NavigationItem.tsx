@@ -13,10 +13,10 @@ export function NavigationItem({ label, destination, icon, isActive }: Navigatio
       title={label}
       aria-label={label}
       aria-current={isActive ? "page" : undefined}
-      className={`grid place-items-center w-[52px] h-[52px] rounded-[var(--radius-lg)] text-2xl transition-colors ${
+      className={`grid place-items-center w-[52px] h-[52px] rounded-lg text-2xl transition-colors ${
         isActive
-          ? "text-[var(--brand)] bg-[var(--brand-soft)]"
-          : "text-[var(--text-secondary)] hover:text-[var(--brand)] hover:bg-[var(--brand-subtle)]"
+          ? "text-brand bg-brand-soft"
+          : "text-text-secondary hover:text-brand hover:bg-brand-subtle"
       }`}
     >
       <Icon name={icon} />

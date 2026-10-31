@@ -8,7 +8,7 @@ export interface SettingsDisclosureProps { readonly section: ReturnType<typeof u
 export function SettingsDisclosure({ section }: SettingsDisclosureProps) {
   return (
     <Accordion id={`settings-${section.id}`} title={section.title} isOpen={section.isOpen} onToggle={section.onToggle}>
-      <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">{section.description}</p>
+      <p className="text-[13px] text-text-secondary leading-relaxed">{section.description}</p>
     </Accordion>
   )
 }

@@ -55,9 +55,9 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
       />
 
       {/* Main Identity Banner Card */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] overflow-hidden">
+      <article className="border border-border rounded-panel bg-surface shadow-panel overflow-hidden">
         {/* Cover visual banner */}
-        <div className="relative h-44 w-full bg-gradient-to-r from-[var(--brand)]/20 via-[var(--brand-soft)] to-[var(--surface-subtle)] border-b border-[var(--border)] overflow-hidden">
+        <div className="relative h-44 w-full bg-gradient-to-r from-brand/20 via-brand-soft to-surface-subtle border-b border-border overflow-hidden">
           {backgroundUrl ? (
             <Image
               src={backgroundUrl}
@@ -67,13 +67,13 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
               unoptimized
             />
           ) : (
-            <div className="absolute inset-0 bg-radial from-transparent to-[var(--surface-subtle)]/40" />
+            <div className="absolute inset-0 bg-radial from-transparent to-surface-subtle/40" />
           )}
 
           <button
             type="button"
             onClick={editor.onOpenEdit}
-            className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-[var(--surface)]/85 px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition hover:bg-[var(--surface)] hover:shadow"
+            className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-surface/85 px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition hover:bg-surface hover:shadow"
           >
             <Icon name={ICON_NAMES.IMAGE} />
             <span>Đổi ảnh bìa</span>
@@ -83,7 +83,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
         {/* Identity row with overlapping avatar */}
         <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 mb-4">
-            <div className="relative inline-block rounded-full ring-4 ring-[var(--surface)] shadow-md group">
+            <div className="relative inline-block rounded-full ring-4 ring-surface shadow-md group">
               <Avatar
                 label={user[USER_PROFILE_FIELDS.DISPLAY_NAME]}
                 src={user[USER_PROFILE_FIELDS.AVATAR_URL]}
@@ -119,7 +119,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
               />
             </div>
 
-            <p className="mt-2.5 text-sm text-[var(--text-secondary)] whitespace-pre-wrap max-w-2xl leading-relaxed">
+            <p className="mt-2.5 text-sm text-text-secondary whitespace-pre-wrap max-w-2xl leading-relaxed">
               {user[USER_PROFILE_FIELDS.BIO] || "Chưa có giới thiệu tiểu sử cá nhân. Hãy thêm vài dòng giới thiệu bản thân nhé!"}
             </p>
           </div>
@@ -151,7 +151,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
             icon={<Icon name={ICON_NAMES.SETTINGS} />}
           />
           <CardContent>
-            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-text-secondary [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-text-primary">
               <div>
                 <dt>Tên người dùng</dt>
                 <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>
@@ -163,7 +163,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
               <div>
                 <dt>Trạng thái tài khoản</dt>
                 <dd className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--positive)]" />
+                  <span className="inline-block h-2 w-2 rounded-full bg-positive" />
                   <span>Hoạt động bình thường</span>
                 </dd>
               </div>

@@ -35,9 +35,9 @@ export function InvitationsPage() {
       />
 
       {/* Generate Invitation Section */}
-      <section className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5">
-        <h2 className="font-semibold text-[var(--text-primary)]">Tạo liên kết mới</h2>
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+      <section className="border border-border rounded-panel bg-surface shadow-panel p-4 sm:p-5">
+        <h2 className="font-semibold text-text-primary">Tạo liên kết mới</h2>
+        <p className="mt-1 text-sm text-text-secondary">
           Liên kết có thời hạn và số lượt tham gia giới hạn.
         </p>
         <Button className="mt-4" isLoading={isIssuing} onClick={handleIssue}>
@@ -45,7 +45,7 @@ export function InvitationsPage() {
         </Button>
 
         {hasIssueError && (
-          <p role="alert" className="mt-3 text-sm text-[var(--danger)]">
+          <p role="alert" className="mt-3 text-sm text-danger">
             Bạn không có quyền tạo lời mời hoặc đã có lỗi xảy ra.
           </p>
         )}
@@ -59,7 +59,7 @@ export function InvitationsPage() {
               id="issued-link"
               readOnly
               value={issuedUrl}
-              className="min-h-11 min-w-0 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] px-3 text-sm text-[var(--text-primary)]"
+              className="min-h-11 min-w-0 rounded-lg border border-border bg-surface-subtle px-3 text-sm text-text-primary"
             />
             <Button variant="secondary" onClick={() => void handleCopy()}>
               Sao chép
@@ -68,7 +68,7 @@ export function InvitationsPage() {
         )}
 
         {feedback && (
-          <p role="status" className="mt-2 text-sm text-[var(--text-secondary)]">
+          <p role="status" className="mt-2 text-sm text-text-secondary">
             {feedback}
           </p>
         )}
@@ -76,7 +76,7 @@ export function InvitationsPage() {
 
       {/* Generated Invitations List */}
       <section className="grid gap-3">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Liên kết đã tạo</h2>
+        <h2 className="text-lg font-semibold text-text-primary">Liên kết đã tạo</h2>
         {query.isPending ? (
           <LoadingState label="Đang tải lời mời" />
         ) : query.isError ? (
@@ -90,13 +90,13 @@ export function InvitationsPage() {
           invitations.map((invitation) => (
             <article
               key={invitation.id}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
+              className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-surface p-4"
             >
               <div>
-                <p className="font-medium text-[var(--text-primary)]">
+                <p className="font-medium text-text-primary">
                   {invitation.revokedAt ? "Đã thu hồi" : "Còn hiệu lực"}
                 </p>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                <p className="mt-1 text-sm text-text-secondary">
                   {invitation.useCount}/{invitation.maxUses} lượt · Hết hạn{" "}
                   {new Date(invitation.expiresAt).toLocaleDateString("vi-VN")}
                 </p>
@@ -117,7 +117,7 @@ export function InvitationsPage() {
       </section>
 
       {hasRevokeError && (
-        <p role="alert" className="text-sm text-[var(--danger)]">
+        <p role="alert" className="text-sm text-danger">
           Không thể thu hồi liên kết. Bạn có thể không còn quyền quản lý nhóm.
         </p>
       )}

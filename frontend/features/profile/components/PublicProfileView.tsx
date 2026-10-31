@@ -59,8 +59,8 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
         }
       />
 
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] overflow-hidden">
-        <div className="relative h-44 w-full bg-gradient-to-r from-[var(--brand)]/20 via-[var(--brand-soft)] to-[var(--surface-subtle)] border-b border-[var(--border)] overflow-hidden">
+      <article className="border border-border rounded-panel bg-surface shadow-panel overflow-hidden">
+        <div className="relative h-44 w-full bg-gradient-to-r from-brand/20 via-brand-soft to-surface-subtle border-b border-border overflow-hidden">
           {backgroundUrl ? (
             <Image
               src={backgroundUrl}
@@ -70,13 +70,13 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
               unoptimized
             />
           ) : (
-            <div className="absolute inset-0 bg-radial from-transparent to-[var(--surface-subtle)]/40" />
+            <div className="absolute inset-0 bg-radial from-transparent to-surface-subtle/40" />
           )}
         </div>
 
         <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 mb-4">
-            <div className="relative inline-block rounded-full ring-4 ring-[var(--surface)] shadow-md">
+            <div className="relative inline-block rounded-full ring-4 ring-surface shadow-md">
               <Avatar
                 label={user[USER_PROFILE_FIELDS.DISPLAY_NAME]}
                 src={user[USER_PROFILE_FIELDS.AVATAR_URL]}
@@ -106,7 +106,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
               />
             </div>
 
-            <p className="mt-2.5 text-sm text-[var(--text-secondary)] whitespace-pre-wrap max-w-2xl leading-relaxed">
+            <p className="mt-2.5 text-sm text-text-secondary whitespace-pre-wrap max-w-2xl leading-relaxed">
               {user[USER_PROFILE_FIELDS.BIO] || "Người dùng này chưa thêm phần giới thiệu tiểu sử."}
             </p>
           </div>
@@ -117,7 +117,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
         <Card>
           <CardHeader title="Thông tin người dùng" icon={<Icon name={ICON_NAMES.PROFILE} />} />
           <CardContent>
-            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-text-secondary [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-text-primary">
               <div>
                 <dt>Tên hiển thị</dt>
                 <dd>{user[USER_PROFILE_FIELDS.DISPLAY_NAME]}</dd>
@@ -144,7 +144,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
         <Card>
           <CardHeader title="Mối quan hệ & Kết nối" icon={<Icon name={ICON_NAMES.CONTACTS} />} />
           <CardContent>
-            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
+            <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-text-secondary [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-text-primary">
               <div>
                 <dt>Quan hệ kết nối</dt>
                 <dd>

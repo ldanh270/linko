@@ -27,8 +27,8 @@ export function PresenceIndicator({
     size === "sm" ? "w-1.5 h-1.5" : size === "lg" ? "w-2.5 h-2.5" : "w-2 h-2"
 
   const dotColorClass = isOnline
-    ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
-    : "bg-[var(--status-offline)]"
+    ? "bg-status-online shadow-[0_0_6px_var(--status-online-glow)]"
+    : "bg-status-offline"
 
   if (variant === "dot") {
     return (
@@ -45,8 +45,8 @@ export function PresenceIndicator({
       <span
         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
           isOnline
-            ? "border-[var(--status-online)]/40 bg-[var(--status-online)]/10 text-[var(--status-online)]"
-            : "border-[var(--status-offline)]/40 bg-[var(--status-offline)]/10 text-[var(--status-offline)]"
+            ? "border-status-online/40 bg-status-online/10 text-status-online"
+            : "border-status-offline/40 bg-status-offline/10 text-status-offline"
         } ${className}`}
       >
         <span className={`rounded-full ${dotSizeClass} ${dotColorClass}`} aria-hidden="true" />
@@ -62,7 +62,7 @@ export function PresenceIndicator({
       )}
       <span
         className={
-          isOnline ? "text-[var(--status-online)] font-semibold" : "text-[var(--text-secondary)] font-medium"
+          isOnline ? "text-status-online font-semibold" : "text-text-secondary font-medium"
         }
       >
         {label}

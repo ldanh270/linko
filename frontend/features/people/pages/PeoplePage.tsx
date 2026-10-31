@@ -44,7 +44,7 @@ export function PeoplePage() {
       />
 
       {/* Search and Stats Bar */}
-      <div className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="border border-border rounded-panel bg-surface shadow-panel p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex-1 max-w-md">
           <SearchInput
             label="Tìm trong danh bạ"
@@ -54,8 +54,8 @@ export function PeoplePage() {
             onChange={state.onSearchChange}
           />
         </div>
-        <div className="text-sm font-medium text-[var(--text-secondary)]">
-          Tổng cộng: <span className="font-bold text-[var(--text-primary)]">{totalFriends}</span> bạn bè
+        <div className="text-sm font-medium text-text-secondary">
+          Tổng cộng: <span className="font-bold text-text-primary">{totalFriends}</span> bạn bè
         </div>
       </div>
 
@@ -88,10 +88,10 @@ export function PeoplePage() {
                 <Badge variant="brand" shape="rounded" size="sm" className="h-7 w-7 text-xs font-bold">
                   {group.letter}
                 </Badge>
-                <span className="text-xs font-medium text-[var(--text-secondary)]">
+                <span className="text-xs font-medium text-text-secondary">
                   {group.contacts.length} liên hệ
                 </span>
-                <div className="flex-1 border-t border-[var(--border)]" />
+                <div className="flex-1 border-t border-border" />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

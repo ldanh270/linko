@@ -9,11 +9,11 @@ export interface LogoutDialogProps { readonly state: ReturnType<typeof useLogout
 export function LogoutDialog({ state }: LogoutDialogProps) {
   return (
     <Modal title="Đăng xuất khỏi Linko?" onClose={state.onClose}>
-      <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">
+      <p className="text-[13px] text-text-secondary leading-relaxed">
         Bạn sẽ cần đăng nhập lại để xem tin nhắn.
       </p>
       {state.error && (
-        <p className="text-xs text-[var(--danger)] mt-2" role="alert">
+        <p className="text-xs text-danger mt-2" role="alert">
           {state.error}
         </p>
       )}

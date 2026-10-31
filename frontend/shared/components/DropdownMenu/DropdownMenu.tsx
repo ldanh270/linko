@@ -24,7 +24,7 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={toggle}
-        className="inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] active:opacity-70 focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
+        className="inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-center rounded-sm text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand active:opacity-70 focus-visible:outline-2 focus-visible:outline-brand"
       >
         <Icon name={ICON_NAMES.MENU} />
       </button>
@@ -32,7 +32,7 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
         <div
           role="menu"
           aria-label={label}
-          className="absolute right-0 top-full z-30 min-w-40 p-1.5 border border-[var(--border)] rounded-[var(--radius-md)] bg-[var(--surface)] shadow-[var(--shadow-dropdown)]"
+          className="absolute right-0 top-full z-30 min-w-40 p-1.5 border border-border rounded-md bg-surface shadow-dropdown"
         >
           {actions.map((item) => (
             <Button
@@ -41,7 +41,7 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
               variant="ghost"
               disabled={item.disabled}
               onClick={item.onSelect}
-              className="w-full justify-start gap-3 px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-hover)] rounded-[var(--radius-sm)]"
+              className="w-full justify-start gap-3 px-3 py-2 text-sm text-text-primary hover:bg-surface-hover rounded-sm"
             >
               {item.icon && <Icon name={item.icon} />}
               {item.label}

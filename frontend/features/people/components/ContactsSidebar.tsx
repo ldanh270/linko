@@ -34,13 +34,14 @@ export function ContactsSidebar() {
         />
       }
     >
+      {/* Contacts search bar */}
       <div className="flex items-center gap-2 px-4 mb-3">
         {Boolean(state.search) && (
           <button
             type="button"
             onClick={() => state.onSearchChange("")}
             aria-label="Xóa bộ lọc danh bạ"
-            className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
+            className="grid place-items-center w-9 h-9 rounded-full text-lg text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand cursor-pointer flex-none"
           >
             <Icon name={ICON_NAMES.BACK} />
           </button>
@@ -56,12 +57,14 @@ export function ContactsSidebar() {
         />
       </div>
 
+      {/* Pending friend requests action banner */}
       {state.requestRows.length > 0 && !state.search && (
         <Button className="mx-4 mb-3" variant="ghost" onClick={state.onOpenAdd}>
           Lời mời kết bạn ({state.requestRows.length})
         </Button>
       )}
 
+      {/* Grouped alphabetical contacts list with skeleton and empty states */}
       {state.friends.isPending ? (
         <ContactsListSkeleton />
       ) : state.friends.isError ? (
@@ -77,6 +80,7 @@ export function ContactsSidebar() {
         <EmptyState title="Chưa có liên hệ" description="Thêm bạn bè để bắt đầu trò chuyện." />
       )}
 
+      {/* Add contact modal dialog */}
       {state.isAdding && <AddContactModal state={state} />}
       {state.userId && <PersonProfilePanel state={state} />}
     </SidebarPanel>

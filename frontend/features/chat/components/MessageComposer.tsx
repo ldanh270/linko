@@ -34,7 +34,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
   } = useMessageComposerView({ state })
 
   return (
-    <div className="relative border-t border-[var(--border)] bg-[var(--surface)]">
+    <div className="relative border-t border-border bg-surface">
       {/* Active Reply Banner */}
       {state.composer.replyId && (
         <ReplyPreview
@@ -52,7 +52,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         />
       )}
       {state.composer.showMentions && state.members.isError && (
-        <p role="alert" className="text-xs text-[var(--danger)] mt-2 px-4">
+        <p role="alert" className="text-xs text-danger mt-2 px-4">
           Không thể tải thành viên để nhắc tên.
         </p>
       )}
@@ -67,12 +67,12 @@ export function MessageComposer({ state }: MessageComposerProps) {
 
       {/* Validation & Send Error Alerts */}
       {state.composer.fileError && (
-        <p role="alert" className="px-4 pt-2 text-xs text-[var(--danger)]">
+        <p role="alert" className="px-4 pt-2 text-xs text-danger">
           {state.composer.fileError}
         </p>
       )}
       {state.composer.sendError && (
-        <p role="alert" className="px-4 pt-2 text-xs text-[var(--danger)]">
+        <p role="alert" className="px-4 pt-2 text-xs text-danger">
           {state.composer.sendError}
         </p>
       )}
@@ -88,7 +88,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
           htmlFor="composer-file-input"
           aria-label={copy.chat.attachBtn}
           title={copy.chat.attachBtn}
-          className="grid place-items-center w-10 h-10 rounded-full text-xl text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex-none mb-0.5"
+          className="grid place-items-center w-10 h-10 rounded-full text-xl text-text-secondary hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer flex-none mb-0.5"
         >
           <Icon name={ICON_NAMES.ATTACH} />
           <input
@@ -107,7 +107,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         </label>
 
         {/* Text Input Container with Inset Emoji Button */}
-        <div className="relative flex-1 min-w-0 flex items-end rounded-[var(--radius-md)] bg-[var(--input-surface)] transition-colors hover:bg-[var(--input-surface-hover)] focus-within:outline-2 focus-within:outline-[var(--border-focus)] focus-within:outline-offset-1">
+        <div className="relative flex-1 min-w-0 flex items-end rounded-md bg-input-surface transition-colors hover:bg-input-surface-hover focus-within:outline-2 focus-within:outline-border-focus focus-within:outline-offset-1">
           <textarea
             ref={textareaRef}
             rows={1}
@@ -117,7 +117,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
             onChange={(e) => state.composer.onContentChange(e.target.value)}
             onKeyDown={state.composer.onKeyDown}
             aria-label="Soạn tin nhắn"
-            className="w-full min-w-0 bg-transparent py-2.5 pl-3.5 pr-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:opacity-90 outline-none resize-none leading-relaxed"
+            className="w-full min-w-0 bg-transparent py-2.5 pl-3.5 pr-10 text-sm text-text-primary placeholder:text-text-secondary placeholder:opacity-90 outline-none resize-none leading-relaxed"
           />
 
           {/* Emoji Picker Popover & Trigger Button */}
@@ -128,7 +128,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
               icon={<Icon name={ICON_NAMES.EMOJI} />}
               onClick={toggleEmojiPicker}
               aria-expanded={isEmojiPickerOpen}
-              className="text-[var(--text-secondary)] hover:text-[var(--brand)] text-lg"
+              className="text-text-secondary hover:text-brand text-lg"
             />
             {isEmojiPickerOpen && (
               <EmojiPicker

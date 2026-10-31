@@ -44,8 +44,8 @@ export function GroupManagePage() {
       <PageHeader eyebrow="Quyền quản trị" title="Quản lý nhóm" />
 
       {/* General Settings Form */}
-      <form onSubmit={handleSubmit} className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] grid gap-4 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Thông tin chung</h2>
+      <form onSubmit={handleSubmit} className="border border-border rounded-panel bg-surface shadow-panel grid gap-4 p-4 sm:p-5">
+        <h2 className="text-lg font-semibold text-text-primary">Thông tin chung</h2>
         <Input
           id="manage-group-name"
           label="Tên nhóm"
@@ -57,7 +57,7 @@ export function GroupManagePage() {
         <div className="grid gap-1.5">
           <label
             htmlFor="manage-group-description"
-            className="text-sm font-medium text-[var(--text-primary)]"
+            className="text-sm font-medium text-text-primary"
           >
             Mô tả
           </label>
@@ -67,7 +67,7 @@ export function GroupManagePage() {
             rows={3}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm text-[var(--text-primary)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
+            className="rounded-lg border border-border bg-surface p-3 text-sm text-text-primary transition-colors focus-visible:outline-2 focus-visible:outline-brand"
           />
         </div>
         <Button type="submit" isLoading={isSaving}>
@@ -77,7 +77,7 @@ export function GroupManagePage() {
 
       {/* Members & Roles Roster */}
       <section className="grid gap-3">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+        <h2 className="text-xl font-semibold text-text-primary">
           Thành viên và vai trò {members.length ? `(${members.length})` : ""}
         </h2>
         {membersQuery.isPending ? (
@@ -91,13 +91,13 @@ export function GroupManagePage() {
           members.map((member) => (
             <article
               key={member.userId}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4"
             >
               <div>
-                <p className="font-medium text-[var(--text-primary)]">
+                <p className="font-medium text-text-primary">
                   {member.displayName || "Thành viên"}
                 </p>
-                <p className="text-sm text-[var(--text-secondary)]">
+                <p className="text-sm text-text-secondary">
                   {member.role === ROLE.OWNER
                     ? "Chủ nhóm"
                     : member.role === ROLE.ADMIN
@@ -138,15 +138,15 @@ export function GroupManagePage() {
       </section>
 
       {hasActionError && (
-        <p role="alert" className="text-sm text-[var(--danger)]">
+        <p role="alert" className="text-sm text-danger">
           Không thể thực hiện thao tác này. Kiểm tra quyền của bạn rồi thử lại.
         </p>
       )}
 
       {/* Danger Zone: Close Group */}
-      <section className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] border-[var(--danger)]/40 p-4 sm:p-5">
-        <h2 className="font-semibold text-[var(--danger)]">Đóng nhóm</h2>
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+      <section className="border border-border rounded-panel bg-surface shadow-panel border-danger/40 p-4 sm:p-5">
+        <h2 className="font-semibold text-danger">Đóng nhóm</h2>
+        <p className="mt-1 text-sm text-text-secondary">
           Thành viên sẽ không thể gửi tin hoặc dùng lời mời hiện có.
         </p>
         <Button

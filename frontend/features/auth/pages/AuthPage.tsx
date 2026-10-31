@@ -11,7 +11,7 @@ export function AuthPage({ mode, isRegistered = false }: { readonly mode: "login
       <SurfacePanel className="w-full max-w-md p-7 sm:p-10">
         <Link
           href="/"
-          className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-[var(--brand)]"
+          className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-brand"
         >
           <Image
             src="/logo.png"
@@ -22,12 +22,12 @@ export function AuthPage({ mode, isRegistered = false }: { readonly mode: "login
             priority
           />
           <span>
-            linko<span className="text-[var(--text-primary)]">.</span>
+            linko<span className="text-text-primary">.</span>
           </span>
         </Link>
         <h1 className="mt-8 text-3xl font-bold tracking-tight">{isSignup ? "Tạo tài khoản" : "Chào mừng trở lại"}</h1>
-        <p className="mb-7 mt-2 text-[var(--text-secondary)]">{isSignup ? "Bắt đầu kết nối với những người bạn yêu quý." : "Đăng nhập để tiếp tục cuộc trò chuyện."}</p>
-        {isRegistered && !isSignup && <p role="status" className="mb-5 rounded-xl bg-[var(--positive)]/10 p-3 text-sm text-[var(--positive)]">Tài khoản đã được tạo. Hãy đăng nhập để tiếp tục.</p>}
+        <p className="mb-7 mt-2 text-text-secondary">{isSignup ? "Bắt đầu kết nối với những người bạn yêu quý." : "Đăng nhập để tiếp tục cuộc trò chuyện."}</p>
+        {isRegistered && !isSignup && <p role="status" className="mb-5 rounded-xl bg-positive/10 p-3 text-sm text-positive">Tài khoản đã được tạo. Hãy đăng nhập để tiếp tục.</p>}
         <AuthForm mode={mode} />
       </SurfacePanel>
     </main>

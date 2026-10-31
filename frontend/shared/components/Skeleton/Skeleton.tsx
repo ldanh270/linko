@@ -10,8 +10,8 @@ export function Skeleton({ className = "", circle = false, style }: SkeletonProp
     <div
       aria-hidden="true"
       style={style}
-      className={`animate-pulse bg-[var(--input-surface)] ${
-        circle ? "rounded-full" : "rounded-[var(--radius-md)]"
+      className={`animate-pulse bg-input-surface ${
+        circle ? "rounded-full" : "rounded-md"
       } ${className}`}
     />
   )

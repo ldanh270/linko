@@ -10,9 +10,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return <ToastContext.Provider value={state}>
     {children}
     <div aria-live="polite" className="fixed bottom-20 right-4 z-50 grid max-w-sm gap-2 md:bottom-4">
-      {toasts.map((toast) => <div key={toast.id} role={toast.kind === "error" ? "alert" : "status"} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm shadow-lg">
+      {toasts.map((toast) => <div key={toast.id} role={toast.kind === "error" ? "alert" : "status"} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 text-sm shadow-lg">
         <span>{toast.message}</span>
-        <button type="button" aria-label="Dismiss notification" onClick={toast.onDismiss} className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--brand)]">×</button>
+        <button type="button" aria-label="Dismiss notification" onClick={toast.onDismiss} className="rounded p-1 text-text-secondary hover:text-text-primary focus-visible:outline-2 focus-visible:outline-brand">×</button>
       </div>)}
     </div>
   </ToastContext.Provider>

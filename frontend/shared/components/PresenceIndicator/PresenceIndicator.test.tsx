@@ -7,7 +7,7 @@ describe("PresenceIndicator component", () => {
     render(<PresenceIndicator isOnline variant="dot" />)
     const dot = screen.getByLabelText("Đang hoạt động")
     expect(dot).toBeInTheDocument()
-    expect(dot).toHaveClass("bg-[var(--status-online)]")
+    expect(dot).toHaveClass("bg-status-online")
   })
 
   it("renders text variant with custom offline label", () => {

@@ -30,7 +30,7 @@ function ConversationPhotoThumb({ photo, onSelect }: ConversationPhotoThumbProps
   return (
     <button
       type="button"
-      className="aspect-square rounded-md overflow-hidden bg-[var(--input-surface)] block p-0 border-none cursor-pointer group disabled:cursor-default disabled:opacity-70"
+      className="aspect-square rounded-md overflow-hidden bg-input-surface block p-0 border-none cursor-pointer group disabled:cursor-default disabled:opacity-70"
       onClick={() => thumbnail.objectUrl && onSelect(photo, thumbnail.objectUrl)}
       disabled={!thumbnail.objectUrl}
       aria-label={`Xem ảnh ${photo.name}`}
@@ -44,7 +44,7 @@ function ConversationPhotoThumb({ photo, onSelect }: ConversationPhotoThumbProps
           className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
         />
       ) : (
-        <div className="grid place-items-center w-full h-full text-[var(--text-secondary)] text-[20px]">
+        <div className="grid place-items-center w-full h-full text-text-secondary text-[20px]">
           <Icon name={ICON_NAMES.IMAGE} />
         </div>
       )}
@@ -59,14 +59,14 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
   const hasFiles = files.length > 0
 
   if (!hasPhotos && !hasFiles) {
-    return <p className="text-[13px] text-[var(--text-secondary)] text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_MEDIA}</p>
+    return <p className="text-[13px] text-text-secondary text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_MEDIA}</p>
   }
 
   return (
     <div className="flex flex-col gap-4">
       {hasPhotos && (
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-2">
             {CHAT_DETAILS_COPY.PHOTOS}
           </h4>
           <div className="grid grid-cols-3 gap-1.5">
@@ -83,21 +83,21 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
 
       {hasFiles && (
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-2">
             {CHAT_DETAILS_COPY.FILES}
           </h4>
           <ul className="flex flex-col gap-1.5 list-none p-0 m-0">
             {files.map((file) => (
-              <li key={file.id} className="rounded-md transition-colors hover:bg-[var(--surface-subtle)]">
+              <li key={file.id} className="rounded-md transition-colors hover:bg-surface-subtle">
                 <Link href={file.href} className="flex items-center gap-2.5 px-2.5 py-2 no-underline text-inherit" target="_blank">
-                  <span className="grid place-items-center w-8 h-8 rounded-md bg-[var(--input-surface)] text-[var(--brand)] text-[18px] shrink-0">
+                  <span className="grid place-items-center w-8 h-8 rounded-md bg-input-surface text-brand text-[18px] shrink-0">
                     <Icon name={ICON_NAMES.FILE} />
                   </span>
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">{file.name}</span>
-                    {file.sizeLabel && <span className="text-[11px] text-[var(--text-secondary)]">{file.sizeLabel}</span>}
+                    <span className="text-[13px] font-medium text-text-primary truncate">{file.name}</span>
+                    {file.sizeLabel && <span className="text-[11px] text-text-secondary">{file.sizeLabel}</span>}
                   </div>
-                  <Icon name={ICON_NAMES.DOWNLOAD} className="text-[16px] text-[var(--text-secondary)] shrink-0" />
+                  <Icon name={ICON_NAMES.DOWNLOAD} className="text-[16px] text-text-secondary shrink-0" />
                 </Link>
               </li>
             ))}

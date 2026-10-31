@@ -39,9 +39,9 @@ export function AccountSummarySection({ profile }: AccountSummarySectionProps) {
           <Avatar label={displayName} src={avatarUrl} size="large" />
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-base truncate">{displayName}</h3>
-            <p className="text-sm text-[var(--text-secondary)] truncate">{username}</p>
+            <p className="text-sm text-text-secondary truncate">{username}</p>
             {profile[USER_PROFILE_FIELDS.BIO] && (
-              <p className="text-xs text-[var(--text-tertiary)] mt-1 line-clamp-2">{profile[USER_PROFILE_FIELDS.BIO]}</p>
+              <p className="text-xs text-text-muted mt-1 line-clamp-2">{profile[USER_PROFILE_FIELDS.BIO]}</p>
             )}
           </div>
         </div>

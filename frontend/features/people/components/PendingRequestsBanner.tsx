@@ -12,14 +12,14 @@ export function PendingRequestsBanner({ count, onOpen }: PendingRequestsBannerPr
   if (count <= 0) return null
 
   return (
-    <div className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-[var(--brand)]/30 bg-[var(--brand-soft)]/20">
+    <div className="border border-border rounded-panel bg-surface shadow-panel flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-brand/30 bg-brand-soft/20">
       <div className="flex items-center gap-3">
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--brand)] text-white">
+        <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand text-white">
           <Icon name={ICON_NAMES.ADD_CONTACT} />
         </div>
         <div>
           <p className="font-semibold text-sm">Lời mời kết bạn đang chờ</p>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-text-secondary">
             Bạn có {count} lời mời kết bạn mới cần phản hồi.
           </p>
         </div>

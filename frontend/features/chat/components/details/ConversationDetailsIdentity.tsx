@@ -25,10 +25,10 @@ interface QuickActionItemProps {
 function QuickActionItem({ icon, label, onClick, href, disabled }: QuickActionItemProps) {
   const content = (
     <>
-      <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
+      <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-input-surface text-text-primary text-[18px] transition-all group-hover:bg-input-surface-hover group-hover:scale-105 active:scale-95">
         <Icon name={icon} />
       </span>
-      <span className="text-xs text-[var(--text-secondary)]">{label}</span>
+      <span className="text-xs text-text-secondary">{label}</span>
     </>
   )
 
@@ -36,7 +36,7 @@ function QuickActionItem({ icon, label, onClick, href, disabled }: QuickActionIt
     return (
       <Link
         href={href}
-        className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer no-underline"
+        className="group flex flex-col items-center gap-1.5 text-xs text-text-primary cursor-pointer no-underline"
         aria-label={label}
       >
         {content}
@@ -47,7 +47,7 @@ function QuickActionItem({ icon, label, onClick, href, disabled }: QuickActionIt
   return (
     <button
       type="button"
-      className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer bg-transparent border-none disabled:opacity-50 disabled:cursor-not-allowed"
+      className="group flex flex-col items-center gap-1.5 text-xs text-text-primary cursor-pointer bg-transparent border-none disabled:opacity-50 disabled:cursor-not-allowed"
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
@@ -82,7 +82,7 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
         </div>
       )}
 
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
+      <h3 className="text-lg font-semibold text-text-primary mb-1">
         {details.profileHref ? (
           <Link href={details.profileHref} className="hover:underline">
             {details.title}
@@ -100,11 +100,11 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
             labelOnline="Đang hoạt động"
             labelOffline="Ngoại tuyến"
           />
-          <span className="text-[var(--text-muted)]">·</span>
-          <span className="text-[var(--text-secondary)]">{details.subtitle}</span>
+          <span className="text-text-muted">·</span>
+          <span className="text-text-secondary">{details.subtitle}</span>
         </div>
       ) : (
-        <p className="text-sm text-[var(--text-secondary)] mb-4">{details.subtitle}</p>
+        <p className="text-sm text-text-secondary mb-4">{details.subtitle}</p>
       )}
 
       {/* Quick Action Buttons Row */}

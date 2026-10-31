@@ -27,11 +27,11 @@ export function SoundNotificationSection() {
   }
 
   return (
-    <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 grid gap-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+    <article className="border border-border rounded-panel bg-surface shadow-panel p-4 sm:p-5 grid gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
         <div>
           <h2 className="text-lg font-semibold">{copy.settings.soundTitle}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-secondary">
             {copy.settings.soundDescription}
           </p>
         </div>
@@ -49,7 +49,7 @@ export function SoundNotificationSection() {
           </Button>
         </div>
       </div>
-      <p className="text-xs text-[var(--text-secondary)]">
+      <p className="text-xs text-text-secondary">
         {copy.settings.soundNote}
       </p>
     </article>

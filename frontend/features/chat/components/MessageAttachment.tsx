@@ -35,17 +35,17 @@ export function MessageAttachment({ file }: MessageAttachmentProps) {
           {thumbnail.objectUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              className="block max-h-[180px] max-w-full w-auto rounded-[var(--radius-md)] object-contain transition-all group-hover:opacity-95 group-hover:scale-[1.01]"
+              className="block max-h-[180px] max-w-full w-auto rounded-md object-contain transition-all group-hover:opacity-95 group-hover:scale-[1.01]"
               src={thumbnail.objectUrl}
               alt={file.name}
             />
           ) : thumbnail.isLoading ? (
-            <div className="flex items-center gap-2 min-w-[170px] max-w-full px-3 py-2 bg-[var(--surface)] text-[var(--text-secondary)] rounded-[var(--radius-md)] border border-[var(--border-subtle)] text-xs">
+            <div className="flex items-center gap-2 min-w-[170px] max-w-full px-3 py-2 bg-surface text-text-secondary rounded-md border border-border-subtle text-xs">
               <Icon name={ICON_NAMES.IMAGE} />
               <span>Đang tải ảnh...</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 min-w-[170px] max-w-full px-3 py-2 bg-[var(--surface)] text-[var(--text-secondary)] rounded-[var(--radius-md)] border border-[var(--border-subtle)] text-xs">
+            <div className="flex items-center gap-2 min-w-[170px] max-w-full px-3 py-2 bg-surface text-text-secondary rounded-md border border-border-subtle text-xs">
               <Icon name={ICON_NAMES.IMAGE} />
               <span>{file.name}</span>
             </div>
@@ -66,17 +66,17 @@ export function MessageAttachment({ file }: MessageAttachmentProps) {
 
   return (
     <Link
-      className="flex items-center gap-3 min-w-[170px] max-w-full px-3 py-2 bg-[var(--surface)] text-[var(--text-primary)] rounded-[var(--radius-md)] mt-2 border border-[var(--border-subtle)] hover:border-[var(--border)] transition-colors text-left"
+      className="flex items-center gap-3 min-w-[170px] max-w-full px-3 py-2 bg-surface text-text-primary rounded-md mt-2 border border-border-subtle hover:border-border transition-colors text-left"
       href={file.href}
     >
-      <span className="text-[28px] text-[var(--brand)] shrink-0" aria-hidden="true">
+      <span className="text-[28px] text-brand shrink-0" aria-hidden="true">
         <Icon name={ICON_NAMES.FILE} />
       </span>
       <span className="flex flex-col min-w-0 flex-1">
         <strong className="block text-sm font-medium [overflow-wrap:anywhere] truncate">{file.name}</strong>
-        <small className="text-xs text-[var(--text-secondary)]">{file.sizeLabel}</small>
+        <small className="text-xs text-text-secondary">{file.sizeLabel}</small>
       </span>
-      <span className="text-[var(--text-secondary)] shrink-0" aria-hidden="true">
+      <span className="text-text-secondary shrink-0" aria-hidden="true">
         <Icon name={ICON_NAMES.DOWNLOAD} />
       </span>
     </Link>

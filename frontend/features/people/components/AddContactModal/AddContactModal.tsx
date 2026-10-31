@@ -19,11 +19,11 @@ export function AddContactModal({ state }: AddContactModalProps) {
   return <Modal title="Thêm bạn bè" onClose={state.onCloseAdd}><FriendRequests state={state} /><h3 className="mb-4 font-semibold">Tìm người dùng</h3>
     <SearchInput label="Tên hoặc tên đăng nhập" value={state.keyword} stateKey={String(state.keywordRevision)} onChange={state.onKeywordChange} />
     {state.keyword.trim().length < PEOPLE_LIMITS.MIN_SEARCH_LENGTH ? (
-      <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
+      <p className="text-[13px] text-text-secondary leading-relaxed">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
     ) : state.results.isPending ? (
       <div className="space-y-3 my-3" role="status" aria-label="Đang tìm kiếm">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 py-3 border-b border-[var(--border)]">
+          <div key={i} className="flex items-center gap-3 py-3 border-b border-border">
             <Skeleton circle className="w-10 h-10 shrink-0" />
             <div className="space-y-1.5 flex-1">
               <Skeleton className="h-4 w-28 rounded-xs" />

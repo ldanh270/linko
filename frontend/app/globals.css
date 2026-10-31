@@ -20,6 +20,8 @@
   --color-brand-subtle: var(--brand-subtle);
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
+  --color-border-focus: var(--border-focus);
+  --color-bubble-outgoing: var(--bubble-outgoing);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);

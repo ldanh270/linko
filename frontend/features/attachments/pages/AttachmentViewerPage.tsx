@@ -21,8 +21,8 @@ export function AttachmentViewerPage() {
     <section className="mx-auto grid min-h-[60dvh] max-w-5xl content-start gap-5">
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-[var(--brand)]">Tệp riêng tư</p>
-          <h1 className="mt-1 text-2xl font-bold text-[var(--text-primary)]">
+          <p className="text-sm font-semibold text-brand">Tệp riêng tư</p>
+          <h1 className="mt-1 text-2xl font-bold text-text-primary">
             Xem tệp đính kèm
           </h1>
         </div>
@@ -37,7 +37,7 @@ export function AttachmentViewerPage() {
           onRetry={handleRetry}
         />
       ) : isImage ? (
-        <figure className="grid min-h-80 place-items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+        <figure className="grid min-h-80 place-items-center rounded-2xl border border-border bg-surface p-4">
           <Image
             src={download.objectUrl}
             alt="Ảnh đính kèm trong cuộc trò chuyện"
@@ -48,15 +48,15 @@ export function AttachmentViewerPage() {
           />
         </figure>
       ) : (
-        <section className="grid justify-items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-10 text-center">
-          <Icon name={ICON_NAMES.DOWNLOAD} className="h-12 w-12 text-[var(--brand)]" />
-          <p className="text-sm text-[var(--text-secondary)]">
+        <section className="grid justify-items-center gap-4 rounded-2xl border border-border bg-surface p-10 text-center">
+          <Icon name={ICON_NAMES.DOWNLOAD} className="h-12 w-12 text-brand" />
+          <p className="text-sm text-text-secondary">
             Định dạng này được tải xuống thiết bị của bạn.
           </p>
           <a
             href={download.objectUrl}
             download={fileName}
-            className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand)] px-5 font-semibold text-[var(--brand-contrast)] transition-colors hover:bg-[var(--brand-hover)]"
+            className="inline-flex min-h-11 items-center rounded-xl bg-brand px-5 font-semibold text-brand-contrast transition-colors hover:bg-brand-hover"
           >
             Tải tệp
           </a>

@@ -24,7 +24,7 @@ export function ComposerFilePreviews({ previews, onRemove }: ComposerFilePreview
         return (
           <div
             key={item.id}
-            className={`relative shrink-0 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] transition-all ${
+            className={`relative shrink-0 rounded-md border border-border bg-surface transition-all ${
               isImage
                 ? "w-[68px] h-[68px] overflow-hidden"
                 : "flex items-center py-2 px-3 pr-[34px] max-w-[220px] min-h-[52px]"
@@ -35,14 +35,14 @@ export function ComposerFilePreviews({ previews, onRemove }: ComposerFilePreview
               <img src={item.previewUrl} alt={item.name} className="w-full h-full object-cover block" />
             ) : (
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-[20px] text-[var(--brand)] shrink-0" aria-hidden="true">
+                <span className="text-[20px] text-brand shrink-0" aria-hidden="true">
                   <Icon name={ICON_NAMES.FILE} />
                 </span>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[140px]" title={item.name}>
+                  <span className="text-sm font-medium text-text-primary truncate max-w-[140px]" title={item.name}>
                     {item.name}
                   </span>
-                  <span className="text-[11px] text-[var(--text-secondary)]">{item.sizeLabel}</span>
+                  <span className="text-[11px] text-text-secondary">{item.sizeLabel}</span>
                 </div>
               </div>
             )}
@@ -51,7 +51,7 @@ export function ComposerFilePreviews({ previews, onRemove }: ComposerFilePreview
               className={
                 isImage
                   ? "absolute top-1 right-1 w-[22px] h-[22px] rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer border-none text-[13px] p-0 transition-all hover:bg-black/85 hover:scale-105 z-10"
-                  : "absolute top-1/2 -translate-y-1/2 right-2 w-[22px] h-[22px] rounded-full bg-[var(--surface-hover)] text-[var(--text-secondary)] border border-[var(--border)] flex items-center justify-center cursor-pointer text-[13px] p-0 transition-all hover:bg-[var(--border)] hover:text-[var(--text-primary)] hover:scale-105 z-10"
+                  : "absolute top-1/2 -translate-y-1/2 right-2 w-[22px] h-[22px] rounded-full bg-surface-hover text-text-secondary border border-border flex items-center justify-center cursor-pointer text-[13px] p-0 transition-all hover:bg-border hover:text-text-primary hover:scale-105 z-10"
               }
               aria-label={`Xóa tệp ${item.name}`}
               title="Xóa tệp"

@@ -30,7 +30,7 @@ export function GroupsSidebar() {
                 type="button"
                 onClick={state.openCreateGroup}
                 aria-label={copy.groups.createGroupBtn}
-                className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer"
+                className="grid place-items-center w-9 h-9 rounded-full text-xl text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand cursor-pointer"
               >
                 <Icon name={ICON_NAMES.GROUP} />
               </button>
@@ -38,13 +38,14 @@ export function GroupsSidebar() {
           />
         }
       >
+        {/* Search filter row */}
         <div className="flex items-center gap-2 px-4 mb-3">
           {Boolean(state.search) && (
             <button
               type="button"
               onClick={() => state.onSearchChange("")}
               aria-label={copy.inbox.clearSearch}
-              className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
+              className="grid place-items-center w-9 h-9 rounded-full text-lg text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand cursor-pointer flex-none"
             >
               <Icon name={ICON_NAMES.BACK} />
             </button>
@@ -60,6 +61,7 @@ export function GroupsSidebar() {
           />
         </div>
 
+        {/* Groups list with loading, error, empty and result states */}
         {state.query.isPending ? (
           <ConversationListSkeleton />
         ) : state.query.isError ? (
@@ -92,6 +94,7 @@ export function GroupsSidebar() {
           </Button>
         )}
       </SidebarPanel>
+      {/* Modal creation dialog */}
       {state.isCreateGroupOpen && <CreateGroupModal onClose={state.closeCreateGroup} />}
     </>
   )

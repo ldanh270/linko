@@ -6,7 +6,7 @@ export interface SidebarPanelProps { readonly header: ReactNode; readonly childr
 /** Keep panel headers fixed while the feature body scrolls independently. UI only. */
 export function SidebarPanel({ header, children }: SidebarPanelProps) {
   return (
-    <section className="flex flex-col h-full min-h-0 bg-[var(--background)]">
+    <section className="flex flex-col h-full min-h-0 bg-background">
       {header}
       <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#a2adb755_transparent]">
         {children}

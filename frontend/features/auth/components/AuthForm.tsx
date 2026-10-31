@@ -61,46 +61,61 @@ export function AuthForm({ mode }: { readonly mode: "login" | "signup" }) {
     }
   }
 
-  return <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-    {isSignup && <>
-      <Input id="displayName" label="Tên hiển thị" error={fieldErrors.displayName} autoComplete="name" required maxLength={80} value={values.displayName} onChange={(event) => { setFieldErrors({ ...fieldErrors, displayName: undefined }); setValues({ ...values, displayName: event.target.value }) }} />
-      <Input id="email" label="Email" error={fieldErrors.email} type="email" autoComplete="email" required value={values.email} onChange={(event) => { setFieldErrors({ ...fieldErrors, email: undefined }); setValues({ ...values, email: event.target.value }) }} />
-    </>}
-    <Input id="username" label="Tên đăng nhập" error={fieldErrors.username} autoComplete="username" required minLength={3} maxLength={30} value={values.username} onChange={(event) => { setFieldErrors({ ...fieldErrors, username: undefined }); setValues({ ...values, username: event.target.value }) }} />
-    <Input
-      id="password"
-      label="Mật khẩu"
-      error={fieldErrors.password}
-      type={showPassword ? "text" : "password"}
-      autoComplete={isSignup ? "new-password" : "current-password"}
-      required
-      minLength={8}
-      value={values.password}
-      onChange={(event) => {
-        setFieldErrors({ ...fieldErrors, password: undefined })
-        setValues({ ...values, password: event.target.value })
-      }}
-      endAdornment={
-        <button
-          type="button"
-          onClick={() => setShowPassword((prev) => !prev)}
-          onMouseDown={(event) => event.preventDefault()}
-          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
-          aria-label={showPassword ? AUTH_FORM_COPY.HIDE_PASSWORD : AUTH_FORM_COPY.SHOW_PASSWORD}
-          title={showPassword ? AUTH_FORM_COPY.HIDE_PASSWORD : AUTH_FORM_COPY.SHOW_PASSWORD}
-        >
-          <Icon name={showPassword ? ICON_NAMES.EYE_OFF : ICON_NAMES.EYE} />
-        </button>
-      }
-    />
-    {isSignup && <p className="-mt-3 text-xs text-[var(--text-secondary)]">Mật khẩu cần có ít nhất 8 ký tự.</p>}
-    {error && <p role="alert" className="text-sm text-[var(--danger)]">{error}</p>}
-    <Button type="submit" isLoading={isLoading} className="mt-2 w-full">{isSignup ? "Tạo tài khoản" : "Đăng nhập"}</Button>
-    <p className="text-center text-sm text-[var(--text-secondary)]">
-      {isSignup ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
-      <Link href={isSignup ? APP_ROUTES.LOGIN : APP_ROUTES.SIGNUP}>{isSignup ? "Đăng nhập" : "Đăng ký"}</Link>
-    </p>
-  </form>
+  return (
+    <form onSubmit={onSubmit} className="grid gap-4" noValidate>
+      {/* Sign-up profile fields (Display name & Email) */}
+      {isSignup && (
+        <>
+          <Input id="displayName" label="Tên hiển thị" error={fieldErrors.displayName} autoComplete="name" required maxLength={80} value={values.displayName} onChange={(event) => { setFieldErrors({ ...fieldErrors, displayName: undefined }); setValues({ ...values, displayName: event.target.value }) }} />
+          <Input id="email" label="Email" error={fieldErrors.email} type="email" autoComplete="email" required value={values.email} onChange={(event) => { setFieldErrors({ ...fieldErrors, email: undefined }); setValues({ ...values, email: event.target.value }) }} />
+        </>
+      )}
+
+      {/* Account credentials fields (Username & Password) */}
+      <Input id="username" label="Tên đăng nhập" error={fieldErrors.username} autoComplete="username" required minLength={3} maxLength={30} value={values.username} onChange={(event) => { setFieldErrors({ ...fieldErrors, username: undefined }); setValues({ ...values, username: event.target.value }) }} />
+      <Input
+        id="password"
+        label="Mật khẩu"
+        error={fieldErrors.password}
+        type={showPassword ? "text" : "password"}
+        autoComplete={isSignup ? "new-password" : "current-password"}
+        required
+        minLength={8}
+        value={values.password}
+        onChange={(event) => {
+          setFieldErrors({ ...fieldErrors, password: undefined })
+          setValues({ ...values, password: event.target.value })
+        }}
+        endAdornment={
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            onMouseDown={(event) => event.preventDefault()}
+            className="flex h-8 w-8 items-center justify-center rounded-control text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            aria-label={showPassword ? AUTH_FORM_COPY.HIDE_PASSWORD : AUTH_FORM_COPY.SHOW_PASSWORD}
+            title={showPassword ? AUTH_FORM_COPY.HIDE_PASSWORD : AUTH_FORM_COPY.SHOW_PASSWORD}
+          >
+            <Icon name={showPassword ? ICON_NAMES.EYE_OFF : ICON_NAMES.EYE} />
+          </button>
+        }
+      />
+      {isSignup && <p className="-mt-3 text-xs text-text-secondary">Mật khẩu cần có ít nhất 8 ký tự.</p>}
+
+      {/* Error message alert */}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+
+      {/* Submit action button */}
+      <Button type="submit" isLoading={isLoading} className="mt-2 w-full">
+        {isSignup ? "Tạo tài khoản" : "Đăng nhập"}
+      </Button>
+
+      {/* Alternate authentication navigation */}
+      <p className="text-center text-sm text-text-secondary">
+        {isSignup ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
+        <Link href={isSignup ? APP_ROUTES.LOGIN : APP_ROUTES.SIGNUP}>{isSignup ? "Đăng nhập" : "Đăng ký"}</Link>
+      </p>
+    </form>
+  )
 }
 
 function readSafeNextPath(): string | null {

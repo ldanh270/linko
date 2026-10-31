@@ -18,8 +18,12 @@ export function ConversationPane({ item }: ConversationPaneProps) {
   const state = useConversationPane(item)
   return (
     <div className="relative flex h-full w-full min-h-0 overflow-hidden">
-      <div className="flex flex-1 min-w-0 flex-col h-full min-h-0 bg-[var(--surface)]">
+      {/* Primary chat column */}
+      <div className="flex flex-1 min-w-0 flex-col h-full min-h-0 bg-surface">
+        {/* Conversation header */}
         <ConversationHeader header={state.header} />
+
+        {/* In-chat message search bar */}
         {state.searchState.isOpen && (
           <ConversationSearchBar
             query={state.searchState.query}
@@ -35,6 +39,8 @@ export function ConversationPane({ item }: ConversationPaneProps) {
             onLoadMoreHistory={state.searchState.onLoadMoreHistory}
           />
         )}
+
+        {/* Message timeline with loading & error fallbacks */}
         {state.query.isPending || state.profile.isPending ? (
           <MessageTimelineSkeleton />
         ) : state.isIdentityUnavailable ? (
@@ -44,8 +50,12 @@ export function ConversationPane({ item }: ConversationPaneProps) {
         ) : (
           <MessageTimeline state={state} />
         )}
+
+        {/* Message composer */}
         <MessageComposer state={state} />
       </div>
+
+      {/* Slide-over conversation details sheet */}
       {state.details.isOpen && (
         <ConversationDetailsSheet details={state.details} onClose={state.details.onClose} />
       )}

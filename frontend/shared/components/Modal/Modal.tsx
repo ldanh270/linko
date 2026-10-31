@@ -20,10 +20,10 @@ export function Modal({ title, children, onClose }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-[min(100%,560px)] max-h-[calc(100dvh-40px)] overflow-y-auto bg-[var(--surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-modal)] border border-[var(--border-subtle)]"
+        className="w-[min(100%,560px)] max-h-[calc(100dvh-40px)] overflow-y-auto bg-surface rounded-lg shadow-modal border border-border-subtle"
       >
-        <header className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border)]">
-          <h2 id={titleId} className="text-lg font-semibold text-[var(--text-primary)]">
+        <header className="flex items-center justify-between px-4 py-3.5 border-b border-border">
+          <h2 id={titleId} className="text-lg font-semibold text-text-primary">
             {title}
           </h2>
           <IconButton label="Đóng" icon={<Icon name={ICON_NAMES.CLOSE} />} onClick={onClose} />

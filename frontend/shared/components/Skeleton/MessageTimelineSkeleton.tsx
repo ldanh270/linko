@@ -17,7 +17,7 @@ export function MessageTimelineSkeleton() {
       <div className="flex items-end gap-3 max-w-[70%]">
         <Skeleton circle className="w-9 h-9 shrink-0" />
         <div className="space-y-1">
-          <Skeleton className="h-14 w-52 rounded-[var(--radius-lg)] rounded-bl-none" />
+          <Skeleton className="h-14 w-52 rounded-lg rounded-bl-none" />
           <Skeleton className="h-3 w-12 rounded-xs" />
         </div>
       </div>
@@ -25,7 +25,7 @@ export function MessageTimelineSkeleton() {
       {/* Outgoing Message Skeleton */}
       <div className="flex items-end justify-end gap-3 self-end max-w-[70%]">
         <div className="space-y-1 flex flex-col items-end">
-          <Skeleton className="h-10 w-44 rounded-[var(--radius-lg)] rounded-br-none" />
+          <Skeleton className="h-10 w-44 rounded-lg rounded-br-none" />
           <Skeleton className="h-3 w-10 rounded-xs" />
         </div>
       </div>
@@ -34,7 +34,7 @@ export function MessageTimelineSkeleton() {
       <div className="flex items-end gap-3 max-w-[70%]">
         <Skeleton circle className="w-9 h-9 shrink-0" />
         <div className="space-y-1">
-          <Skeleton className="h-16 w-64 rounded-[var(--radius-lg)] rounded-bl-none" />
+          <Skeleton className="h-16 w-64 rounded-lg rounded-bl-none" />
           <Skeleton className="h-3 w-14 rounded-xs" />
         </div>
       </div>
@@ -42,7 +42,7 @@ export function MessageTimelineSkeleton() {
       {/* Another Outgoing Message Skeleton */}
       <div className="flex items-end justify-end gap-3 self-end max-w-[70%]">
         <div className="space-y-1 flex flex-col items-end">
-          <Skeleton className="h-12 w-56 rounded-[var(--radius-lg)] rounded-br-none" />
+          <Skeleton className="h-12 w-56 rounded-lg rounded-br-none" />
           <Skeleton className="h-3 w-10 rounded-xs" />
         </div>
       </div>

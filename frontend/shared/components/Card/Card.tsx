@@ -23,7 +23,7 @@ export function Card({ children, className = "", ...props }: CardProps) {
   return (
     <article
       {...props}
-      className={`border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] overflow-hidden ${className}`}
+      className={`border border-border rounded-panel bg-surface shadow-panel overflow-hidden ${className}`}
     >
       {children}
     </article>
@@ -33,12 +33,12 @@ export function Card({ children, className = "", ...props }: CardProps) {
 /** Render structured card header with optional icon, title, description, and action button. UI only. */
 export function CardHeader({ title, description, action, icon, className = "" }: CardHeaderProps) {
   return (
-    <div className={`flex items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-3.5 mb-4 ${className}`}>
+    <div className={`flex items-start sm:items-center justify-between gap-4 border-b border-border pb-3.5 mb-4 ${className}`}>
       <div className="flex items-center gap-2.5 min-w-0">
-        {icon && <span className="text-[var(--brand)] text-lg shrink-0">{icon}</span>}
+        {icon && <span className="text-brand text-lg shrink-0">{icon}</span>}
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold text-[var(--text-primary)] truncate">{title}</h2>
-          {description && <p className="text-xs text-[var(--text-secondary)] mt-0.5">{description}</p>}
+          <h2 className="text-base font-semibold text-text-primary truncate">{title}</h2>
+          {description && <p className="text-xs text-text-secondary mt-0.5">{description}</p>}
         </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}

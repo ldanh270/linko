@@ -14,11 +14,11 @@ export interface BadgeProps {
 }
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  danger: "bg-[var(--badge-background)] text-[var(--badge-text)]",
-  brand: "bg-[var(--brand-soft)] text-[var(--brand)]",
-  neutral: "bg-[var(--surface-subtle)] text-[var(--text-secondary)] border border-[var(--border)]",
-  success: "bg-[var(--positive-soft)] text-[var(--positive)]",
-  warning: "bg-[var(--warning-soft)] text-[var(--warning)]",
+  danger: "bg-badge-background text-badge-text",
+  brand: "bg-brand-soft text-brand",
+  neutral: "bg-surface-subtle text-text-secondary border border-border",
+  success: "bg-positive-soft text-positive",
+  warning: "bg-warning-soft text-warning",
 }
 
 const SHAPE_CLASSES: Record<BadgeShape, string> = {

@@ -31,7 +31,7 @@ export function NotificationsPage() {
       />
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-[var(--border)] pb-3">
+      <div className="flex items-center gap-2 border-b border-border pb-3">
         {filterTabs.map((tab) => {
           const isActive = state.filter === tab.id
           return (
@@ -41,8 +41,8 @@ export function NotificationsPage() {
               onClick={() => state.setFilter(tab.id)}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
                 isActive
-                  ? "bg-[var(--brand)] text-white shadow-sm"
-                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text)]"
+                  ? "bg-brand text-white shadow-sm"
+                  : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
               }`}
             >
               {tab.label}
@@ -66,8 +66,8 @@ export function NotificationsPage() {
           {state.items.map((item) => (
             <article
               key={item.id}
-              className={`border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 transition hover:border-[var(--brand)]/40 ${
-                item.isUnread ? "bg-[var(--surface)] border-l-4 border-l-[var(--brand)]" : "bg-[var(--surface)]/70"
+              className={`border border-border rounded-panel bg-surface shadow-panel flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 transition hover:border-brand/40 ${
+                item.isUnread ? "bg-surface border-l-4 border-l-brand" : "bg-surface/70"
               }`}
             >
               <div className="flex items-start gap-3.5 min-w-0">
@@ -76,7 +76,7 @@ export function NotificationsPage() {
                 ) : item.type === "message" ? (
                   <Avatar label={item.title} src={item.avatarUrl} size="medium" />
                 ) : (
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand">
                     <Icon name={ICON_NAMES.BELL} />
                   </div>
                 )}
@@ -85,13 +85,13 @@ export function NotificationsPage() {
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-sm truncate">{item.title}</h3>
                     {item.isUnread && (
-                      <span className="h-2 w-2 rounded-full bg-[var(--brand)] shrink-0" />
+                      <span className="h-2 w-2 rounded-full bg-brand shrink-0" />
                     )}
                   </div>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                  <p className="text-xs text-text-secondary mt-0.5 line-clamp-2">
                     {item.description}
                   </p>
-                  <p className="text-[11px] text-[var(--text-tertiary)] mt-1.5 flex items-center gap-1">
+                  <p className="text-[11px] text-text-muted mt-1.5 flex items-center gap-1">
                     <Icon name={ICON_NAMES.CLOCK} className="h-3 w-3" />
                     <span>{item.time}</span>
                   </p>

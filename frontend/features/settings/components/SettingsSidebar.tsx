@@ -30,22 +30,23 @@ export function SettingsSidebar() {
   return (
     <SidebarPanel header={<SidebarHeader title={copy.settings.title} />}>
       {state.profile.query.isError && profile && (
-        <p role="alert" className="text-xs text-[var(--danger)] px-4 mt-2">
+        <p role="alert" className="text-xs text-danger px-4 mt-2">
           Không thể làm mới thông tin tài khoản.
         </p>
       )}
 
+      {/* User identity profile header card */}
       {state.profile.query.isPending ? (
         <SettingsSidebarSkeleton />
       ) : !profile ? (
         <ErrorState title="Không thể tải tài khoản" onRetry={state.profile.onRetry} />
       ) : (
-        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between gap-3">
+        <div className="p-4 border-b border-border flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Avatar label={profile.displayName || profile.username} src={profile.avatarUrl} size="medium" />
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-sm truncate">{profile.displayName || profile.username}</h3>
-              <p className="text-xs text-[var(--text-secondary)] truncate">@{profile.username}</p>
+              <p className="text-xs text-text-secondary truncate">@{profile.username}</p>
             </div>
           </div>
           <Link href={APP_ROUTES.PROFILE}>
@@ -56,6 +57,7 @@ export function SettingsSidebar() {
         </div>
       )}
 
+      {/* Settings preference sections */}
       <div className="p-6 overflow-y-auto">
         <Accordion
           id="settings-chat"
@@ -97,12 +99,14 @@ export function SettingsSidebar() {
           <SettingsDisclosure key={section.id} section={section} />
         ))}
 
+        {/* Logout action button */}
         <Button className="mt-4 w-full" variant="ghost" onClick={state.logout.onOpen}>
           <Icon name={ICON_NAMES.LOGOUT} />
           {copy.settings.logoutBtn}
         </Button>
       </div>
 
+      {/* Logout confirmation dialog */}
       {state.logout.isOpen && <LogoutDialog state={state.logout} />}
     </SidebarPanel>
   )

@@ -8,11 +8,11 @@ export function PeoplePageSkeleton() {
         <div className="flex items-center gap-2">
           <Skeleton className="h-7 w-7 rounded-md" />
           <Skeleton className="h-3 w-16 rounded-xs" />
-          <div className="flex-1 border-t border-[var(--border)]" />
+          <div className="flex-1 border-t border-border" />
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <article key={i} className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] flex items-center justify-between gap-3 p-3.5">
+            <article key={i} className="border border-border rounded-panel bg-surface shadow-panel flex items-center justify-between gap-3 p-3.5">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Skeleton circle className="w-10 h-10 shrink-0" />
                 <div className="space-y-1.5 flex-1">

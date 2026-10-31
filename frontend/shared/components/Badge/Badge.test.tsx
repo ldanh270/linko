@@ -13,13 +13,13 @@ describe("Badge component", () => {
     expect(badge).toBeInTheDocument()
     expect(badge).toHaveTextContent("3")
     expect(badge).toHaveClass("rounded-full")
-    expect(badge).toHaveClass("bg-[var(--badge-background)]")
+    expect(badge).toHaveClass("bg-badge-background")
   })
 
   it("renders brand badge with default rounded shape", () => {
     render(<Badge variant="brand">Linko</Badge>)
     const badge = screen.getByText("Linko")
     expect(badge).toBeInTheDocument()
-    expect(badge).toHaveClass("bg-[var(--brand-soft)]")
+    expect(badge).toHaveClass("bg-brand-soft")
   })
 })

@@ -4,14 +4,14 @@ import { Skeleton } from "./Skeleton"
 export function ProfileSidebarSkeleton() {
   return (
     <div className="flex flex-col" role="status" aria-label="Đang tải hồ sơ">
-      <div className="grid justify-items-center gap-3 px-4 pt-2 pb-4 border-b border-[var(--border)]">
+      <div className="grid justify-items-center gap-3 px-4 pt-2 pb-4 border-b border-border">
         <Skeleton circle className="w-20 h-20" />
         <Skeleton className="h-5 w-36 rounded-xs mt-1" />
         <Skeleton className="h-4 w-24 rounded-xs" />
       </div>
       <div className="p-4 space-y-4">
-        <Skeleton className="h-12 w-full rounded-[var(--radius-md)]" />
-        <div className="border border-[var(--border)] rounded-[var(--radius-md)] bg-[var(--surface)] p-4 space-y-4">
+        <Skeleton className="h-12 w-full rounded-md" />
+        <div className="border border-border rounded-md bg-surface p-4 space-y-4">
           <Skeleton className="h-4 w-28 rounded-xs" />
           <div className="space-y-3">
             <Skeleton className="h-4 w-full rounded-xs" />

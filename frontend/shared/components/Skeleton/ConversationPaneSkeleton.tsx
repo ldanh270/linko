@@ -5,12 +5,12 @@ import { MessageTimelineSkeleton } from "./MessageTimelineSkeleton"
 export function ConversationPaneSkeleton() {
   return (
     <div
-      className="flex flex-col h-full min-h-0 bg-[var(--surface)]"
+      className="flex flex-col h-full min-h-0 bg-surface"
       role="status"
       aria-label="Đang mở cuộc trò chuyện"
     >
       {/* Header Skeleton */}
-      <header className="flex min-h-[var(--header-height)] items-center justify-between gap-4 border-b border-[var(--border)] px-4 py-3.5 bg-[var(--surface)]">
+      <header className="flex min-h-[var(--header-height)] items-center justify-between gap-4 border-b border-border px-4 py-3.5 bg-surface">
         <div className="flex items-center gap-3">
           <Skeleton circle className="w-9 h-9 shrink-0" />
           <div className="space-y-1.5">
@@ -28,8 +28,8 @@ export function ConversationPaneSkeleton() {
       <MessageTimelineSkeleton />
 
       {/* Composer Skeleton */}
-      <div className="relative border-t border-[var(--border)] px-4 py-3.5 bg-[var(--surface)] flex items-center gap-3">
-        <Skeleton className="h-10 flex-1 rounded-[var(--radius-md)]" />
+      <div className="relative border-t border-border px-4 py-3.5 bg-surface flex items-center gap-3">
+        <Skeleton className="h-10 flex-1 rounded-md" />
         <Skeleton circle className="w-9 h-9 shrink-0" />
         <Skeleton circle className="w-9 h-9 shrink-0" />
       </div>

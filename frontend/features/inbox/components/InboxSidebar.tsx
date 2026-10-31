@@ -39,7 +39,7 @@ export function InboxSidebar() {
                   type="button"
                   onClick={state.openCreateGroup}
                   aria-label={copy.inbox.createGroup}
-                  className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer"
+                  className="grid place-items-center w-9 h-9 rounded-full text-xl text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand cursor-pointer"
                 >
                   <Icon name={ICON_NAMES.GROUP} />
                 </button>
@@ -47,7 +47,7 @@ export function InboxSidebar() {
                   type="button"
                   onClick={state.addContact.onOpen}
                   aria-label={copy.inbox.findFriends}
-                  className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer"
+                  className="grid place-items-center w-9 h-9 rounded-full text-xl text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand cursor-pointer"
                 >
                   <Icon name={ICON_NAMES.ADD_CONTACT} />
                 </button>
@@ -63,7 +63,7 @@ export function InboxSidebar() {
               type="button"
               onClick={searchState.handleExitSearch}
               aria-label={copy.inbox.backToConversations}
-              className="grid place-items-center w-9 h-9 rounded-full text-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)] cursor-pointer flex-none"
+              className="grid place-items-center w-9 h-9 rounded-full text-lg text-text-secondary transition-colors hover:bg-brand-soft hover:text-brand cursor-pointer flex-none"
             >
               <Icon name={ICON_NAMES.BACK} />
             </button>
@@ -96,13 +96,15 @@ export function InboxSidebar() {
           />
         ) : (
           <>
+            {/* Recent active contacts horizontal strip */}
             {state.query.isPending ? (
               <RecentPeopleStripSkeleton />
             ) : state.people.length > 0 ? (
               <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />
             ) : null}
 
-            <h2 className="px-4 mt-3 mb-2 text-base font-semibold text-[var(--text-primary)]">
+            {/* Conversation category filter tabs */}
+            <h2 className="px-4 mt-3 mb-2 text-base font-semibold text-text-primary">
               {copy.inbox.recent}
             </h2>
 
@@ -114,6 +116,7 @@ export function InboxSidebar() {
               ))}
             </nav>
 
+            {/* Conversation rows list with skeleton, error and empty states */}
             {state.query.isPending ? (
               <ConversationListSkeleton />
             ) : state.query.isError ? (
@@ -128,6 +131,7 @@ export function InboxSidebar() {
               />
             )}
 
+            {/* Pagination load more button */}
             {state.query.data?.nextCursor && (
               <Button className="m-4" variant="ghost" onClick={state.onLoadMore} isLoading={state.query.isFetching}>
                 {copy.inbox.nextPage}
@@ -136,6 +140,7 @@ export function InboxSidebar() {
           </>
         )}
       </SidebarPanel>
+      {/* Creation and contact modals */}
       {state.isCreateGroupOpen && <CreateGroupModal onClose={state.closeCreateGroup} />}
       {state.addContact.isOpen && <AddContactModal state={state.addContact} />}
     </>

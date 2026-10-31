@@ -10,5 +10,5 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 
 /** Render a keyboard-operable icon action. UI only. */
 export function IconButton({ label, icon, className = "", ...props }: IconButtonProps) {
-  return <Button {...props} aria-label={label} className={`h-10 w-10 rounded-full p-0 text-[var(--text-secondary)] hover:text-[var(--brand)] hover:bg-[var(--brand-soft)] ${className}`} variant="ghost">{icon}</Button>
+  return <Button {...props} aria-label={label} className={`h-10 w-10 rounded-full p-0 text-text-secondary hover:text-brand hover:bg-brand-soft ${className}`} variant="ghost">{icon}</Button>
 }

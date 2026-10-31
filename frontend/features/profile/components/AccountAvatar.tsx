@@ -17,7 +17,7 @@ export function AccountAvatar() {
       href={state.href}
       aria-label="Hồ sơ tài khoản"
       className={`grid place-items-center rounded-full p-0.5 transition-all duration-200 hover:opacity-85 ${
-        isActive ? "ring-2 ring-[var(--brand)]" : ""
+        isActive ? "ring-2 ring-brand" : ""
       }`}
     >
       <Avatar label={state.name} src={state.avatarUrl} size="small" />
