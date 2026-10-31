@@ -22,5 +22,5 @@ export function Icon({ name, className = "" }: IconProps) {
       </svg>
     )
   }
-  return <i aria-hidden="true" className={`shrink-0 ri-${name} ${className}`.trim()} />
+  return <i aria-hidden="true" className={`app-icon shrink-0 ri-${name} ${className}`.trim()} />
 }
