@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { CONVERSATION_KIND, CONVERSATION_TYPE, CONVERSATION_QUERY_PARAMS, type ConversationKind } from "@linko/contracts"
@@ -21,10 +22,16 @@ export function useInboxPage(fixedKind?: ConversationKind) {
   const router = useRouter(), pathname = usePathname(), params = useSearchParams()
   const profile = useCurrentProfile()
   const { conversationId } = useWorkspaceNavigation()
-  const { value: kind } = useQueryParamState(CONVERSATION_QUERY_PARAMS.KIND, KIND_SCHEMA, CONVERSATION_KIND.ALL)
+  const { value: kindFromUrl } = useQueryParamState(CONVERSATION_QUERY_PARAMS.KIND, KIND_SCHEMA, CONVERSATION_KIND.ALL)
+  const [activeKind, setActiveKind] = useState<ConversationKind>(fixedKind ?? kindFromUrl)
+
+  useEffect(() => {
+    setActiveKind(fixedKind ?? kindFromUrl)
+  }, [fixedKind, kindFromUrl])
+
+  const effectiveKind = fixedKind ?? activeKind
   const { value: cursor, setValue: setCursor } = useQueryParamState(CONVERSATION_QUERY_PARAMS.CURSOR, z.string(), "")
   const { value: search, setValue: setSearch, revision: searchRevision, cancelPending: cancelSearch } = useQueryParamState(WORKSPACE_PARAMS.SEARCH, z.string(), "")
-  const effectiveKind = fixedKind ?? kind
   const query = useQuery({ queryKey: [...INBOX_QUERY_KEY, effectiveKind, cursor], queryFn: ({ signal }) => listInbox({ kind: effectiveKind, cursor: cursor || undefined, signal }) })
   const recentPeopleQuery = useQuery({
     queryKey: [...INBOX_QUERY_KEY, "recent-direct-people"],
@@ -45,10 +52,16 @@ export function useInboxPage(fixedKind?: ConversationKind) {
 
   const changeKind = (value: ConversationKind) => {
     cancelSearch()
-    const next = new URLSearchParams(params.toString()); next.delete(CONVERSATION_QUERY_PARAMS.CURSOR)
-    if (value === CONVERSATION_KIND.ALL) next.delete(CONVERSATION_QUERY_PARAMS.KIND)
-    else next.set(CONVERSATION_QUERY_PARAMS.KIND, value)
-    router.push(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false })
+    setActiveKind(value)
+    if (typeof window !== "undefined") {
+      const next = new URLSearchParams(window.location.search)
+      next.delete(CONVERSATION_QUERY_PARAMS.CURSOR)
+      if (value === CONVERSATION_KIND.ALL) next.delete(CONVERSATION_QUERY_PARAMS.KIND)
+      else next.set(CONVERSATION_QUERY_PARAMS.KIND, value)
+      const qs = next.toString()
+      const nextUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}`
+      window.history.replaceState(null, "", nextUrl)
+    }
   }
   const onSearchChange = (value: string) => {
     setSearch(value, { history: "replace", debounceMs: 250, resetKeys: [CONVERSATION_QUERY_PARAMS.CURSOR] })
@@ -64,7 +77,7 @@ export function useInboxPage(fixedKind?: ConversationKind) {
     conversationId,
     onRetry: () => void query.refetch(),
     onLoadMore: () => { cancelSearch(); setCursor(query.data?.nextCursor ?? "") },
-    filters: INBOX_FILTERS.map((filter) => ({ ...filter, isActive: kind === filter.value, onSelect: () => changeKind(filter.value) })),
+    filters: INBOX_FILTERS.map((filter) => ({ ...filter, isActive: effectiveKind === filter.value, onSelect: () => changeKind(filter.value) })),
     isOnline: (peerId?: string | null) => presence.isOnline(peerId),
   }
 }

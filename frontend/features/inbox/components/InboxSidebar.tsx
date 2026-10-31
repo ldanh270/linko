@@ -108,11 +108,21 @@ export function InboxSidebar() {
               {copy.inbox.recent}
             </h2>
 
-            <nav aria-label="Lọc hội thoại" className="flex gap-1 px-4 pb-2">
+            <nav aria-label="Lọc hội thoại" className="flex gap-1.5 px-4 pb-2">
               {state.filters.map((filter) => (
-                <Button key={filter.value} variant="ghost" aria-pressed={filter.isActive} onClick={filter.onSelect}>
+                <button
+                  key={filter.value}
+                  type="button"
+                  aria-pressed={filter.isActive}
+                  onClick={filter.onSelect}
+                  className={`inline-flex items-center justify-center font-medium min-h-8 px-3.5 text-sm rounded-full transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:scale-[0.98] ${
+                    filter.isActive
+                      ? "bg-brand-soft text-brand font-semibold shadow-xs"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
+                  }`}
+                >
                   {filter.label}
-                </Button>
+                </button>
               ))}
             </nav>
 
