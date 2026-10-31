@@ -11,7 +11,14 @@ import { ThemeProvider } from "@/shared/theme/ThemeProvider"
 import "./globals.css"
 
 /** Linko metadata displayed by browsers and sharing surfaces. */
-export const metadata: Metadata = { title: "Linko", description: "Kết nối gần hơn mỗi ngày" }
+export const metadata: Metadata = {
+  title: "Linko",
+  description: "Kết nối gần hơn mỗi ngày",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+}
 
 /** Mount global theme, i18n, query and notification providers once. */
 export default function RootLayout({ children }: { children: ReactNode }) {

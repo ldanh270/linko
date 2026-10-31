@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Link } from "../components/Link"
 import { IconButton } from "../components/IconButton"
 import { Icon } from "../icons/Icon"
@@ -23,9 +24,16 @@ export function NavigationRail({ links, onToggleTheme, account }: NavigationRail
       <Link
         href={APP_ROUTES.INBOX}
         aria-label={copy.navigation.brandLogo}
-        className="mt-5 text-[30px] text-[var(--brand)] transition-transform hover:scale-105"
+        className="mt-4 inline-flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
       >
-        <Icon name={ICON_NAMES.BRAND} />
+        <Image
+          src="/logo.png"
+          alt="Linko"
+          width={40}
+          height={40}
+          className="rounded-xl object-contain drop-shadow-xs"
+          priority
+        />
       </Link>
       <nav aria-label="Chính" className="my-auto grid gap-4">
         {links.map((item) => (

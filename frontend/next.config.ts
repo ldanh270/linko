@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 /** Prevent invitation URLs from entering referrers or browser caches. */
 const nextConfig: NextConfig = {
   distDir: process.env.LINKO_NEXT_DIST_DIR || ".next",
+  devIndicators: false,
   async headers() {
     return [{
       source: "/invite/:token",
