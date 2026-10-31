@@ -1,12 +1,4 @@
 @font-face {
-  font-family:"Public Sans";
-  font-style:normal;
-  font-weight:400 600;
-  font-display:swap;
-  src:url("/fonts/public-sans.woff2") format("woff2");
-}
-
-@font-face {
   font-family:remixicon;
   font-display:block;
   src:url("/fonts/remixicon.woff2") format("woff2");
