@@ -1,4 +1,4 @@
-/* Linko Global Styles */
+/* Linko Global Styles - SOT Design Tokens Applied */
 @import "tailwindcss";
 @import "../shared/theme/tokens.css";
 @import "../shared/theme/reference-fonts.css";

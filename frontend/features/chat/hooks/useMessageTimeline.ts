@@ -18,7 +18,16 @@ export function useMessageTimeline(messages: readonly MessageViewModel[], loadOl
     if (olderSnapshot.current) {
       node.scrollTop = olderSnapshot.current.top + node.scrollHeight - olderSnapshot.current.height
       olderSnapshot.current = null
-    } else if (!previousCount.current || node.scrollHeight - node.clientHeight - node.scrollTop < 240 || isOwn) node.scrollTop = node.scrollHeight
+    } else if (!previousCount.current) {
+      const overflow = node.scrollHeight - node.clientHeight
+      if (overflow > 48) {
+        node.scrollTop = node.scrollHeight
+      } else {
+        node.scrollTop = 0
+      }
+    } else if (node.scrollHeight - node.clientHeight - node.scrollTop < 240 || isOwn) {
+      node.scrollTop = node.scrollHeight
+    }
     previousCount.current = messageCount
   }, [messageCount, newestMessageId, isOwn])
   useVisibleMessageRead({ timelineRef, conversationId, newestMessageId })
