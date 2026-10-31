@@ -1,7 +1,7 @@
 "use client"
 
 import { useSelectedConversation } from "@/features/inbox/hooks/useSelectedConversation"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { ConversationPaneSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { ConversationEmptyState } from "./ConversationEmptyState"
 import { ConversationPane } from "./ConversationPane"
@@ -10,7 +10,7 @@ import { ConversationPane } from "./ConversationPane"
 export function SelectedConversation() {
   const { conversationId, isConversationView, query } = useSelectedConversation()
   if (!conversationId) return isConversationView ? <ErrorState title="Cuộc trò chuyện không hợp lệ" /> : <ConversationEmptyState />
-  if (query.isPending) return <LoadingState label="Đang mở cuộc trò chuyện" />
+  if (query.isPending) return <ConversationPaneSkeleton />
   if (query.isError) return <ErrorState title="Không thể mở cuộc trò chuyện" onRetry={() => void query.refetch()} />
   if (!query.data) return <ErrorState title="Cuộc trò chuyện không còn khả dụng" onRetry={() => void query.refetch()} />
   return <ConversationPane key={conversationId} item={query.data} />

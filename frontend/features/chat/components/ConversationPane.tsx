@@ -1,7 +1,7 @@
 "use client"
 
 import type { InboxItemDto } from "@linko/contracts"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { MessageTimelineSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { useConversationPane } from "../hooks/useConversationPane"
 import { ConversationHeader } from "./ConversationHeader"
@@ -36,7 +36,7 @@ export function ConversationPane({ item }: ConversationPaneProps) {
           />
         )}
         {state.query.isPending || state.profile.isPending ? (
-          <LoadingState label="Đang tải tin nhắn" />
+          <MessageTimelineSkeleton />
         ) : state.isIdentityUnavailable ? (
           <ErrorState title="Không thể tải tài khoản" onRetry={() => void state.profile.refetch()} />
         ) : state.isHistoryUnavailable ? (

@@ -4,7 +4,7 @@ import { USER_PROFILE_FIELDS } from "@linko/contracts"
 import { SidebarPanel } from "@/shared/layout/SidebarPanel"
 import { SidebarHeader } from "@/shared/layout/SidebarHeader"
 import { IconButton } from "@/shared/components/IconButton"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { ProfileSidebarSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
@@ -17,7 +17,7 @@ import { ProfileEditModal } from "./ProfileEditModal/ProfileEditModal"
 export function ProfileSidebar() {
   const state = useProfileSidebar()
   return <SidebarPanel header={<SidebarHeader title="Hồ sơ của tôi" action={<IconButton label="Chỉnh sửa hồ sơ" icon={<Icon name={ICON_NAMES.MENU} />} onClick={state.onOpenEdit} disabled={!state.query.data} />} />}>
-    {state.query.isPending ? <LoadingState label="Đang tải hồ sơ" /> : !state.query.data ? <ErrorState title="Không thể tải hồ sơ" onRetry={state.onRetry} /> : <>
+    {state.query.isPending ? <ProfileSidebarSkeleton /> : !state.query.data ? <ErrorState title="Không thể tải hồ sơ" onRetry={state.onRetry} /> : <>
       {state.query.isError && <p role="alert" className="text-xs text-[var(--danger)] px-6 mt-2">Không thể làm mới hồ sơ.</p>}
       <ProfileIdentity name={state.query.data[USER_PROFILE_FIELDS.DISPLAY_NAME]} username={state.query.data[USER_PROFILE_FIELDS.USERNAME]} avatarUrl={state.query.data[USER_PROFILE_FIELDS.AVATAR_URL]} />
       <div className="p-6">

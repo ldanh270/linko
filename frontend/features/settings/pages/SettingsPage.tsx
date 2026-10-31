@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/Button"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { AccountSummarySectionSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { useI18n } from "@/shared/i18n/useI18n"
 import { useSettingsPage } from "../hooks/useSettingsPage"
@@ -32,7 +32,7 @@ export function SettingsPage() {
 
       {/* Account Info Card (Read-only with direct link to /profile) */}
       {state.profile.query.isPending ? (
-        <LoadingState label={copy.common.loading} />
+        <AccountSummarySectionSkeleton />
       ) : !profileData ? (
         <ErrorState title="Không thể tải tài khoản" onRetry={state.profile.onRetry} />
       ) : (

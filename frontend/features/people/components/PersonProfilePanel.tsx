@@ -1,6 +1,6 @@
 import { Modal } from "@/shared/components/Modal/Modal"
 import { Avatar } from "@/shared/components/Avatar"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { Skeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import type { usePeoplePage } from "../hooks/usePeoplePage"
 
@@ -12,7 +12,13 @@ export function PersonProfilePanel({ state }: PersonProfilePanelProps) {
   return (
     <Modal title="Hồ sơ" onClose={state.onCloseProfile}>
       {state.profile.isPending ? (
-        <LoadingState label="Đang tải hồ sơ" />
+        <section className="grid justify-items-center gap-3" role="status" aria-label="Đang tải hồ sơ">
+          <Skeleton circle className="w-20 h-20" />
+          <Skeleton className="h-5 w-36 rounded-xs mt-1" />
+          <Skeleton className="h-4 w-24 rounded-xs" />
+          <Skeleton className="h-10 w-full rounded-md mt-2" />
+          <span className="sr-only">Đang tải hồ sơ</span>
+        </section>
       ) : state.profile.isError || !state.profile.data ? (
         <ErrorState title="Không tìm thấy hồ sơ" />
       ) : (

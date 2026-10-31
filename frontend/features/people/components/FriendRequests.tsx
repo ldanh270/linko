@@ -1,5 +1,5 @@
 import { ErrorState } from "@/shared/components/ErrorState"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { FriendRequestsSkeleton } from "@/shared/components/Skeleton"
 import type { usePeoplePage } from "../hooks/usePeoplePage"
 import { FriendRequestRow } from "./FriendRequestRow"
 
@@ -12,7 +12,7 @@ export function FriendRequests({ state }: FriendRequestsProps) {
     <section className="mb-5">
       <h3 className="font-semibold">Lời mời kết bạn</h3>
       {state.requests.isPending ? (
-        <LoadingState label="Đang tải lời mời" />
+        <FriendRequestsSkeleton />
       ) : state.requests.isError ? (
         <ErrorState title="Không thể tải lời mời" onRetry={() => void state.requests.refetch()} />
       ) : state.requestRows.length ? (

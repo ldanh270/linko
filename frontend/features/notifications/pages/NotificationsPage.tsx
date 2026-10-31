@@ -2,7 +2,7 @@
 
 import { Button } from "@/shared/components/Button"
 import { Avatar } from "@/shared/components/Avatar"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { NotificationsListSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { PageHeader } from "@/shared/components/PageHeader"
@@ -53,7 +53,7 @@ export function NotificationsPage() {
 
       {/* Notifications List */}
       {state.isLoading ? (
-        <LoadingState label={copy.notifications.loading} />
+        <NotificationsListSkeleton />
       ) : state.isError ? (
         <ErrorState title={copy.notifications.errorTitle} onRetry={state.onRetry} />
       ) : state.items.length === 0 ? (

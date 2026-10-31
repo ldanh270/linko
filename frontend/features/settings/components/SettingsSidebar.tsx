@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { SidebarHeader } from "@/shared/layout/SidebarHeader"
 import { SidebarPanel } from "@/shared/layout/SidebarPanel"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { SettingsSidebarSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { Accordion } from "@/shared/components/Accordion"
 import { Button } from "@/shared/components/Button"
@@ -36,7 +36,7 @@ export function SettingsSidebar() {
       )}
 
       {state.profile.query.isPending ? (
-        <LoadingState label={copy.common.loading} />
+        <SettingsSidebarSkeleton />
       ) : !profile ? (
         <ErrorState title="Không thể tải tài khoản" onRetry={state.profile.onRetry} />
       ) : (

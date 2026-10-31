@@ -4,7 +4,7 @@ import Image from "next/image"
 import { USER_PROFILE_FIELDS } from "@linko/contracts"
 import { Button } from "@/shared/components/Button"
 import { Avatar } from "@/shared/components/Avatar"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { ProfilePageSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { Icon } from "@/shared/icons/Icon"
@@ -23,7 +23,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
   const state = useUserProfile(userId)
 
   if (state.isLoading) {
-    return <LoadingState label="Đang tải hồ sơ..." />
+    return <ProfilePageSkeleton />
   }
 
   if (state.isError || !state.user) {

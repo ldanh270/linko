@@ -5,7 +5,7 @@ import { SearchInput } from "@/shared/components/SearchInput"
 import { Avatar } from "@/shared/components/Avatar"
 import { Link } from "@/shared/components/Link"
 import { DropdownMenu } from "@/shared/components/DropdownMenu/DropdownMenu"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { PeoplePageSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { PageHeader } from "@/shared/components/PageHeader"
@@ -76,7 +76,7 @@ export function PeoplePage() {
 
       {/* Main Friends List */}
       {state.friends.isPending ? (
-        <LoadingState label="Đang tải danh bạ..." />
+        <PeoplePageSkeleton />
       ) : state.friends.isError ? (
         <ErrorState title="Không thể tải danh bạ" onRetry={state.onRetry} />
       ) : !state.groups.length ? (

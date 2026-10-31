@@ -6,7 +6,7 @@ import { SidebarHeader } from "@/shared/layout/SidebarHeader"
 import { SearchInput } from "@/shared/components/SearchInput"
 import { Link } from "@/shared/components/Link"
 import { Button } from "@/shared/components/Button"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { ConversationListSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { Icon } from "@/shared/icons/Icon"
@@ -44,7 +44,7 @@ export function GroupsSidebar() {
         className="mx-6 mb-4"
       />
       {state.query.isPending ? (
-        <LoadingState label="Đang tải nhóm" />
+        <ConversationListSkeleton />
       ) : state.query.isError ? (
         <ErrorState title="Không thể tải nhóm" onRetry={state.onRetry} />
       ) : state.rows.length ? (

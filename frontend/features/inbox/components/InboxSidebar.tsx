@@ -5,7 +5,7 @@ import { SidebarHeader } from "@/shared/layout/SidebarHeader"
 import { SearchInput } from "@/shared/components/SearchInput"
 import { Link } from "@/shared/components/Link"
 import { Button } from "@/shared/components/Button"
-import { LoadingState } from "@/shared/components/LoadingState"
+import { ConversationListSkeleton, RecentPeopleStripSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { Icon } from "@/shared/icons/Icon"
@@ -44,7 +44,11 @@ export function InboxSidebar() {
         onChange={state.onSearchChange}
         className="mx-6 mb-4"
       />
-      {state.people.length > 0 && <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />}
+      {state.query.isPending ? (
+        <RecentPeopleStripSkeleton />
+      ) : state.people.length > 0 ? (
+        <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />
+      ) : null}
       <h2 className="mx-6 mt-4 mb-3 text-base font-semibold text-[var(--text-primary)]">Gần đây</h2>
       <nav aria-label="Lọc hội thoại" className="flex gap-1 px-6 pb-2">
         {state.filters.map((filter) => (
@@ -54,7 +58,7 @@ export function InboxSidebar() {
         ))}
       </nav>
       {state.query.isPending ? (
-        <LoadingState label="Đang tải hội thoại" />
+        <ConversationListSkeleton />
       ) : state.query.isError ? (
         <ErrorState title="Không thể tải hộp thư" onRetry={state.onRetry} />
       ) : state.rows.length === 0 ? (
