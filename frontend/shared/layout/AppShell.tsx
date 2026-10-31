@@ -16,15 +16,15 @@ export function AppShell({ children, account }: AppShellProps) {
   const { links, mobileLinks, isDetail } = useAppShell()
 
   return (
-    <div className="h-dvh overflow-hidden lg:grid lg:grid-cols-[var(--rail-width)_minmax(0,1fr)]">
+    <div className="fixed inset-0 h-dvh overflow-hidden lg:grid lg:grid-cols-[var(--rail-width)_minmax(0,1fr)]">
       <NavigationRail
         links={links}
         account={account}
       />
       <main
         id="main-content"
-        className={`min-h-0 h-full min-w-0 ${
-          isDetail ? "h-full overflow-y-auto p-4 sm:p-6 pb-24 lg:pb-6" : ""
+        className={`relative min-h-0 h-full min-w-0 ${
+          isDetail ? "overflow-y-auto p-4 sm:p-6 pb-24 lg:pb-6" : ""
         }`}
       >
         {children}

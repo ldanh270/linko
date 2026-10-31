@@ -22,7 +22,7 @@ export function NavigationRail({
 
   return (
     <aside
-      className="hidden lg:flex flex-col items-center h-dvh bg-surface border-r border-border"
+      className="hidden lg:flex flex-col items-center h-full bg-surface border-r border-border"
       aria-label="Điều hướng chính"
     >
       {/* Brand logo */}
