@@ -46,11 +46,19 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
               <h2 className="text-base font-semibold truncate text-[var(--text-primary)]">{header.title}</h2>
             )}
             {isPeerOnline !== undefined && (
-              <p className="text-xs text-[var(--text-secondary)]">
+              <p className="flex items-center gap-1.5 text-xs">
+                <span
+                  className={`inline-block w-2 h-2 rounded-full ${
+                    isPeerOnline
+                      ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
+                      : "bg-[var(--status-offline)]"
+                  }`}
+                  aria-hidden="true"
+                />
                 {isPeerOnline ? (
-                  <span className="text-[var(--positive)] font-medium">Đang hoạt động</span>
+                  <span className="text-[var(--status-online)] font-semibold">Đang hoạt động</span>
                 ) : (
-                  "Ngoại tuyến"
+                  <span className="text-[var(--text-secondary)] font-medium">Ngoại tuyến</span>
                 )}
               </p>
             )}

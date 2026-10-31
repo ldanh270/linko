@@ -109,8 +109,8 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
               <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--brand)]">
                 @{user[USER_PROFILE_FIELDS.USERNAME]}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--positive)]/30 bg-[var(--positive)]/10 px-2 py-0.5 text-xs font-medium text-[var(--positive)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--positive)]" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-online)]/40 bg-[var(--status-online)]/10 px-2.5 py-0.5 text-xs font-semibold text-[var(--status-online)]">
+                <span className="h-2 w-2 rounded-full bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]" />
                 Đang trực tuyến
               </span>
             </div>

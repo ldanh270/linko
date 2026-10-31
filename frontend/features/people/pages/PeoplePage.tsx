@@ -125,11 +125,19 @@ export function PeoplePage() {
                         <p className="font-semibold text-sm truncate" title={contact.name}>
                           {contact.name}
                         </p>
-                        <p className="text-xs text-[var(--text-secondary)]">
+                        <p className="flex items-center gap-1.5 text-xs">
+                          <span
+                            className={`inline-block w-1.5 h-1.5 rounded-full ${
+                              presence.isOnline(contact.id)
+                                ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
+                                : "bg-[var(--status-offline)]"
+                            }`}
+                            aria-hidden="true"
+                          />
                           {presence.isOnline(contact.id) ? (
-                            <span className="text-[var(--positive)] font-medium">Trực tuyến</span>
+                            <span className="text-[var(--status-online)] font-semibold">Trực tuyến</span>
                           ) : (
-                            "Ngoại tuyến"
+                            <span className="text-[var(--status-offline)] font-medium">Ngoại tuyến</span>
                           )}
                         </p>
                       </div>

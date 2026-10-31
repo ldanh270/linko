@@ -26,6 +26,8 @@
   --color-text-muted: var(--text-muted);
   --color-positive: var(--positive);
   --color-positive-soft: var(--positive-soft);
+  --color-status-online: var(--status-online);
+  --color-status-offline: var(--status-offline);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
@@ -130,32 +132,37 @@ body {
   right: 0;
   border-radius: 9999px;
   border: 2px solid var(--surface);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   z-index: 2;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .avatar-status--online {
-  background-color: var(--positive);
+  background-color: var(--status-online);
+  box-shadow: 0 0 0 1.5px var(--surface), 0 0 8px var(--status-online-glow);
 }
 
 .avatar-status--offline {
-  background-color: var(--text-secondary);
-  opacity: 0.6;
+  background-color: var(--status-offline);
+  opacity: 1;
+  box-shadow: 0 0 0 1.5px var(--surface);
 }
 
 .avatar-status--small {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
+  border-width: 2px;
 }
 
 .avatar-status--medium {
-  width: 11px;
-  height: 11px;
+  width: 13px;
+  height: 13px;
+  border-width: 2px;
 }
 
 .avatar-status--large {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   border-width: 3px;
 }
 

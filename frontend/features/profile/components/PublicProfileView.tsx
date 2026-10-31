@@ -96,15 +96,17 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
                 @{user[USER_PROFILE_FIELDS.USERNAME]}
               </span>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
                   state.isOnline
-                    ? "border-[var(--positive)]/30 bg-[var(--positive)]/10 text-[var(--positive)]"
-                    : "border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--text-secondary)]"
+                    ? "border-[var(--status-online)]/40 bg-[var(--status-online)]/10 text-[var(--status-online)]"
+                    : "border-[var(--status-offline)]/40 bg-[var(--status-offline)]/10 text-[var(--status-offline)]"
                 }`}
               >
                 <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    state.isOnline ? "bg-[var(--positive)]" : "bg-[var(--text-secondary)]"
+                  className={`h-2 w-2 rounded-full ${
+                    state.isOnline
+                      ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
+                      : "bg-[var(--status-offline)]"
                   }`}
                 />
                 {state.isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}
@@ -138,10 +140,14 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
               <dd className="flex items-center gap-2">
                 <span
                   className={`inline-block h-2 w-2 rounded-full ${
-                    state.isOnline ? "bg-[var(--positive)]" : "bg-[var(--text-secondary)]"
+                    state.isOnline
+                      ? "bg-[var(--status-online)] shadow-[0_0_6px_var(--status-online-glow)]"
+                      : "bg-[var(--status-offline)]"
                   }`}
                 />
-                <span>{state.isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}</span>
+                <span className={state.isOnline ? "text-[var(--status-online)] font-semibold" : "text-[var(--status-offline)] font-medium"}>
+                  {state.isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}
+                </span>
               </dd>
             </div>
           </dl>
