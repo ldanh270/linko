@@ -8,6 +8,21 @@
 
 ---
 
+> [!CAUTION]
+> ### 🚨 TOP-PRIORITY RULE: ALWAYS COMMIT IMMEDIATELY UPON COMPLETION (ƯU TIÊN HÀNG ĐẦU)
+>
+> **MANDATORY FOR ALL AGENTS — ZERO EXCEPTIONS:**
+> 1. **Always commit when done ("Xong là phải commit ngay"):** Whenever a task, sub-task, bug fix, feature, refactoring, or design update is completed and verified, you **MUST split into logical commits and commit immediately** before concluding your response or handing work back to the user.
+> 2. **Never finish a turn with uncommitted code:** A task is strictly considered **INCOMPLETE** if `git status` still shows uncommitted modifications belonging to the finished work. Never wait for the user to remind you *"xong thì commit đi chứ"*.
+> 3. **Split into clean, atomic Conventional Commits:** Do NOT lump all modified files into one giant commit. Group changes logically into atomic commits following Conventional Commits (`feat(...)`, `fix(...)`, `refactor(...)`, `style(...)`, `test(...)`, `chore(...)`).
+> 4. **Verification checklist before stopping:**
+>    - Stage specific files (`git add <files>`).
+>    - Create the commit (`git commit -m "..."`).
+>    - Verify with `git status` and `git log -n ... --oneline`.
+> 5. **Local commits only:** Do not push to remote (`origin`) unless explicitly instructed by the user.
+
+---
+
 ## 0. Project Decisions (fill in once, never deviate)
 
 These are the "pick one and be consistent" decisions. Before writing any code, read this table. If a row is blank, **infer it from the existing schema/code and follow it**; if nothing exists, use the DEFAULT. Never introduce a second style.
@@ -37,6 +52,7 @@ These are the "pick one and be consistent" decisions. Before writing any code, r
 
 ### 1.2 Clean code rules
 
+- **Always commit immediately upon task completion:** Never conclude a turn with uncommitted code. Split logically into atomic Conventional Commits.
 - **KISS / YAGNI:** build what the task needs, not what it might need. No speculative abstractions. Apply the *rule of three*: abstract on the third repetition, not the first.
 - **DRY:** one source of truth for every piece of knowledge (field names, error codes, routes, enum values, validation rules).
 - **Naming:** names reveal intent. Classes = nouns (`OrderService`), functions = verbs (`calculateTotal`), booleans = `is/has/can/should` prefix. No abbreviations except universally known ones (`id`, `url`, `dto`). No `data`, `info`, `temp`, `manager`, `helper` as stand-alone names.
