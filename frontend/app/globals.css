@@ -1,3 +1,4 @@
+/* Linko Global Styles */
 @import "tailwindcss";
 @import "../shared/theme/tokens.css";
 @import "../shared/theme/reference-fonts.css";
@@ -8,12 +9,52 @@
   --color-foreground: var(--text-primary);
   --color-surface: var(--surface);
   --color-surface-subtle: var(--surface-subtle);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-input-surface: var(--input-surface);
+  --color-input-surface-hover: var(--input-surface-hover);
   --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-active: var(--brand-active);
+  --color-brand-contrast: var(--brand-contrast);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-subtle: var(--brand-subtle);
   --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
   --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
+  --color-danger-contrast: var(--danger-contrast);
+  --color-danger-soft: var(--danger-soft);
+  --color-badge-background: var(--badge-background);
+  --color-badge-text: var(--badge-text);
+
   --font-sans: var(--font-family-sans);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+  --radius-control: var(--radius-control);
+  --radius-panel: var(--radius-panel);
+  --radius-bubble: var(--radius-bubble);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-dropdown: var(--shadow-dropdown);
+  --shadow-modal: var(--shadow-modal);
+  --shadow-brand: var(--shadow-brand);
 }
 
 html { min-width: 320px; min-height: 100%; }
@@ -270,15 +311,15 @@ textarea.has-scrollbar {
 
 .emoji-picker-popover {
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + var(--space-2));
   right: 64px;
   width: 320px;
   max-width: calc(100vw - 32px);
   max-height: 380px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-panel), 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-dropdown);
   display: flex;
   flex-direction: column;
   z-index: 50;
