@@ -57,7 +57,7 @@ export function InboxSidebar() {
         }
       >
         {/* Search Bar Row */}
-        <div className="flex items-center gap-2 px-4 mb-3">
+        <div className="flex items-center gap-3 px-4 mb-4">
           {searchState.isSearchActive && (
             <button
               type="button"

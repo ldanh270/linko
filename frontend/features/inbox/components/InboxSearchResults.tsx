@@ -42,11 +42,11 @@ export function InboxSearchResults({
   if (!trimmed) {
     return (
       <div className="flex-1 overflow-y-auto px-1 py-1">
-        <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+        <h3 className="px-4 pt-2 pb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider">
           {copy.inbox.recent}
         </h3>
         {recentConversations.length > 0 ? (
-          <ul>
+          <ul className="px-2">
             {recentConversations.map((row) => (
               <ConversationListRow
                 key={row.id}
@@ -57,7 +57,7 @@ export function InboxSearchResults({
             ))}
           </ul>
         ) : (
-          <p className="px-5 py-6 text-center text-xs text-text-secondary">
+          <p className="px-4 py-6 text-center text-xs text-text-secondary">
             {copy.inbox.welcomeDescription}
           </p>
         )}
@@ -91,11 +91,11 @@ export function InboxSearchResults({
     <div className="flex-1 overflow-y-auto px-1 py-1">
       {/* Conversations Section */}
       {hasConversations && (
-        <section aria-label="Cuộc trò chuyện phù hợp" className="mb-3">
-          <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+        <section aria-label="Cuộc trò chuyện phù hợp" className="mb-4">
+          <h3 className="px-4 pt-2 pb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider">
             {copy.inbox.conversationsMatch} ({matchingConversations.length})
           </h3>
-          <ul>
+          <ul className="px-2">
             {matchingConversations.map((row) => (
               <ConversationListRow
                 key={row.id}
@@ -111,11 +111,11 @@ export function InboxSearchResults({
       {/* People / Contacts Section */}
       {(hasPeople || isSearchingPeople) && (
         <section aria-label="Người dùng phù hợp">
-          <h3 className="px-5 pt-2 pb-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+          <h3 className="px-4 pt-2 pb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider">
             {copy.inbox.peopleMatch} {hasPeople ? `(${matchingPeople.length})` : ""}
           </h3>
           {hasPeople && (
-            <ul>
+            <ul className="px-2">
               {matchingPeople.map((person) => (
                 <InboxSearchContactRow
                   key={person.id}

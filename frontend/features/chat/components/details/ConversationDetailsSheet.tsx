@@ -27,7 +27,7 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
       className="w-(--details-width) border-l border-border bg-surface flex flex-col h-full min-h-0"
       aria-label={CHAT_DETAILS_COPY.SHEET_TITLE}
     >
-      <header className="flex min-h-(--header-height) items-center justify-between px-4 py-3.5 border-b border-border">
+      <header className="flex min-h-(--header-height) items-center justify-between px-4 py-4 border-b border-border">
         <h2 className="text-lg font-semibold text-text-primary">{CHAT_DETAILS_COPY.SHEET_TITLE}</h2>
         <IconButton
           label={CHAT_DETAILS_COPY.CLOSE}
@@ -36,16 +36,18 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
         />
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin [scrollbar-color:#a2adb755_transparent] p-4 flex flex-col gap-4">
-        <ConversationDetailsIdentity details={details} />
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin [scrollbar-color:#a2adb755_transparent] flex flex-col">
+        <div className="p-4 flex flex-col gap-4">
+          <ConversationDetailsIdentity details={details} />
 
-        {details.description && (
-          <div className="p-3 rounded-md bg-surface-subtle text-sm text-text-secondary leading-normal">
-            <p>{details.description}</p>
-          </div>
-        )}
+          {details.description && (
+            <div className="p-4 rounded-md bg-surface-subtle text-sm text-text-secondary leading-normal">
+              <p>{details.description}</p>
+            </div>
+          )}
+        </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col border-t border-border">
           <Accordion
             id="details-members"
             title={CHAT_DETAILS_COPY.SECTION_MEMBERS}

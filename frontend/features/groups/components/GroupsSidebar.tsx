@@ -39,7 +39,7 @@ export function GroupsSidebar() {
         }
       >
         {/* Search filter row */}
-        <div className="flex items-center gap-2 px-4 mb-3">
+        <div className="flex items-center gap-3 px-4 mb-4">
           {Boolean(state.search) && (
             <button
               type="button"

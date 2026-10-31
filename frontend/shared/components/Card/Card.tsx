@@ -23,7 +23,7 @@ export function Card({ children, className = "", ...props }: CardProps) {
   return (
     <article
       {...props}
-      className={`border border-border rounded-panel bg-surface shadow-panel overflow-hidden ${className}`}
+      className={`border border-border rounded-panel bg-surface shadow-panel overflow-hidden p-4 sm:p-5 ${className}`}
     >
       {children}
     </article>
