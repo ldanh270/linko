@@ -17,7 +17,7 @@ export function ConversationDetailsActions({ details }: ConversationDetailsActio
       {details.manageHref && (
         <Link
           href={details.manageHref}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-text-primary text-[13px] hover:bg-surface-subtle transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-text-primary text-sm hover:bg-surface-subtle transition-colors"
         >
           <Icon name={ICON_NAMES.SETTINGS} />
           <span>{CHAT_DETAILS_COPY.MANAGE_GROUP}</span>

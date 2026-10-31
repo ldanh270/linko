@@ -19,7 +19,7 @@ export function AddContactModal({ state }: AddContactModalProps) {
   return <Modal title="Thêm bạn bè" onClose={state.onCloseAdd}><FriendRequests state={state} /><h3 className="mb-4 font-semibold">Tìm người dùng</h3>
     <SearchInput label="Tên hoặc tên đăng nhập" value={state.keyword} stateKey={String(state.keywordRevision)} onChange={state.onKeywordChange} />
     {state.keyword.trim().length < PEOPLE_LIMITS.MIN_SEARCH_LENGTH ? (
-      <p className="text-[13px] text-text-secondary leading-relaxed">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
+      <p className="text-sm text-text-secondary leading-relaxed">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
     ) : state.results.isPending ? (
       <div className="space-y-3 my-3" role="status" aria-label="Đang tìm kiếm">
         {Array.from({ length: 3 }).map((_, i) => (

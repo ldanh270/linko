@@ -25,7 +25,7 @@ interface QuickActionItemProps {
 function QuickActionItem({ icon, label, onClick, href, disabled }: QuickActionItemProps) {
   const content = (
     <>
-      <span className="grid place-items-center w-9.5 h-9.5 rounded-full bg-input-surface text-text-primary text-[18px] transition-all group-hover:bg-input-surface-hover group-hover:scale-105 active:scale-95">
+      <span className="grid place-items-center w-9.5 h-9.5 rounded-full bg-input-surface text-text-primary text-lg transition-all group-hover:bg-input-surface-hover group-hover:scale-105 active:scale-95">
         <Icon name={icon} />
       </span>
       <span className="text-xs text-text-secondary">{label}</span>

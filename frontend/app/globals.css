@@ -39,6 +39,25 @@
 
   --font-sans: var(--font-family-sans);
 
+  --text-2xs: var(--font-size-2xs);
+  --text-2xs--line-height: var(--line-height-2xs);
+  --text-xs: var(--font-size-xs);
+  --text-xs--line-height: var(--line-height-xs);
+  --text-sm: var(--font-size-sm);
+  --text-sm--line-height: var(--line-height-sm);
+  --text-base: var(--font-size-body);
+  --text-base--line-height: var(--line-height-body);
+  --text-md: var(--font-size-md);
+  --text-md--line-height: var(--line-height-md);
+  --text-lg: var(--font-size-lg);
+  --text-lg--line-height: var(--line-height-lg);
+  --text-xl: var(--font-size-xl);
+  --text-xl--line-height: var(--line-height-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-2xl--line-height: var(--line-height-2xl);
+  --text-3xl: var(--font-size-3xl);
+  --text-3xl--line-height: var(--line-height-3xl);
+
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);

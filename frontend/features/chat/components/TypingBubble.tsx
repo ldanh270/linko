@@ -19,7 +19,7 @@ export function TypingBubble({ names, avatarUrl }: TypingBubbleProps) {
           <span className="w-1.5 h-1.5 rounded-full bg-brand animate-bounce [animation-delay:-0.16s]" />
           <span className="w-1.5 h-1.5 rounded-full bg-brand animate-bounce" />
         </div>
-        <span className="text-[11px] font-medium text-text-secondary">{names} đang soạn tin...</span>
+        <span className="text-xs font-medium text-text-secondary">{names} đang soạn tin...</span>
       </div>
     </div>
   )

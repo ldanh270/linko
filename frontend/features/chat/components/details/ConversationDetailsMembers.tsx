@@ -16,12 +16,12 @@ export function ConversationDetailsMembers({ members, invitationsHref }: Convers
   return (
     <div className="flex flex-col gap-2">
       {invitationsHref && (
-        <div className="mb-1.5">
+        <div className="mb-2">
           <Link
             href={invitationsHref}
-            className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-brand no-underline text-[13px] font-medium hover:bg-brand-soft transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-brand no-underline text-sm font-medium hover:bg-brand-soft transition-colors"
           >
-            <span className="grid place-items-center w-7 h-7 rounded-full bg-brand-soft text-[16px]">
+            <span className="grid place-items-center w-7 h-7 rounded-full bg-brand-soft text-base">
               <Icon name={ICON_NAMES.ADD} />
             </span>
             <span>{CHAT_DETAILS_COPY.ADD_MEMBER}</span>
@@ -30,7 +30,7 @@ export function ConversationDetailsMembers({ members, invitationsHref }: Convers
       )}
       <ul className="flex flex-col gap-1 list-none p-0 m-0">
         {members.map((member) => (
-          <li key={member.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-surface-subtle transition-colors">
+          <li key={member.id} className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-subtle transition-colors">
             <Link
               href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: member.id })}
               className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-85 transition-opacity"
@@ -38,8 +38,8 @@ export function ConversationDetailsMembers({ members, invitationsHref }: Convers
             >
               <Avatar label={member.name} src={member.avatarUrl} size="small" />
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-[13px] font-medium text-text-primary truncate">{member.name}</span>
-                <span className="text-[11px] text-text-secondary">{member.roleLabel}</span>
+                <span className="text-sm font-medium text-text-primary truncate">{member.name}</span>
+                <span className="text-xs text-text-secondary">{member.roleLabel}</span>
               </div>
             </Link>
           </li>

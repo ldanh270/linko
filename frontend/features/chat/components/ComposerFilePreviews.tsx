@@ -35,14 +35,14 @@ export function ComposerFilePreviews({ previews, onRemove }: ComposerFilePreview
               <img src={item.previewUrl} alt={item.name} className="w-full h-full object-cover block" />
             ) : (
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-[20px] text-brand shrink-0" aria-hidden="true">
+                <span className="text-xl text-brand shrink-0" aria-hidden="true">
                   <Icon name={ICON_NAMES.FILE} />
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-medium text-text-primary truncate max-w-35" title={item.name}>
                     {item.name}
                   </span>
-                  <span className="text-[11px] text-text-secondary">{item.sizeLabel}</span>
+                  <span className="text-xs text-text-secondary">{item.sizeLabel}</span>
                 </div>
               </div>
             )}
@@ -50,8 +50,8 @@ export function ComposerFilePreviews({ previews, onRemove }: ComposerFilePreview
               type="button"
               className={
                 isImage
-                  ? "absolute top-1 right-1 w-5.5 h-5.5 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer border-none text-[13px] p-0 transition-all hover:bg-black/85 hover:scale-105 z-10"
-                  : "absolute top-1/2 -translate-y-1/2 right-2 w-5.5 h-5.5 rounded-full bg-surface-hover text-text-secondary border border-border flex items-center justify-center cursor-pointer text-[13px] p-0 transition-all hover:bg-border hover:text-text-primary hover:scale-105 z-10"
+                  ? "absolute top-1 right-1 w-5.5 h-5.5 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer border-none text-sm p-0 transition-all hover:bg-black/85 hover:scale-105 z-10"
+                  : "absolute top-1/2 -translate-y-1/2 right-2 w-5.5 h-5.5 rounded-full bg-surface-hover text-text-secondary border border-border flex items-center justify-center cursor-pointer text-sm p-0 transition-all hover:bg-border hover:text-text-primary hover:scale-105 z-10"
               }
               aria-label={`Xóa tệp ${item.name}`}
               title="Xóa tệp"

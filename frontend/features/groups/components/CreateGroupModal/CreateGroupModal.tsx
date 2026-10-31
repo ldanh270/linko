@@ -149,7 +149,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                   <Avatar
                     label={friend.displayName || friend.username}
                     size="small"
-                    className="w-4 h-4 text-[9px]"
+                    className="w-4 h-4 text-2xs"
                   />
                   <span className="truncate max-w-30">
                     {friend.displayName || friend.username}
@@ -208,7 +208,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
                         <p className="text-xs font-semibold text-text-primary truncate">
                           {displayName}
                         </p>
-                        <p className="text-[11px] text-text-secondary truncate">
+                        <p className="text-xs text-text-secondary truncate">
                           @{friend.username}
                         </p>
                       </div>

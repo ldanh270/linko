@@ -44,7 +44,7 @@ function ConversationPhotoThumb({ photo, onSelect }: ConversationPhotoThumbProps
           className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
         />
       ) : (
-        <div className="grid place-items-center w-full h-full text-text-secondary text-[20px]">
+        <div className="grid place-items-center w-full h-full text-text-secondary text-xl">
           <Icon name={ICON_NAMES.IMAGE} />
         </div>
       )}
@@ -59,7 +59,7 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
   const hasFiles = files.length > 0
 
   if (!hasPhotos && !hasFiles) {
-    return <p className="text-[13px] text-text-secondary text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_MEDIA}</p>
+    return <p className="text-sm text-text-secondary text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_MEDIA}</p>
   }
 
   return (
@@ -90,14 +90,14 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
             {files.map((file) => (
               <li key={file.id} className="rounded-md transition-colors hover:bg-surface-subtle">
                 <Link href={file.href} className="flex items-center gap-2.5 px-2.5 py-2 no-underline text-inherit" target="_blank">
-                  <span className="grid place-items-center w-8 h-8 rounded-md bg-input-surface text-brand text-[18px] shrink-0">
+                  <span className="grid place-items-center w-8 h-8 rounded-md bg-input-surface text-brand text-lg shrink-0">
                     <Icon name={ICON_NAMES.FILE} />
                   </span>
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-[13px] font-medium text-text-primary truncate">{file.name}</span>
-                    {file.sizeLabel && <span className="text-[11px] text-text-secondary">{file.sizeLabel}</span>}
+                    <span className="text-sm font-medium text-text-primary truncate">{file.name}</span>
+                    {file.sizeLabel && <span className="text-xs text-text-secondary">{file.sizeLabel}</span>}
                   </div>
-                  <Icon name={ICON_NAMES.DOWNLOAD} className="text-[16px] text-text-secondary shrink-0" />
+                  <Icon name={ICON_NAMES.DOWNLOAD} className="text-base text-text-secondary shrink-0" />
                 </Link>
               </li>
             ))}

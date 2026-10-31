@@ -12,7 +12,7 @@ export function SearchPersonRow({ person, isPending }: SearchPersonRowProps) {
       <Avatar label={person.displayName} src={person.avatarUrl} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-text-primary">{person.displayName}</p>
-        <p className="text-[13px] text-text-secondary leading-relaxed truncate">@{person.username}</p>
+        <p className="text-sm text-text-secondary leading-relaxed truncate">@{person.username}</p>
       </div>
       <Button
         size="small"

@@ -91,7 +91,7 @@ export function NotificationsPage() {
                   <p className="text-xs text-text-secondary mt-0.5 line-clamp-2">
                     {item.description}
                   </p>
-                  <p className="text-[11px] text-text-muted mt-1.5 flex items-center gap-1">
+                  <p className="text-xs text-text-muted mt-1.5 flex items-center gap-1">
                     <Icon name={ICON_NAMES.CLOCK} className="h-3 w-3" />
                     <span>{item.time}</span>
                   </p>

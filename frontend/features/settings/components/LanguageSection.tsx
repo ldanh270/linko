@@ -71,7 +71,7 @@ export function LanguageSection() {
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm text-text-primary">{option.label}</p>
                     {isSelected && (
-                      <span className="rounded-full bg-brand text-white text-[10px] font-semibold px-2 py-0.5">
+                      <span className="rounded-full bg-brand text-white text-2xs font-semibold px-2 py-0.5">
                         {language === "vi" ? "Đang chọn" : "Active"}
                       </span>
                     )}

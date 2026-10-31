@@ -28,7 +28,7 @@ const SHAPE_CLASSES: Record<BadgeShape, string> = {
 }
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {
-  sm: "text-[10px] font-bold",
+  sm: "text-2xs font-bold",
   md: "text-xs font-semibold",
 }
 

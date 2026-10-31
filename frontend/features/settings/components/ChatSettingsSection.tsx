@@ -46,7 +46,7 @@ export function ChatSettingsSection() {
             />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-text-primary">{copy.settings.sendOnEnterOptionEnter}</p>
-              <p className="text-[11px] text-text-secondary mt-0.5">Tiêu chuẩn chat nhanh</p>
+              <p className="text-xs text-text-secondary mt-0.5">Tiêu chuẩn chat nhanh</p>
             </div>
           </button>
 
@@ -68,7 +68,7 @@ export function ChatSettingsSection() {
             />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-text-primary">{copy.settings.sendOnEnterOptionCtrlEnter}</p>
-              <p className="text-[11px] text-text-secondary mt-0.5">Tiện cho tin nhắn nhiều dòng</p>
+              <p className="text-xs text-text-secondary mt-0.5">Tiện cho tin nhắn nhiều dòng</p>
             </div>
           </button>
         </div>

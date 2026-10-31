@@ -50,7 +50,7 @@ export function SearchInput({
     <div
       className={`group flex items-center gap-2.5 h-10 px-3 rounded-md bg-input-surface text-text-secondary transition-colors hover:bg-input-surface-hover focus-within:outline-2 focus-within:outline-border-focus focus-within:outline-offset-1 ${className ?? ""}`.trim()}
     >
-      <Icon name={ICON_NAMES.SEARCH} className="text-[17px] flex-none text-text-secondary" />
+      <Icon name={ICON_NAMES.SEARCH} className="text-lg flex-none text-text-secondary" />
       <input
         ref={inputRef}
         type="search"

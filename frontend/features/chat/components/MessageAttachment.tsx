@@ -69,7 +69,7 @@ export function MessageAttachment({ file }: MessageAttachmentProps) {
       className="flex items-center gap-3 min-w-42.5 max-w-full px-3 py-2 bg-surface text-text-primary rounded-md mt-2 border border-border-subtle hover:border-border transition-colors text-left"
       href={file.href}
     >
-      <span className="text-[28px] text-brand shrink-0" aria-hidden="true">
+      <span className="text-3xl text-brand shrink-0" aria-hidden="true">
         <Icon name={ICON_NAMES.FILE} />
       </span>
       <span className="flex flex-col min-w-0 flex-1">

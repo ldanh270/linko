@@ -87,7 +87,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                       : "bg-white/15 border-white/85 text-inherit"
                   }`}
                 >
-                  <span className="font-semibold text-[11px] opacity-90">{message.reply.author}</span>
+                  <span className="font-semibold text-xs opacity-90">{message.reply.author}</span>
                   <p className="truncate opacity-85 m-0 text-xs">{message.reply.content}</p>
                 </div>
               )}

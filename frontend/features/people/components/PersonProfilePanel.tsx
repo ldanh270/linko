@@ -25,7 +25,7 @@ export function PersonProfilePanel({ state }: PersonProfilePanelProps) {
         <section className="grid justify-items-center gap-3">
           <Avatar label={state.profile.data.displayName} src={state.profile.data.avatarUrl} size="large" />
           <h2 className="font-semibold text-text-primary">{state.profile.data.displayName}</h2>
-          <p className="text-[13px] text-text-secondary leading-relaxed">@{state.profile.data.username}</p>
+          <p className="text-sm text-text-secondary leading-relaxed">@{state.profile.data.username}</p>
           <p className="text-sm text-text-primary">{state.profile.data.bio}</p>
         </section>
       )}

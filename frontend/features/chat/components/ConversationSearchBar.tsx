@@ -146,7 +146,7 @@ export function ConversationSearchBar({
               {/* Match list dropdown */}
               {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-1.5 w-80 max-h-72 overflow-y-auto rounded-xl border border-border bg-surface p-1.5 shadow-lg z-50">
-                  <p className="px-2.5 py-1 text-[11px] font-semibold text-text-secondary border-b border-border">
+                  <p className="px-2.5 py-1 text-xs font-semibold text-text-secondary border-b border-border">
                     Nhấn vào tin nhắn để nhảy đến vị trí
                   </p>
                   <div className="grid gap-1 mt-1">
@@ -167,7 +167,7 @@ export function ConversationSearchBar({
                             <span className="text-xs font-semibold text-text-primary truncate">
                               {match.author}
                             </span>
-                            <span className="text-[10px] text-text-secondary shrink-0">
+                            <span className="text-2xs text-text-secondary shrink-0">
                               {match.time}
                             </span>
                           </div>
