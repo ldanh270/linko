@@ -15,21 +15,50 @@ export interface AvatarProps {
   isOnline?: boolean
 }
 
+const AVATAR_SIZE_CLASSES: Record<AvatarSize, string> = {
+  small: "w-9 h-9 text-xs",
+  medium: "w-11 h-11 text-sm",
+  large: "w-20 h-20 text-2xl",
+}
+
+const STATUS_SIZE_CLASSES: Record<AvatarSize, string> = {
+  small: "w-[11px] h-[11px] border-2",
+  medium: "w-[13px] h-[13px] border-2",
+  large: "w-[17px] h-[17px] border-[3px]",
+}
+
+const STATUS_COLOR_CLASSES = {
+  online: "bg-[var(--status-online)] shadow-[0_0_0_1.5px_var(--surface),0_0_8px_var(--status-online-glow)]",
+  offline: "bg-[var(--status-offline)] opacity-100 shadow-[0_0_0_1.5px_var(--surface)]",
+}
+
 /** Render initials consistently when a profile image is not available with presence status. UI only. */
 export function Avatar({ label, src, size = "medium", className = "", isOnline }: AvatarProps) {
   const { initials, imageSource, onImageError } = useAvatar(label, src)
   return (
-    <span className={`relative inline-grid place-items-center ${className}`}>
-      <span className={`avatar avatar--${size}`}>
+    <span className={`relative inline-grid place-items-center ${className}`.trim()}>
+      <span
+        className={`avatar inline-grid flex-none place-items-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)] font-bold leading-none overflow-hidden select-none ${AVATAR_SIZE_CLASSES[size]}`}
+      >
         {imageSource ? (
-          <Image src={imageSource} alt={label} width={96} height={96} unoptimized onError={onImageError} />
+          <Image
+            src={imageSource}
+            alt={label}
+            width={96}
+            height={96}
+            unoptimized
+            onError={onImageError}
+            className="w-full h-full object-cover rounded-full"
+          />
         ) : (
           <span aria-hidden="true">{initials}</span>
         )}
       </span>
       {isOnline !== undefined && (
         <span
-          className={`avatar-status-badge avatar-status--${isOnline ? "online" : "offline"} avatar-status--${size}`}
+          className={`avatar-status-badge absolute bottom-0 right-0 rounded-full border-[var(--surface)] z-2 transition-all duration-150 ${STATUS_SIZE_CLASSES[size]} ${
+            isOnline ? STATUS_COLOR_CLASSES.online : STATUS_COLOR_CLASSES.offline
+          }`}
           title={isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}
           aria-label={isOnline ? "Đang trực tuyến" : "Ngoại tuyến"}
         />

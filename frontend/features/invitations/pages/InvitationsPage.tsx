@@ -35,7 +35,7 @@ export function InvitationsPage() {
       />
 
       {/* Generate Invitation Section */}
-      <section className="surface-panel p-5 sm:p-6">
+      <section className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-5 sm:p-6">
         <h2 className="font-semibold text-[var(--text-primary)]">Tạo liên kết mới</h2>
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
           Liên kết có thời hạn và số lượt tham gia giới hạn.

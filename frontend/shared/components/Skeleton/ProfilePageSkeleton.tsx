@@ -12,7 +12,7 @@ export function ProfilePageSkeleton() {
       </div>
 
       {/* Cover Banner & Identity Card */}
-      <article className="surface-panel overflow-hidden">
+      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] overflow-hidden">
         <Skeleton className="h-44 w-full rounded-none" />
         <div className="px-6 pb-6 pt-0 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 mb-4">
@@ -33,7 +33,7 @@ export function ProfilePageSkeleton() {
 
       {/* 2-Column Info Grid */}
       <div className="grid gap-6 md:grid-cols-2">
-        <article className="surface-panel p-6 space-y-4">
+        <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 space-y-4">
           <Skeleton className="h-5 w-36 rounded-xs border-b border-[var(--border)] pb-3" />
           <div className="space-y-3">
             <Skeleton className="h-4 w-full rounded-xs" />
@@ -41,7 +41,7 @@ export function ProfilePageSkeleton() {
             <Skeleton className="h-4 w-2/3 rounded-xs" />
           </div>
         </article>
-        <article className="surface-panel p-6 space-y-4">
+        <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 space-y-4">
           <Skeleton className="h-5 w-36 rounded-xs border-b border-[var(--border)] pb-3" />
           <div className="space-y-3">
             <Skeleton className="h-4 w-full rounded-xs" />

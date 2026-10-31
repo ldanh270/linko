@@ -49,7 +49,7 @@ export function GroupInfoPage() {
       ) : query.isError || !group ? (
         <ErrorState title="Không thể mở thông tin nhóm" onRetry={() => void query.refetch()} />
       ) : (
-        <article className="surface-panel p-5 sm:p-6">
+        <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-5 sm:p-6">
           <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{group.name}</h2>
           <p className="mt-2 text-[var(--text-secondary)]">
             {group.description || "Nhóm riêng tư"}
@@ -72,7 +72,7 @@ export function GroupInfoPage() {
       )}
 
       {/* Personal Notifications Card */}
-      <article className="surface-panel p-5">
+      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-semibold text-[var(--text-primary)]">Thông báo</h2>

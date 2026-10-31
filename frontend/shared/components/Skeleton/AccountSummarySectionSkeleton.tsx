@@ -3,7 +3,7 @@ import { Skeleton } from "./Skeleton"
 /** Render account summary skeleton card to eliminate CLS on settings page. UI only. */
 export function AccountSummarySectionSkeleton() {
   return (
-    <article className="surface-panel p-6 grid gap-5" role="status" aria-label="Đang tải thông tin tài khoản">
+    <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 grid gap-5" role="status" aria-label="Đang tải thông tin tài khoản">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
         <div className="space-y-1">
           <Skeleton className="h-6 w-36 rounded-xs" />

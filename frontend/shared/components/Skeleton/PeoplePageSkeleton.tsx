@@ -12,7 +12,7 @@ export function PeoplePageSkeleton() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <article key={i} className="surface-panel flex items-center justify-between gap-3 p-3.5">
+            <article key={i} className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] flex items-center justify-between gap-3 p-3.5">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Skeleton circle className="w-10 h-10 shrink-0" />
                 <div className="space-y-1.5 flex-1">

@@ -44,7 +44,7 @@ export function PeoplePage() {
       />
 
       {/* Search and Stats Bar */}
-      <div className="surface-panel p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex-1 max-w-md">
           <SearchInput
             label="Tìm trong danh bạ"

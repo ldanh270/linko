@@ -59,7 +59,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
         }
       />
 
-      <article className="surface-panel overflow-hidden">
+      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] overflow-hidden">
         <div className="relative h-44 w-full bg-gradient-to-r from-[var(--brand)]/20 via-[var(--brand-soft)] to-[var(--surface-subtle)] border-b border-[var(--border)] overflow-hidden">
           {backgroundUrl ? (
             <Image

@@ -27,7 +27,7 @@ export function SoundNotificationSection() {
   }
 
   return (
-    <article className="surface-panel p-6 grid gap-4">
+    <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 grid gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
         <div>
           <h2 className="text-lg font-semibold">{copy.settings.soundTitle}</h2>

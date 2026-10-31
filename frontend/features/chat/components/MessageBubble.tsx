@@ -23,7 +23,7 @@ function renderHighlightedContent(content: string, query?: string) {
 
   return parts.map((part, index) =>
     part.toLowerCase() === q.toLowerCase() ? (
-      <mark key={index} className="search-match-text">
+      <mark key={index} className="bg-amber-400/50 text-[var(--text-primary)] rounded-xs px-0.5">
         {part}
       </mark>
     ) : (

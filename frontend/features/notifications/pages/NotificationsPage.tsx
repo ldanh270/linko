@@ -66,7 +66,7 @@ export function NotificationsPage() {
           {state.items.map((item) => (
             <article
               key={item.id}
-              className={`surface-panel flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 transition hover:border-[var(--brand)]/40 ${
+              className={`border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 transition hover:border-[var(--brand)]/40 ${
                 item.isUnread ? "bg-[var(--surface)] border-l-4 border-l-[var(--brand)]" : "bg-[var(--surface)]/70"
               }`}
             >

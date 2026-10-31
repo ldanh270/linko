@@ -23,7 +23,7 @@ export interface ContactCardProps {
 /** Render a single contact item in the directory with status indicator and quick actions. UI only. */
 export function ContactCard({ contact, isOnline }: ContactCardProps) {
   return (
-    <article className="surface-panel flex items-center justify-between gap-3 p-3.5 transition-shadow hover:shadow-md">
+    <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] flex items-center justify-between gap-3 p-3.5 transition-shadow hover:shadow-md">
       <Link
         href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: contact.id })}
         className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-85 transition-opacity"

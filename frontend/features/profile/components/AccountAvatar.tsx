@@ -16,7 +16,9 @@ export function AccountAvatar() {
     <Link
       href={state.href}
       aria-label="Hồ sơ tài khoản"
-      className={`rail-account-link ${isActive ? "is-active" : ""}`}
+      className={`grid place-items-center rounded-full p-0.5 transition-all duration-200 hover:opacity-85 ${
+        isActive ? "ring-2 ring-[var(--brand)]" : ""
+      }`}
     >
       <Avatar label={state.name} src={state.avatarUrl} size="small" />
     </Link>

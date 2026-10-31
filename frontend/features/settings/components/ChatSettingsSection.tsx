@@ -11,7 +11,7 @@ export function ChatSettingsSection() {
   const { copy } = useI18n()
 
   return (
-    <article className="surface-panel p-6 grid gap-6">
+    <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 grid gap-6">
       <div className="border-b border-[var(--border)] pb-3">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Icon name={ICON_NAMES.CHAT} className="text-[var(--brand)]" />
