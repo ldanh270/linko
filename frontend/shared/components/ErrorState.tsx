@@ -5,9 +5,15 @@ export interface ErrorStateProps { title?: string; requestId?: string; onRetry?:
 
 /** Show a safe error message and support reference. UI only. */
 export function ErrorState({ title = "Something went wrong", requestId, onRetry }: ErrorStateProps) {
-  return <section role="alert" className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-    <h2 className="text-lg font-semibold">{title}</h2>
-    {requestId && <p className="mt-2 text-sm text-[var(--text-secondary)]">Reference: {requestId}</p>}
-    {onRetry && <Button onClick={onRetry} className="mt-5">Try again</Button>}
-  </section>
+  return (
+    <section role="alert" className="m-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-center">
+      <h2 className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
+      {requestId && <p className="mt-1.5 text-sm text-[var(--text-secondary)]">Reference: {requestId}</p>}
+      {onRetry && (
+        <Button onClick={onRetry} className="mt-4" size="small">
+          Thử lại
+        </Button>
+      )}
+    </section>
+  )
 }

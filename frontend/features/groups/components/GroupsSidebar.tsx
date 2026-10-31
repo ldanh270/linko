@@ -38,7 +38,7 @@ export function GroupsSidebar() {
           />
         }
       >
-        <div className="flex items-center gap-2 mx-6 mb-4">
+        <div className="flex items-center gap-2 px-4 mb-3">
           {Boolean(state.search) && (
             <button
               type="button"
@@ -65,7 +65,7 @@ export function GroupsSidebar() {
         ) : state.query.isError ? (
           <ErrorState title="Không thể tải nhóm" onRetry={state.onRetry} />
         ) : state.rows.length ? (
-          <ul>
+          <ul className="px-2">
             {state.rows.map((group) => (
               <GroupListRow key={group.id} group={group} />
             ))}

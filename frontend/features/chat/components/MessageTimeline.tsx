@@ -16,7 +16,7 @@ export function MessageTimeline({ state }: MessageTimelineProps) {
   const { timelineRef, onLoadOlder } = useMessageTimeline(state.rows, state.query.fetchNextPage, state.conversationId)
   return (
     <div
-      className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-6 pb-4 [scrollbar-width:thin] [scroll-padding-top:1.5rem] [scroll-padding-bottom:1rem]"
+      className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pt-4 pb-4 [scrollbar-width:thin] [scroll-padding-top:1rem] [scroll-padding-bottom:1rem]"
       ref={timelineRef}
       aria-label="Tin nhắn"
       role="log"

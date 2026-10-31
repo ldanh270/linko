@@ -49,7 +49,7 @@ export function SettingsPage() {
       <SoundNotificationSection />
 
       {/* Appearance Section */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 grid gap-4">
+      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 grid gap-4">
         <div className="border-b border-[var(--border)] pb-3">
           <h2 className="text-lg font-semibold">{copy.settings.appearanceTitle}</h2>
           <p className="text-sm text-[var(--text-secondary)]">{copy.settings.appearanceDescription}</p>
@@ -58,7 +58,7 @@ export function SettingsPage() {
       </article>
 
       {/* Privacy, Security & Help Explanations */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 grid gap-4">
+      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 grid gap-4">
         <div className="border-b border-[var(--border)] pb-3">
           <h2 className="text-lg font-semibold">{copy.settings.privacyTitle}</h2>
           <p className="text-sm text-[var(--text-secondary)]">{copy.settings.privacyDescription}</p>
@@ -71,7 +71,7 @@ export function SettingsPage() {
       </article>
 
       {/* Session / Danger Zone */}
-      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-6 border-[var(--danger)]/40 bg-[var(--danger)]/5 grid gap-4">
+      <article className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] p-4 sm:p-5 border-[var(--danger)]/40 bg-[var(--danger)]/5 grid gap-4">
         <div>
           <h2 className="text-lg font-semibold text-[var(--danger)]">{copy.settings.logoutTitle}</h2>
           <p className="text-sm text-[var(--text-secondary)]">

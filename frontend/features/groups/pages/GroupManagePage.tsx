@@ -44,7 +44,7 @@ export function GroupManagePage() {
       <PageHeader eyebrow="Quyền quản trị" title="Quản lý nhóm" />
 
       {/* General Settings Form */}
-      <form onSubmit={handleSubmit} className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] grid gap-4 p-5 sm:p-6">
+      <form onSubmit={handleSubmit} className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] grid gap-4 p-4 sm:p-5">
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Thông tin chung</h2>
         <Input
           id="manage-group-name"
@@ -144,7 +144,7 @@ export function GroupManagePage() {
       )}
 
       {/* Danger Zone: Close Group */}
-      <section className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] border-[var(--danger)]/40 p-5 sm:p-6">
+      <section className="border border-[var(--border)] rounded-[var(--radius-panel)] bg-[var(--surface)] shadow-[var(--shadow-panel)] border-[var(--danger)]/40 p-4 sm:p-5">
         <h2 className="font-semibold text-[var(--danger)]">Đóng nhóm</h2>
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
           Thành viên sẽ không thể gửi tin hoặc dùng lời mời hiện có.

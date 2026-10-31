@@ -27,7 +27,7 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
       className="w-[var(--details-width)] border-l border-[var(--border)] bg-[var(--surface)] flex flex-col h-full min-h-0"
       aria-label={CHAT_DETAILS_COPY.SHEET_TITLE}
     >
-      <header className="flex min-h-[var(--header-height)] items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+      <header className="flex min-h-[var(--header-height)] items-center justify-between px-4 py-3.5 border-b border-[var(--border)]">
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">{CHAT_DETAILS_COPY.SHEET_TITLE}</h2>
         <IconButton
           label={CHAT_DETAILS_COPY.CLOSE}
@@ -36,7 +36,7 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
         />
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#a2adb755_transparent] px-4 py-5 flex flex-col gap-5">
+      <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#a2adb755_transparent] p-4 flex flex-col gap-4">
         <ConversationDetailsIdentity details={details} />
 
         {details.description && (

@@ -46,7 +46,7 @@ export function CreateGroupModal({ isOpen = true, onClose }: CreateGroupModalPro
 
   return (
     <Modal title="Tạo nhóm mới" onClose={handleClose}>
-      <form onSubmit={handleSubmit} className="grid gap-5">
+      <form onSubmit={handleSubmit} className="grid gap-4">
         {/* Avatar & Name Header */}
         <div className="flex items-center gap-4">
           {/* Avatar Picker */}

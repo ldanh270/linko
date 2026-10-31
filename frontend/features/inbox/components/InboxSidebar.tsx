@@ -57,7 +57,7 @@ export function InboxSidebar() {
         }
       >
         {/* Search Bar Row */}
-        <div className="flex items-center gap-2 mx-6 mb-3">
+        <div className="flex items-center gap-2 px-4 mb-3">
           {searchState.isSearchActive && (
             <button
               type="button"
@@ -102,11 +102,11 @@ export function InboxSidebar() {
               <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />
             ) : null}
 
-            <h2 className="mx-6 mt-4 mb-3 text-base font-semibold text-[var(--text-primary)]">
+            <h2 className="px-4 mt-3 mb-2 text-base font-semibold text-[var(--text-primary)]">
               {copy.inbox.recent}
             </h2>
 
-            <nav aria-label="Lọc hội thoại" className="flex gap-1 px-6 pb-2">
+            <nav aria-label="Lọc hội thoại" className="flex gap-1 px-4 pb-2">
               {state.filters.map((filter) => (
                 <Button key={filter.value} variant="ghost" aria-pressed={filter.isActive} onClick={filter.onSelect}>
                   {filter.label}

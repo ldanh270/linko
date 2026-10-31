@@ -52,7 +52,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         />
       )}
       {state.composer.showMentions && state.members.isError && (
-        <p role="alert" className="text-xs text-[var(--danger)] mt-2 px-6">
+        <p role="alert" className="text-xs text-[var(--danger)] mt-2 px-4">
           Không thể tải thành viên để nhắc tên.
         </p>
       )}
@@ -67,12 +67,12 @@ export function MessageComposer({ state }: MessageComposerProps) {
 
       {/* Validation & Send Error Alerts */}
       {state.composer.fileError && (
-        <p role="alert" className="px-6 pt-2 text-xs text-[var(--danger)]">
+        <p role="alert" className="px-4 pt-2 text-xs text-[var(--danger)]">
           {state.composer.fileError}
         </p>
       )}
       {state.composer.sendError && (
-        <p role="alert" className="px-6 pt-2 text-xs text-[var(--danger)]">
+        <p role="alert" className="px-4 pt-2 text-xs text-[var(--danger)]">
           {state.composer.sendError}
         </p>
       )}
@@ -80,7 +80,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
       {/* Main Composer Form */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-2.5 px-6 py-4"
+        className="flex items-end gap-2.5 px-4 py-3.5"
         aria-label="Soạn tin nhắn"
       >
         {/* Attachment Upload Button */}

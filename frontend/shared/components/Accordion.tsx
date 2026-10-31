@@ -15,7 +15,7 @@ export function Accordion({ title, id, icon, isOpen, onToggle, children }: Accor
     <section className="border-b border-[var(--border)]">
       <Button
         variant="ghost"
-        className="w-full flex items-center justify-between px-6 py-4 text-base font-medium text-[var(--text-primary)] rounded-none min-h-[52px]"
+        className="w-full flex items-center justify-between px-4 py-3.5 text-base font-medium text-[var(--text-primary)] rounded-none min-h-[52px]"
         aria-expanded={isOpen}
         aria-controls={id}
         onClick={onToggle}
@@ -25,7 +25,7 @@ export function Accordion({ title, id, icon, isOpen, onToggle, children }: Accor
         <Icon name={ICON_NAMES.CHEVRON} className={`transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`} />
       </Button>
       {isOpen && (
-        <div id={id} className="px-6 pb-4">
+        <div id={id} className="px-4 pb-4">
           {children}
         </div>
       )}

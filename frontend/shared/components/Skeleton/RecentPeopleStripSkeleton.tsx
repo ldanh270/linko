@@ -4,7 +4,7 @@ import { Skeleton } from "./Skeleton"
 export function RecentPeopleStripSkeleton() {
   return (
     <div
-      className="flex gap-2.5 overflow-x-auto px-6 pt-1 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-2.5 overflow-x-auto px-4 pt-1 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="status"
       aria-label="Đang tải danh sách gần đây"
     >

@@ -9,7 +9,7 @@ export interface ProfileIdentityProps { readonly name: string; readonly username
 /** Render the reference's centered avatar/name header without inventing online presence. UI only. */
 export function ProfileIdentity({ name, username, avatarUrl, onEdit }: ProfileIdentityProps) {
   return (
-    <section className="grid justify-items-center gap-3 px-6 pt-2 pb-6 border-b border-[var(--border)]">
+    <section className="grid justify-items-center gap-3 px-4 pt-2 pb-4 border-b border-[var(--border)]">
       <div className="relative [&>.avatar]:border [&>.avatar]:border-[var(--border)] [&>.avatar]:p-1 [&>.avatar]:bg-[var(--surface)] [&>.avatar]:rounded-full [&_img]:rounded-full">
         <Avatar label={name} src={avatarUrl} size="large" />
         {onEdit && (

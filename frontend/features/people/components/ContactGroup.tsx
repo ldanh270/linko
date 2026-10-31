@@ -7,7 +7,7 @@ export interface ContactGroupProps { readonly group: ReturnType<typeof usePeople
 /** Render a letter heading followed by its compact contact list. UI only. */
 export function ContactGroup({ group }: ContactGroupProps) {
   return (
-    <section className="px-6 pb-3.5">
+    <section className="px-4 pb-3">
       <h2 className="px-3 pb-3 text-[var(--brand)] text-base font-semibold">{group.letter}</h2>
       <ul>{group.contacts.map((contact) => <ContactRow key={contact.id} contact={contact} />)}</ul>
     </section>

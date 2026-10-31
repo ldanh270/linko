@@ -30,7 +30,7 @@ export function SettingsSidebar() {
   return (
     <SidebarPanel header={<SidebarHeader title={copy.settings.title} />}>
       {state.profile.query.isError && profile && (
-        <p role="alert" className="text-xs text-[var(--danger)] px-6 mt-2">
+        <p role="alert" className="text-xs text-[var(--danger)] px-4 mt-2">
           Không thể làm mới thông tin tài khoản.
         </p>
       )}

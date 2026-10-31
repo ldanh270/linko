@@ -74,7 +74,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
           )}
         </div>
 
-        <div className="px-6 pb-6 pt-0 relative">
+        <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 mb-4">
             <div className="relative inline-block rounded-full ring-4 ring-[var(--surface)] shadow-md">
               <Avatar

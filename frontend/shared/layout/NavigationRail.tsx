@@ -54,7 +54,7 @@ export function NavigationRail({
           <NavigationItem key={item.destination} {...item} />
         ))}
       </nav>
-      <div className="grid place-items-center gap-3 pb-6">
+      <div className="grid place-items-center gap-3 pb-4">
         {onToggleLanguage && (
           <button
             type="button"

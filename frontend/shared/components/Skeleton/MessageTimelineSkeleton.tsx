@@ -4,7 +4,7 @@ import { Skeleton } from "./Skeleton"
 export function MessageTimelineSkeleton() {
   return (
     <div
-      className="flex-1 min-h-0 flex flex-col justify-end gap-4 overflow-hidden px-6 pt-6 pb-4"
+      className="flex-1 min-h-0 flex flex-col justify-end gap-4 overflow-hidden px-4 pt-4 pb-4"
       role="status"
       aria-label="Đang tải tin nhắn"
     >

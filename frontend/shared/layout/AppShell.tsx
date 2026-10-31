@@ -27,7 +27,7 @@ export function AppShell({ children, account }: AppShellProps) {
       <main
         id="main-content"
         className={`min-h-0 h-full min-w-0 ${
-          isDetail ? "h-full overflow-y-auto px-6 pt-6 pb-24 lg:pb-6" : ""
+          isDetail ? "h-full overflow-y-auto p-4 sm:p-6 pb-24 lg:pb-6" : ""
         }`}
       >
         {children}

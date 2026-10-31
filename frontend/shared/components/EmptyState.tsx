@@ -5,9 +5,11 @@ export interface EmptyStateProps { title: string; description?: string; action?:
 
 /** Explain an empty view and optionally offer its next action. UI only. */
 export function EmptyState({ title, description, action }: EmptyStateProps) {
-  return <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-    <h2 className="text-lg font-semibold">{title}</h2>
-    {description && <p className="mt-2 text-sm text-[var(--text-secondary)]">{description}</p>}
-    {action && <div className="mt-5">{action}</div>}
-  </section>
+  return (
+    <section className="m-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-center">
+      <h2 className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
+      {description && <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{description}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </section>
+  )
 }

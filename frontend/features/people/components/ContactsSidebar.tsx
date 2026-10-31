@@ -34,7 +34,7 @@ export function ContactsSidebar() {
         />
       }
     >
-      <div className="flex items-center gap-2 mx-6 mb-4">
+      <div className="flex items-center gap-2 px-4 mb-3">
         {Boolean(state.search) && (
           <button
             type="button"
@@ -57,7 +57,7 @@ export function ContactsSidebar() {
       </div>
 
       {state.requestRows.length > 0 && !state.search && (
-        <Button className="mx-6 mb-4" variant="ghost" onClick={state.onOpenAdd}>
+        <Button className="mx-4 mb-3" variant="ghost" onClick={state.onOpenAdd}>
           Lời mời kết bạn ({state.requestRows.length})
         </Button>
       )}
