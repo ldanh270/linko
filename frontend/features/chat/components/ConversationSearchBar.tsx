@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react"
+import { Badge } from "@/shared/components/Badge"
 import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+import { useConversationSearchBar } from "../hooks/useConversationSearchBar"
 
 export interface SearchMatch {
   readonly id: string
@@ -39,52 +40,24 @@ export function ConversationSearchBar({
   isLoadingMore = false,
   onLoadMoreHistory,
 }: ConversationSearchBarProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
-
-  // Close dropdown on outside click or escape
-  useEffect(() => {
-    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (isDropdownOpen) {
-          setIsDropdownOpen(false)
-        } else {
-          onClose()
-        }
-      }
-    }
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsDropdownOpen(false)
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isDropdownOpen, onClose])
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      if (e.shiftKey) {
-        onPrev()
-      } else {
-        onNext()
-      }
-    }
-  }
-
   const matchCount = matches.length
-  const currentPosition = matchCount > 0 ? activeIndex + 1 : 0
+  const {
+    isDropdownOpen,
+    toggleDropdown,
+    inputRef,
+    dropdownRef,
+    handleInputKeyDown,
+    currentPosition,
+    selectMatch,
+  } = useConversationSearchBar({
+    query,
+    matchCount,
+    activeIndex,
+    onNext,
+    onPrev,
+    onSelectMatch,
+    onClose,
+  })
 
   return (
     <div className="relative border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 shadow-xs z-30">
@@ -99,7 +72,7 @@ export function ConversationSearchBar({
             type="text"
             value={query}
             onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleInputKeyDown}
             placeholder="Tìm tin nhắn trong cuộc trò chuyện (Enter để nhảy tiếp)..."
             className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] pl-9 pr-8 py-1.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-secondary)] transition focus:border-[var(--brand)] focus:bg-[var(--surface)] focus:outline-hidden focus:ring-1 focus:ring-[var(--brand)]"
           />
@@ -157,7 +130,7 @@ export function ConversationSearchBar({
             <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onClick={toggleDropdown}
                 className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
                   isDropdownOpen
                     ? "border-[var(--brand)] bg-[var(--brand-soft)]/20 text-[var(--brand)]"
@@ -165,9 +138,9 @@ export function ConversationSearchBar({
                 }`}
               >
                 <span>Danh sách kết quả</span>
-                <span className="rounded-full bg-[var(--brand)] text-white text-[10px] px-1.5 py-0.2 font-semibold">
+                <Badge variant="brand" shape="pill" size="sm">
                   {matchCount}
-                </span>
+                </Badge>
               </button>
 
               {/* Match list dropdown */}
@@ -183,10 +156,7 @@ export function ConversationSearchBar({
                         <button
                           key={match.id}
                           type="button"
-                          onClick={() => {
-                            onSelectMatch(idx)
-                            setIsDropdownOpen(false)
-                          }}
+                          onClick={() => selectMatch(idx)}
                           className={`w-full rounded-lg p-2 text-left transition ${
                             isSelected
                               ? "bg-[var(--brand-soft)]/30 border border-[var(--brand)]/40"

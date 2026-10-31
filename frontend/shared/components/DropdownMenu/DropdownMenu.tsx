@@ -6,6 +6,8 @@ import { ICON_NAMES } from "@/shared/icons/icon.constants"
 import type { DropdownAction } from "./dropdown.types"
 import { useDropdownMenu } from "./useDropdownMenu"
 
+export type { DropdownAction } from "./dropdown.types"
+
 /** Named menu with actions provided by the owning feature hook. */
 export interface DropdownMenuProps { readonly label: string; readonly items: readonly DropdownAction[] }
 
