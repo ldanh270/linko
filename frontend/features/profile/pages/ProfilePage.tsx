@@ -144,7 +144,7 @@ export function ProfilePage({ userId }: ProfilePageProps = {}) {
             <Icon name={ICON_NAMES.SETTINGS} />
             <span>Tài khoản & Trạng thái bảo mật</span>
           </div>
-          <dl className="profile-details">
+          <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
             <div>
               <dt>Tên người dùng</dt>
               <dd>@{user[USER_PROFILE_FIELDS.USERNAME]}</dd>

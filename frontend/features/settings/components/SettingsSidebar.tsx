@@ -30,7 +30,7 @@ export function SettingsSidebar() {
   return (
     <SidebarPanel header={<SidebarHeader title={copy.settings.title} />}>
       {state.profile.query.isError && profile && (
-        <p role="alert" className="composer-error px-6">
+        <p role="alert" className="text-xs text-[var(--danger)] px-6 mt-2">
           Không thể làm mới thông tin tài khoản.
         </p>
       )}
@@ -56,7 +56,7 @@ export function SettingsSidebar() {
         </div>
       )}
 
-      <div className="profile-sections overflow-y-auto">
+      <div className="p-6 overflow-y-auto">
         <Accordion
           id="settings-chat"
           title={copy.settings.chatTitle}

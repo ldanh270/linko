@@ -6,5 +6,9 @@ export interface SettingsDisclosureProps { readonly section: ReturnType<typeof u
 
 /** Render a reference disclosure without suggesting unavailable editable settings. UI only. */
 export function SettingsDisclosure({ section }: SettingsDisclosureProps) {
-  return <Accordion id={`settings-${section.id}`} title={section.title} isOpen={section.isOpen} onToggle={section.onToggle}><p className="quiet-copy">{section.description}</p></Accordion>
+  return (
+    <Accordion id={`settings-${section.id}`} title={section.title} isOpen={section.isOpen} onToggle={section.onToggle}>
+      <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">{section.description}</p>
+    </Accordion>
+  )
 }

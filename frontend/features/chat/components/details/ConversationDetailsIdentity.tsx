@@ -19,15 +19,17 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
   const isPeerOnline = details.peerId ? presence.isOnline(details.peerId) : undefined
 
   return (
-    <div className="conversation-details-identity">
+    <div className="flex flex-col items-center text-center py-2.5">
       {details.profileHref ? (
-        <Link href={details.profileHref} className="hover:opacity-85 transition-opacity inline-block" title="Xem trang cá nhân">
+        <Link href={details.profileHref} className="hover:opacity-85 transition-opacity inline-block mb-3" title="Xem trang cá nhân">
           <Avatar label={details.title} src={details.avatarUrl} size="large" isOnline={isPeerOnline} />
         </Link>
       ) : (
-        <Avatar label={details.title} src={details.avatarUrl} size="large" isOnline={isPeerOnline} />
+        <div className="mb-3">
+          <Avatar label={details.title} src={details.avatarUrl} size="large" isOnline={isPeerOnline} />
+        </div>
       )}
-      <h3 className="conversation-details-title">
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
         {details.profileHref ? (
           <Link href={details.profileHref} className="hover:underline">
             {details.title}
@@ -36,57 +38,57 @@ export function ConversationDetailsIdentity({ details }: ConversationDetailsIden
           details.title
         )}
       </h3>
-      <p className="conversation-details-subtitle">{details.subtitle}</p>
+      <p className="text-sm text-[var(--text-secondary)] mb-4">{details.subtitle}</p>
 
-      <div className="conversation-details-quick-actions">
+      <div className="flex items-center justify-center gap-4 w-full">
         {details.invitationsHref ? (
           <Link
             href={details.invitationsHref}
-            className="details-quick-action"
+            className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer no-underline"
             aria-label={CHAT_DETAILS_COPY.ADD_MEMBER}
           >
-            <span className="details-quick-action-icon">
+            <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
               <Icon name={ICON_NAMES.ADD_CONTACT} />
             </span>
-            <span className="details-quick-action-label">{CHAT_DETAILS_COPY.ADD_MEMBER}</span>
+            <span className="text-xs text-[var(--text-secondary)]">{CHAT_DETAILS_COPY.ADD_MEMBER}</span>
           </Link>
         ) : details.profileHref ? (
           <Link
             href={details.profileHref}
-            className="details-quick-action"
+            className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer no-underline"
             aria-label={CHAT_DETAILS_COPY.PROFILE}
           >
-            <span className="details-quick-action-icon">
+            <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
               <Icon name={ICON_NAMES.PROFILE} />
             </span>
-            <span className="details-quick-action-label">{CHAT_DETAILS_COPY.PROFILE}</span>
+            <span className="text-xs text-[var(--text-secondary)]">{CHAT_DETAILS_COPY.PROFILE}</span>
           </Link>
         ) : null}
 
         <button
           type="button"
-          className="details-quick-action"
+          className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
           onClick={details.onOpenSearch}
           aria-label={CHAT_DETAILS_COPY.SEARCH}
         >
-          <span className="details-quick-action-icon">
+          <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
             <Icon name={ICON_NAMES.SEARCH} />
           </span>
-          <span className="details-quick-action-label">{CHAT_DETAILS_COPY.SEARCH}</span>
+          <span className="text-xs text-[var(--text-secondary)]">{CHAT_DETAILS_COPY.SEARCH}</span>
         </button>
 
         {isGroup && (
           <button
             type="button"
-            className="details-quick-action"
+            className="group flex flex-col items-center gap-1.5 text-xs text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
             onClick={details.onToggleMute}
             disabled={details.isMuteLoading}
             aria-label={details.isMuted ? CHAT_DETAILS_COPY.UNMUTE : CHAT_DETAILS_COPY.MUTE}
           >
-            <span className="details-quick-action-icon">
+            <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-[var(--input-surface)] text-[var(--text-primary)] text-[18px] transition-all group-hover:bg-[var(--input-surface-hover)] group-hover:scale-105 active:scale-95">
               <Icon name={details.isMuted ? ICON_NAMES.SUN : ICON_NAMES.MOON} />
             </span>
-            <span className="details-quick-action-label">
+            <span className="text-xs text-[var(--text-secondary)]">
               {details.isMuted ? CHAT_DETAILS_COPY.UNMUTE : CHAT_DETAILS_COPY.MUTE}
             </span>
           </button>

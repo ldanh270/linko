@@ -27,20 +27,24 @@ export function MessageAttachment({ file }: MessageAttachmentProps) {
       <>
         <button
           type="button"
-          className="attachment-card attachment-card-image"
+          className="p-1 bg-transparent cursor-pointer border-none text-left font-inherit disabled:cursor-default disabled:opacity-70 group"
           onClick={onOpenLightbox}
           disabled={!thumbnail.objectUrl}
           aria-label={`Xem ảnh ${file.name}`}
         >
           {thumbnail.objectUrl ? (
-            <img className="attachment-image" src={thumbnail.objectUrl} alt={file.name} />
+            <img
+              className="block max-h-[180px] max-w-full w-auto rounded-[var(--radius-md)] object-contain transition-all group-hover:opacity-95 group-hover:scale-[1.01]"
+              src={thumbnail.objectUrl}
+              alt={file.name}
+            />
           ) : thumbnail.isLoading ? (
-            <div className="attachment-loading">
+            <div className="flex items-center gap-2 min-w-[170px] max-w-full px-3 py-2 bg-[var(--surface)] text-[var(--text-secondary)] rounded-[var(--radius-md)] border border-[var(--border-subtle)] text-xs">
               <Icon name={ICON_NAMES.IMAGE} />
               <span>Đang tải ảnh...</span>
             </div>
           ) : (
-            <div className="attachment-placeholder">
+            <div className="flex items-center gap-2 min-w-[170px] max-w-full px-3 py-2 bg-[var(--surface)] text-[var(--text-secondary)] rounded-[var(--radius-md)] border border-[var(--border-subtle)] text-xs">
               <Icon name={ICON_NAMES.IMAGE} />
               <span>{file.name}</span>
             </div>
@@ -60,13 +64,20 @@ export function MessageAttachment({ file }: MessageAttachmentProps) {
   }
 
   return (
-    <Link className="attachment-card" href={file.href}>
-      <Icon name={ICON_NAMES.FILE} />
-      <span>
-        <strong>{file.name}</strong>
-        <small>{file.sizeLabel}</small>
+    <Link
+      className="flex items-center gap-3 min-w-[170px] max-w-full px-3 py-2 bg-[var(--surface)] text-[var(--text-primary)] rounded-[var(--radius-md)] mt-2 border border-[var(--border-subtle)] hover:border-[var(--border)] transition-colors text-left"
+      href={file.href}
+    >
+      <span className="text-[28px] text-[var(--brand)] shrink-0" aria-hidden="true">
+        <Icon name={ICON_NAMES.FILE} />
       </span>
-      <Icon name={ICON_NAMES.DOWNLOAD} />
+      <span className="flex flex-col min-w-0 flex-1">
+        <strong className="block text-sm font-medium [overflow-wrap:anywhere] truncate">{file.name}</strong>
+        <small className="text-xs text-[var(--text-secondary)]">{file.sizeLabel}</small>
+      </span>
+      <span className="text-[var(--text-secondary)] shrink-0" aria-hidden="true">
+        <Icon name={ICON_NAMES.DOWNLOAD} />
+      </span>
     </Link>
   )
 }

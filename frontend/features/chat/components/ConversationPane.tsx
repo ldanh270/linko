@@ -18,7 +18,7 @@ export function ConversationPane({ item }: ConversationPaneProps) {
   const state = useConversationPane(item)
   return (
     <div className={`conversation-layout ${state.details.isOpen ? "has-details" : ""}`}>
-      <div className="conversation-pane">
+      <div className="flex flex-col h-full min-h-0 bg-[var(--surface)]">
         <ConversationHeader header={state.header} />
         {state.searchState.isOpen && (
           <ConversationSearchBar

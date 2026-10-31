@@ -10,21 +10,21 @@ export interface ConversationDetailsPinsProps {
 /** Render pinned group messages inside the details accordion. UI only. */
 export function ConversationDetailsPins({ pins }: ConversationDetailsPinsProps) {
   if (pins.length === 0) {
-    return <p className="details-empty-notice">{CHAT_DETAILS_COPY.NO_PINS}</p>
+    return <p className="text-[13px] text-[var(--text-secondary)] text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_PINS}</p>
   }
 
   return (
-    <ul className="details-pins-list">
+    <ul className="flex flex-col gap-2 list-none p-0 m-0">
       {pins.map((pin) => (
-        <li key={pin.id} className="details-pin-item">
-          <div className="details-pin-header">
-            <span className="details-pin-author">
+        <li key={pin.id} className="p-2.5 rounded-md bg-[var(--surface-subtle)] border-l-2 border-[var(--brand)]">
+          <div className="flex justify-between items-center mb-1">
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--brand)]">
               <Icon name={ICON_NAMES.PIN} />
               {pin.author}
             </span>
-            <time className="details-pin-time">{pin.createdAt}</time>
+            <time className="text-[11px] text-[var(--text-secondary)]">{pin.createdAt}</time>
           </div>
-          <p className="details-pin-content">{pin.content}</p>
+          <p className="text-xs text-[var(--text-primary)] m-0 truncate">{pin.content}</p>
         </li>
       ))}
     </ul>

@@ -5,7 +5,25 @@ export interface MessengerWorkspaceProps { readonly sidebar: ReactNode; readonly
 
 /** Arrange independently scrolling sidebar/chat regions with mobile view selection. UI only. */
 export function MessengerWorkspace({ sidebar, conversation, isConversationView = false }: MessengerWorkspaceProps) {
-  return <div className={`messenger-workspace ${isConversationView ? "messenger-workspace--conversation" : ""}`}>
-    <aside className="workspace-sidebar">{sidebar}</aside><section className="workspace-conversation" aria-label="Cuộc trò chuyện">{conversation}</section>
-  </div>
+  return (
+    <div
+      className="h-full min-w-0 min-h-0 pb-[calc(65px+env(safe-area-inset-bottom))] lg:pb-0 lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)]"
+    >
+      <aside
+        className={`h-full min-h-0 bg-[var(--background)] ${
+          isConversationView ? "hidden lg:block" : "block"
+        }`}
+      >
+        {sidebar}
+      </aside>
+      <section
+        className={`h-full min-w-0 min-h-0 overflow-hidden bg-[var(--surface)] ${
+          isConversationView ? "block" : "hidden lg:block"
+        }`}
+        aria-label="Cuộc trò chuyện"
+      >
+        {conversation}
+      </section>
+    </div>
+  )
 }

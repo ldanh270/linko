@@ -7,5 +7,19 @@ export interface NavigationItemProps { readonly label: string; readonly destinat
 
 /** Render one labelled destination with a shared selected state. UI only. */
 export function NavigationItem({ label, destination, icon, isActive }: NavigationItemProps) {
-  return <Link href={destination} title={label} aria-label={label} aria-current={isActive ? "page" : undefined} className="rail-link"><Icon name={icon} /></Link>
+  return (
+    <Link
+      href={destination}
+      title={label}
+      aria-label={label}
+      aria-current={isActive ? "page" : undefined}
+      className={`grid place-items-center w-[52px] h-[52px] rounded-[var(--radius-lg)] text-2xl transition-colors ${
+        isActive
+          ? "text-[var(--brand)] bg-[var(--brand-soft)]"
+          : "text-[var(--text-secondary)] hover:text-[var(--brand)] hover:bg-[var(--brand-subtle)]"
+      }`}
+    >
+      <Icon name={icon} />
+    </Link>
+  )
 }

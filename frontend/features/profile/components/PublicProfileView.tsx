@@ -124,7 +124,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
             <Icon name={ICON_NAMES.PROFILE} />
             <span>Thông tin người dùng</span>
           </div>
-          <dl className="profile-details">
+          <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
             <div>
               <dt>Tên hiển thị</dt>
               <dd>{user[USER_PROFILE_FIELDS.DISPLAY_NAME]}</dd>
@@ -152,7 +152,7 @@ export function PublicProfileView({ state }: PublicProfileViewProps) {
             <Icon name={ICON_NAMES.CONTACTS} />
             <span>Mối quan hệ & Kết nối</span>
           </div>
-          <dl className="profile-details">
+          <dl className="grid gap-5 [overflow-wrap:anywhere] [&_dt]:text-xs [&_dt]:text-[var(--text-secondary)] [&_dt]:mb-1 [&_dd]:text-sm [&_dd]:text-[var(--text-primary)]">
             <div>
               <dt>Quan hệ kết nối</dt>
               <dd>

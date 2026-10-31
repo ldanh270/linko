@@ -24,11 +24,11 @@ export function InboxSidebar() {
         <SidebarHeader
           title="Tin nhắn"
           action={
-            <div className="sidebar-header-actions">
-              <Link href={APP_ROUTES.GROUP_CREATE} aria-label="Tạo nhóm" className="sidebar-header-action">
+            <div className="flex items-center gap-1">
+              <Link href={APP_ROUTES.GROUP_CREATE} aria-label="Tạo nhóm" className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]">
                 <Icon name={ICON_NAMES.GROUP} />
               </Link>
-              <Link href={APP_ROUTES.PEOPLE} aria-label="Tìm bạn bè" className="sidebar-header-action">
+              <Link href={APP_ROUTES.PEOPLE} aria-label="Tìm bạn bè" className="grid place-items-center w-9 h-9 rounded-full text-xl text-[var(--text-secondary)] transition-colors hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]">
                 <Icon name={ICON_NAMES.ADD_CONTACT} />
               </Link>
             </div>
@@ -42,10 +42,11 @@ export function InboxSidebar() {
         value={state.search}
         stateKey={state.searchRevision}
         onChange={state.onSearchChange}
+        className="mx-6 mb-4"
       />
       {state.people.length > 0 && <RecentPeopleStrip people={state.people} isOnline={state.isOnline} />}
-      <h2 className="sidebar-section-label">Gần đây</h2>
-      <nav aria-label="Lọc hội thoại" className="sidebar-filters">
+      <h2 className="mx-6 mt-4 mb-3 text-base font-semibold text-[var(--text-primary)]">Gần đây</h2>
+      <nav aria-label="Lọc hội thoại" className="flex gap-1 px-6 pb-2">
         {state.filters.map((filter) => (
           <Button key={filter.value} variant="ghost" aria-pressed={filter.isActive} onClick={filter.onSelect}>
             {filter.label}
@@ -65,7 +66,7 @@ export function InboxSidebar() {
           isOnline={state.isOnline}
         />
       )}
-      {state.search && <p className="sidebar-footnote">Tìm trong các hội thoại ở trang đã tải.</p>}
+      {state.search && <p className="px-6 py-3 text-xs text-[var(--text-secondary)]">Tìm trong các hội thoại ở trang đã tải.</p>}
       {state.query.data?.nextCursor && (
         <Button className="m-4" variant="ghost" onClick={state.onLoadMore} isLoading={state.query.isFetching}>
           Trang tiếp theo

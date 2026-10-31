@@ -6,5 +6,18 @@ export interface MentionListProps { readonly members: readonly MemberDto[]; read
 
 /** Render keyboard-operable mention choices. UI only. */
 export function MentionList({ members, onSelect }: MentionListProps) {
-  return <ul className="mention-list" aria-label="Chọn người được nhắc tên">{members.map((member) => <li key={member.userId}><Button variant="ghost" onClick={() => onSelect(member)}>{member.displayName ?? "Thành viên"}</Button></li>)}</ul>
+  return (
+    <ul
+      className="absolute bottom-full left-6 max-h-[200px] overflow-y-auto bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius-sm)] shadow-[var(--shadow-panel)] z-20 p-1 flex flex-col gap-0.5 list-none"
+      aria-label="Chọn người được nhắc tên"
+    >
+      {members.map((member) => (
+        <li key={member.userId}>
+          <Button variant="ghost" onClick={() => onSelect(member)}>
+            {member.displayName ?? "Thành viên"}
+          </Button>
+        </li>
+      ))}
+    </ul>
+  )
 }

@@ -76,7 +76,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="composer" aria-label="Soạn tin nhắn">
+    <form onSubmit={handleSubmit} className="relative border-t border-[var(--border)] px-6 py-4 bg-[var(--surface)]" aria-label="Soạn tin nhắn">
       {state.composer.replyId && (
         <ReplyPreview
           author={state.composer.replyTarget?.author}
@@ -88,7 +88,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         <MentionList members={state.members.data} onSelect={state.composer.onMention} />
       )}
       {state.composer.showMentions && state.members.isError && (
-        <p role="alert" className="composer-error">
+        <p role="alert" className="text-xs text-[var(--danger)] mt-2">
           Không thể tải thành viên để nhắc tên.
         </p>
       )}
@@ -105,7 +105,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         />
       )}
 
-      <div className="composer-controls">
+      <div className="flex items-center gap-3">
         <label className="sr-only" htmlFor="message-input">
           Soạn tin nhắn
         </label>
@@ -119,16 +119,20 @@ export function MessageComposer({ state }: MessageComposerProps) {
           onKeyDown={state.composer.onKeyDown}
           placeholder={placeholder}
           disabled={state.isComposerDisabled}
+          className="min-w-0 flex-1 min-h-[42px] max-h-[140px] px-3.5 py-2.5 resize-none rounded-[var(--radius-md)] bg-[var(--surface-subtle)] border border-[var(--border)] text-[var(--text-primary)] text-sm leading-normal overflow-y-hidden box-border focus-visible:outline-none focus-visible:border-[var(--brand)] focus-visible:ring-1 focus-visible:ring-[var(--brand)] disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <IconButton
-          className="emoji-action"
+          className="shrink-0 w-10 h-10 min-h-10 p-0 text-[18px]"
           label={copy.chat.emojiBtn}
           disabled={state.composer.isSending || state.isComposerDisabled}
           aria-expanded={isEmojiPickerOpen}
           icon={<Icon name={ICON_NAMES.EMOJI} />}
           onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)}
         />
-        <label className="composer-attachment" title={copy.chat.attachBtn}>
+        <label
+          className="grid place-items-center w-6 h-10 text-[var(--brand)] text-[18px] cursor-pointer hover:opacity-85 focus-within:ring-2 focus-within:ring-[var(--brand)] rounded-[var(--radius-sm)] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 shrink-0"
+          title={copy.chat.attachBtn}
+        >
           <Icon name={ICON_NAMES.ATTACH} />
           <span className="sr-only">{copy.chat.attachBtn}</span>
           <input
@@ -142,6 +146,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         </label>
         <Button
           type="submit"
+          className="shrink-0 w-10 h-10 min-h-10 p-0 text-[18px]"
           aria-label={copy.chat.sendBtn}
           isLoading={state.composer.isSending && state.composer.files.length > 0}
           disabled={!state.composer.canSend || state.isComposerDisabled}
@@ -158,17 +163,17 @@ export function MessageComposer({ state }: MessageComposerProps) {
       </div>
 
       {state.composer.fileError && (
-        <p role="alert" className="composer-error">
+        <p role="alert" className="text-xs text-[var(--danger)] mt-2">
           {state.composer.fileError}
         </p>
       )}
       {state.composer.sendError && (
-        <p role="alert" className="composer-error">
+        <p role="alert" className="text-xs text-[var(--danger)] mt-2">
           {state.composer.sendError}
         </p>
       )}
       {state.pins.update.isError && (
-        <p role="alert" className="composer-error">
+        <p role="alert" className="text-xs text-[var(--danger)] mt-2">
           Không thể cập nhật tin ghim. Vui lòng thử lại.
         </p>
       )}

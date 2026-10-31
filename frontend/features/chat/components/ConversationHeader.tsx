@@ -23,9 +23,9 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
 
   return (
     <div>
-      <header className="conversation-header">
-        <div className="conversation-identity">
-          <Link href={header.backHref} aria-label="Về danh sách tin nhắn" className="conversation-mobile-back">
+      <header className="relative z-10 flex min-h-[var(--header-height)] items-center justify-between gap-3 px-6 py-4 border-b border-[var(--border)] bg-[var(--surface)]">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link href={header.backHref} aria-label="Về danh sách tin nhắn" className="lg:hidden mr-1 flex-none text-[var(--text-secondary)] hover:text-[var(--brand)]">
             <Icon name={ICON_NAMES.BACK} />
           </Link>
           {peerProfileHref ? (
@@ -37,13 +37,13 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
           )}
           <div className="min-w-0">
             {peerProfileHref ? (
-              <h2>
+              <h2 className="text-base font-semibold truncate text-[var(--text-primary)]">
                 <Link href={peerProfileHref} className="hover:underline">
                   {header.title}
                 </Link>
               </h2>
             ) : (
-              <h2>{header.title}</h2>
+              <h2 className="text-base font-semibold truncate text-[var(--text-primary)]">{header.title}</h2>
             )}
             {isPeerOnline !== undefined && (
               <p className="text-xs text-[var(--text-secondary)]">
@@ -56,20 +56,20 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
             )}
           </div>
         </div>
-        <div className="conversation-actions">
+        <div className="flex items-center gap-3 text-[var(--text-secondary)]">
           <IconButton
             label="Tìm trong tin nhắn đã tải"
             icon={<Icon name={ICON_NAMES.SEARCH} />}
             onClick={header.onToggleSearch}
           />
           <IconButton
-            className="call-action"
+            className="hidden sm:inline-flex"
             label="Gọi thoại chưa khả dụng"
             disabled
             icon={<Icon name={ICON_NAMES.PHONE} />}
           />
           <IconButton
-            className="call-action"
+            className="hidden sm:inline-flex"
             label="Gọi video chưa khả dụng"
             disabled
             icon={<Icon name={ICON_NAMES.VIDEO} />}
@@ -77,7 +77,7 @@ export function ConversationHeader({ header }: ConversationHeaderProps) {
           <IconButton
             label={CHAT_DETAILS_COPY.OPEN_DETAILS}
             aria-expanded={header.isDetailsOpen}
-            className={`conversation-details-button ${header.isDetailsOpen ? "is-active" : ""}`}
+            className={`transition-colors ${header.isDetailsOpen ? "text-[var(--brand)] bg-[var(--brand-soft)]" : ""}`}
             icon={<Icon name={ICON_NAMES.MENU} />}
             onClick={header.onToggleDetails}
           />

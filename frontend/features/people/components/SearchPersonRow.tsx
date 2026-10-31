@@ -7,5 +7,21 @@ export interface SearchPersonRowProps { readonly person: ReturnType<typeof usePe
 
 /** Render a safe public search result with an honest request state. UI only. */
 export function SearchPersonRow({ person, isPending }: SearchPersonRowProps) {
-  return <li className="flex items-center gap-3 border-b border-[var(--border)] py-3"><Avatar label={person.displayName} src={person.avatarUrl} /><div className="min-w-0 flex-1"><p className="truncate text-sm">{person.displayName}</p><p className="quiet-copy">@{person.username}</p></div><Button size="small" disabled={person.isFriend || person.isRequested} isLoading={isPending} onClick={person.onRequest}>{person.isFriend ? "Đã là bạn" : person.isRequested ? "Đã gửi" : "Kết bạn"}</Button></li>
+  return (
+    <li className="flex items-center gap-3 border-b border-[var(--border)] py-3">
+      <Avatar label={person.displayName} src={person.avatarUrl} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-[var(--text-primary)]">{person.displayName}</p>
+        <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed truncate">@{person.username}</p>
+      </div>
+      <Button
+        size="small"
+        disabled={person.isFriend || person.isRequested}
+        isLoading={isPending}
+        onClick={person.onRequest}
+      >
+        {person.isFriend ? "Đã là bạn" : person.isRequested ? "Đã gửi" : "Kết bạn"}
+      </Button>
+    </li>
+  )
 }

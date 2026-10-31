@@ -10,7 +10,10 @@ export interface RecentPeopleStripProps {
 /** Render the horizontally scrolling reference people strip. UI only. */
 export function RecentPeopleStrip({ people, isOnline }: RecentPeopleStripProps) {
   return (
-    <div className="people-strip" aria-label="Trò chuyện gần đây">
+    <div
+      className="flex gap-2.5 overflow-x-auto px-6 pt-1 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      aria-label="Trò chuyện gần đây"
+    >
       {people.map((person) => (
         <RecentPerson
           key={person.id}

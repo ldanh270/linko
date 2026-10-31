@@ -14,11 +14,30 @@ export interface MessageTimelineProps { readonly state: ReturnType<typeof useCon
 /** Render the independent scrolling history region and its pagination states. UI only. */
 export function MessageTimeline({ state }: MessageTimelineProps) {
   const { timelineRef, onLoadOlder } = useMessageTimeline(state.rows, state.query.fetchNextPage, state.conversationId)
-  return <div className="timeline" ref={timelineRef} aria-label="Tin nhắn" role="log" aria-live="polite">
-    {state.query.isFetchNextPageError && <ErrorState title="Không thể tải tin cũ hơn" onRetry={onLoadOlder} />}
-    {state.query.hasNextPage && <Button className="mb-5 w-full" variant="ghost" isLoading={state.query.isFetchingNextPage} onClick={onLoadOlder}>Tải tin cũ hơn</Button>}
-    {state.rows.length === 0 && <EmptyState title={state.header.search ? "Không tìm thấy tin nhắn đã tải" : "Chưa có tin nhắn"} description="Bắt đầu cuộc trò chuyện bằng tin nhắn đầu tiên." />}
-    {state.rows.map((message) => <MessageBubble key={message.id} message={message} />)}
-    {Boolean(state.typingNames) && <TypingBubble names={state.typingNames} />}
-  </div>
+  return (
+    <div
+      className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-6 pb-4 [scrollbar-width:thin] [scroll-padding-top:1.5rem] [scroll-padding-bottom:1rem]"
+      ref={timelineRef}
+      aria-label="Tin nhắn"
+      role="log"
+      aria-live="polite"
+    >
+      {state.query.isFetchNextPageError && <ErrorState title="Không thể tải tin cũ hơn" onRetry={onLoadOlder} />}
+      {state.query.hasNextPage && (
+        <Button className="mb-5 w-full" variant="ghost" isLoading={state.query.isFetchingNextPage} onClick={onLoadOlder}>
+          Tải tin cũ hơn
+        </Button>
+      )}
+      {state.rows.length === 0 && (
+        <EmptyState
+          title={state.header.search ? "Không tìm thấy tin nhắn đã tải" : "Chưa có tin nhắn"}
+          description="Bắt đầu cuộc trò chuyện bằng tin nhắn đầu tiên."
+        />
+      )}
+      {state.rows.map((message) => (
+        <MessageBubble key={message.id} message={message} />
+      ))}
+      {Boolean(state.typingNames) && <TypingBubble names={state.typingNames} />}
+    </div>
+  )
 }

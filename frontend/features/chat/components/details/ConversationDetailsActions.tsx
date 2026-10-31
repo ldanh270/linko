@@ -13,16 +13,19 @@ export interface ConversationDetailsActionsProps {
 export function ConversationDetailsActions({ details }: ConversationDetailsActionsProps) {
   const isGroup = details.kind === CHAT_KIND.GROUP
   return (
-    <div className="details-actions-section">
+    <div className="flex flex-col gap-3">
       {details.manageHref && (
-        <Link href={details.manageHref} className="details-action-link">
+        <Link
+          href={details.manageHref}
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[var(--text-primary)] text-[13px] hover:bg-[var(--surface-subtle)] transition-colors"
+        >
           <Icon name={ICON_NAMES.SETTINGS} />
           <span>{CHAT_DETAILS_COPY.MANAGE_GROUP}</span>
         </Link>
       )}
 
       {isGroup && (
-        <div className="details-danger-zone">
+        <div className="mt-1 pt-3 border-t border-[var(--border)]">
           <Button
             variant="danger"
             isLoading={details.isLeaving}

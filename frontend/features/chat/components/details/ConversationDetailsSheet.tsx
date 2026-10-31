@@ -23,9 +23,12 @@ export interface ConversationDetailsSheetProps {
 export function ConversationDetailsSheet({ details, onClose }: ConversationDetailsSheetProps) {
   const isGroup = details.kind === CHAT_KIND.GROUP
   return (
-    <aside className="conversation-details-sheet" aria-label={CHAT_DETAILS_COPY.SHEET_TITLE}>
-      <header className="conversation-details-header">
-        <h2 className="conversation-details-header-title">{CHAT_DETAILS_COPY.SHEET_TITLE}</h2>
+    <aside
+      className="w-[var(--details-width)] border-l border-[var(--border)] bg-[var(--surface)] flex flex-col h-full min-h-0"
+      aria-label={CHAT_DETAILS_COPY.SHEET_TITLE}
+    >
+      <header className="flex min-h-[var(--header-height)] items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">{CHAT_DETAILS_COPY.SHEET_TITLE}</h2>
         <IconButton
           label={CHAT_DETAILS_COPY.CLOSE}
           icon={<Icon name={ICON_NAMES.CLOSE} />}
@@ -33,16 +36,16 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
         />
       </header>
 
-      <div className="conversation-details-scroll">
+      <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#a2adb755_transparent] px-4 py-5 flex flex-col gap-5">
         <ConversationDetailsIdentity details={details} />
 
         {details.description && (
-          <div className="conversation-details-description">
+          <div className="p-3 rounded-[var(--radius-md)] bg-[var(--surface-subtle)] text-sm text-[var(--text-secondary)] leading-normal">
             <p>{details.description}</p>
           </div>
         )}
 
-        <div className="conversation-details-sections">
+        <div className="flex flex-col">
           <Accordion
             id="details-members"
             title={CHAT_DETAILS_COPY.SECTION_MEMBERS}

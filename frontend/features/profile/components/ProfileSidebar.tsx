@@ -18,16 +18,16 @@ export function ProfileSidebar() {
   const state = useProfileSidebar()
   return <SidebarPanel header={<SidebarHeader title="Hồ sơ của tôi" action={<IconButton label="Chỉnh sửa hồ sơ" icon={<Icon name={ICON_NAMES.MENU} />} onClick={state.onOpenEdit} disabled={!state.query.data} />} />}>
     {state.query.isPending ? <LoadingState label="Đang tải hồ sơ" /> : !state.query.data ? <ErrorState title="Không thể tải hồ sơ" onRetry={state.onRetry} /> : <>
-      {state.query.isError && <p role="alert" className="composer-error px-6">Không thể làm mới hồ sơ.</p>}
+      {state.query.isError && <p role="alert" className="text-xs text-[var(--danger)] px-6 mt-2">Không thể làm mới hồ sơ.</p>}
       <ProfileIdentity name={state.query.data[USER_PROFILE_FIELDS.DISPLAY_NAME]} username={state.query.data[USER_PROFILE_FIELDS.USERNAME]} avatarUrl={state.query.data[USER_PROFILE_FIELDS.AVATAR_URL]} />
-      <div className="profile-sections">
-        <p className="profile-biography">{state.query.data[USER_PROFILE_FIELDS.BIO] || "Chưa có giới thiệu."}</p>
-        <div className="profile-static-section">
-          <div className="profile-static-header">
+      <div className="p-6">
+        <p className="mb-6 text-[var(--text-secondary)] leading-normal [overflow-wrap:anywhere]">{state.query.data[USER_PROFILE_FIELDS.BIO] || "Chưa có giới thiệu."}</p>
+        <div className="border border-[var(--border)] rounded-[var(--radius-md)] bg-[var(--surface)] overflow-hidden">
+          <div className="flex items-center gap-2.5 w-full text-sm font-medium text-[var(--text-primary)] px-4 py-3 border-b border-[var(--border)]">
             <Icon name={ICON_NAMES.PROFILE} />
             <span>Giới thiệu</span>
           </div>
-          <div className="profile-static-content">
+          <div className="p-4 bg-[var(--surface)] text-sm">
             <ProfileAbout details={state.details} />
           </div>
         </div>

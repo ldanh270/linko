@@ -13,17 +13,32 @@ export interface ConversationListRowProps {
 export function ConversationListRow({ row, isActive, isOnline }: ConversationListRowProps) {
   return (
     <li>
-      <Link href={row.href} aria-current={isActive ? "page" : undefined} className="conversation-row">
+      <Link
+        href={row.href}
+        aria-current={isActive ? "page" : undefined}
+        className={`flex items-center min-h-[72px] gap-3 px-5 py-3 rounded-[var(--radius-md)] mb-0.5 transition-colors ${
+          isActive
+            ? "bg-[var(--input-surface)] text-[var(--text-primary)]"
+            : "hover:bg-[var(--input-surface)] text-[var(--text-primary)]"
+        }`}
+      >
         <Avatar label={row.title} src={row.avatarUrl} size="small" isOnline={isOnline} />
-        <span className="conversation-row-main">
-          <span className="conversation-row-heading">
-            <strong>{row.title}</strong>
-            {row.timestamp && <time dateTime={row.timestamp}>{row.timeLabel}</time>}
+        <span className="flex flex-col flex-1 min-w-0">
+          <span className="flex items-center justify-between gap-2 leading-normal">
+            <strong className="text-base font-semibold truncate text-[var(--text-primary)]">{row.title}</strong>
+            {row.timestamp && (
+              <time dateTime={row.timestamp} className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
+                {row.timeLabel}
+              </time>
+            )}
           </span>
-          <span className="conversation-row-preview">
+          <span className="flex items-center justify-between mt-1 gap-2 text-sm text-[var(--text-secondary)]">
             <span className="truncate">{row.preview}</span>
             {row.unreadCount > 0 && (
-              <span className="unread-badge" aria-label={`${row.unreadCount} tin chưa đọc`}>
+              <span
+                className="inline-grid place-items-center bg-[var(--badge-background)] text-[var(--badge-text)] text-[10px] font-bold min-w-5 min-h-5 px-1.5 rounded-full"
+                aria-label={`${row.unreadCount} tin chưa đọc`}
+              >
                 {row.unreadCount}
               </span>
             )}

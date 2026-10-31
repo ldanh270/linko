@@ -30,15 +30,20 @@ function ConversationPhotoThumb({ photo, onSelect }: ConversationPhotoThumbProps
   return (
     <button
       type="button"
-      className="details-photo-thumb"
+      className="aspect-square rounded-md overflow-hidden bg-[var(--input-surface)] block p-0 border-none cursor-pointer group disabled:cursor-default disabled:opacity-70"
       onClick={() => thumbnail.objectUrl && onSelect(photo, thumbnail.objectUrl)}
       disabled={!thumbnail.objectUrl}
       aria-label={`Xem ảnh ${photo.name}`}
     >
       {thumbnail.objectUrl ? (
-        <img src={thumbnail.objectUrl} alt={photo.name} loading="lazy" />
+        <img
+          src={thumbnail.objectUrl}
+          alt={photo.name}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+        />
       ) : (
-        <div className="details-photo-placeholder">
+        <div className="grid place-items-center w-full h-full text-[var(--text-secondary)] text-[20px]">
           <Icon name={ICON_NAMES.IMAGE} />
         </div>
       )}
@@ -53,15 +58,17 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
   const hasFiles = files.length > 0
 
   if (!hasPhotos && !hasFiles) {
-    return <p className="details-empty-notice">{CHAT_DETAILS_COPY.NO_MEDIA}</p>
+    return <p className="text-[13px] text-[var(--text-secondary)] text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_MEDIA}</p>
   }
 
   return (
-    <div className="details-media-section">
+    <div className="flex flex-col gap-4">
       {hasPhotos && (
-        <div className="details-photos-block">
-          <h4 className="details-subsection-title">{CHAT_DETAILS_COPY.PHOTOS}</h4>
-          <div className="details-photos-grid">
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+            {CHAT_DETAILS_COPY.PHOTOS}
+          </h4>
+          <div className="grid grid-cols-3 gap-1.5">
             {photos.map((photo) => (
               <ConversationPhotoThumb
                 key={photo.id}
@@ -74,20 +81,22 @@ export function ConversationDetailsMedia({ photos, files }: ConversationDetailsM
       )}
 
       {hasFiles && (
-        <div className="details-files-block">
-          <h4 className="details-subsection-title">{CHAT_DETAILS_COPY.FILES}</h4>
-          <ul className="details-files-list">
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+            {CHAT_DETAILS_COPY.FILES}
+          </h4>
+          <ul className="flex flex-col gap-1.5 list-none p-0 m-0">
             {files.map((file) => (
-              <li key={file.id} className="details-file-item">
-                <Link href={file.href} className="details-file-link" target="_blank">
-                  <span className="details-file-icon">
+              <li key={file.id} className="rounded-md transition-colors hover:bg-[var(--surface-subtle)]">
+                <Link href={file.href} className="flex items-center gap-2.5 px-2.5 py-2 no-underline text-inherit" target="_blank">
+                  <span className="grid place-items-center w-8 h-8 rounded-md bg-[var(--input-surface)] text-[var(--brand)] text-[18px] shrink-0">
                     <Icon name={ICON_NAMES.FILE} />
                   </span>
-                  <div className="details-file-meta">
-                    <span className="details-file-name">{file.name}</span>
-                    {file.sizeLabel && <span className="details-file-size">{file.sizeLabel}</span>}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">{file.name}</span>
+                    {file.sizeLabel && <span className="text-[11px] text-[var(--text-secondary)]">{file.sizeLabel}</span>}
                   </div>
-                  <Icon name={ICON_NAMES.DOWNLOAD} className="details-file-action" />
+                  <Icon name={ICON_NAMES.DOWNLOAD} className="text-[16px] text-[var(--text-secondary)] shrink-0" />
                 </Link>
               </li>
             ))}

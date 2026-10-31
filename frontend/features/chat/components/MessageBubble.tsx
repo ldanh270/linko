@@ -34,49 +34,97 @@ function renderHighlightedContent(content: string, query?: string) {
 
 /** Render an incoming or outgoing reference bubble with sender attribution. UI only. */
 export function MessageBubble({ message }: MessageBubbleProps) {
-  return <Fragment>
-    {message.showDate && <div className="message-date"><span>{message.dateLabel}</span></div>}
-    <article className={`message-row ${message.isOwn ? "message-row--own" : ""} ${message.isGroupEnd ? "" : "message-row--continuation"} ${message.isSearchActive ? "is-search-active" : ""}`} data-owner={message.isOwn ? "self" : "peer"} data-message-id={message.id}>
-      {message.isGroupEnd ? (
-        message.senderId ? (
-          <Link
-            href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: message.senderId })}
-            className="hover:opacity-85 transition-opacity flex-none"
-            title={`Xem hồ sơ của ${message.author}`}
-          >
-            <Avatar label={message.author} src={message.avatarUrl} size="small" />
-          </Link>
-        ) : (
-          <Avatar label={message.author} src={message.avatarUrl} size="small" />
-        )
-      ) : (
-        <span className="message-avatar-spacer" aria-hidden="true" />
+  return (
+    <Fragment>
+      {message.showDate && (
+        <div className="flex items-center gap-3 my-8 text-xs text-center before:content-[''] before:h-px before:bg-[var(--border)] before:flex-1 before:opacity-50 after:content-[''] after:h-px after:bg-[var(--border)] after:flex-1 after:opacity-50">
+          <span className="bg-[var(--bubble-outgoing)] px-2.5 py-1 rounded-[var(--radius-sm)] text-[var(--text-secondary)]">
+            {message.dateLabel}
+          </span>
+        </div>
       )}
-      <div className="message-stack"><div className="message-content-row">
-        <div className="message-bubble">
-          {message.isPinned && <span className="text-xs"><Icon name={ICON_NAMES.PIN} /> Đã ghim</span>}
-          {message.reply && (
-            <div className="message-reply-preview">
-              <span className="message-reply-author">{message.reply.author}</span>
-              <p className="message-reply-content">{message.reply.content}</p>
-            </div>
-          )}
-          <p>{renderHighlightedContent(message.content, message.searchQuery)}</p>
-          {message.attachments.map((file) => <MessageAttachment key={file.id} file={file} />)}
-          <time className="message-time" dateTime={message.createdAt}><Icon name={ICON_NAMES.CLOCK} />{message.time}</time>
-        </div><DropdownMenu label={CHAT_COPY.MESSAGE_ACTIONS} items={message.actions} />
-      </div>{message.isGroupEnd && (
-        message.senderId && !message.isOwn ? (
-          <Link
-            href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: message.senderId })}
-            className="message-sender hover:underline"
-          >
-            {message.author}
-          </Link>
+      <article
+        className={`flex items-end gap-3 ${message.isOwn ? "flex-row-reverse" : ""} ${
+          message.isGroupEnd ? "mb-5" : "mb-2"
+        } ${message.isSearchActive ? "is-search-active" : ""}`}
+        data-owner={message.isOwn ? "self" : "peer"}
+        data-message-id={message.id}
+      >
+        {message.isGroupEnd ? (
+          message.senderId ? (
+            <Link
+              href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: message.senderId })}
+              className="hover:opacity-85 transition-opacity flex-none"
+              title={`Xem hồ sơ của ${message.author}`}
+            >
+              <Avatar label={message.author} src={message.avatarUrl} size="small" />
+            </Link>
+          ) : (
+            <Avatar label={message.author} src={message.avatarUrl} size="small" />
+          )
         ) : (
-          <p className="message-sender">{message.author}</p>
-        )
-      )}</div>
-    </article>
-  </Fragment>
+          <span className="flex-none w-9" aria-hidden="true" />
+        )}
+        <div className="max-w-[min(78%,600px)] min-w-0">
+          <div className={`flex items-start gap-1 ${message.isOwn ? "flex-row-reverse" : ""}`}>
+            <div
+              className={`relative px-4 py-2.5 rounded-[var(--radius-lg)] min-w-[70px] ${
+                message.isOwn
+                  ? "rounded-br-none bg-[var(--bubble-outgoing)] text-[var(--text-primary)] after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-[var(--bubble-outgoing)] after:border-r-[var(--bubble-outgoing)] after:right-0 after:-bottom-[9px]"
+                  : "rounded-bl-none bg-[var(--brand)] text-[var(--brand-contrast)] after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-[var(--brand)] after:border-l-[var(--brand)] after:left-0 after:-bottom-[9px]"
+              }`}
+            >
+              {message.isPinned && (
+                <span className="flex items-center gap-1 text-xs mb-1 opacity-80">
+                  <Icon name={ICON_NAMES.PIN} /> Đã ghim
+                </span>
+              )}
+              {message.reply && (
+                <div
+                  className={`flex flex-col gap-0.5 px-2.5 py-1.5 mb-2 rounded-[var(--radius-sm)] text-xs border-l-[3px] ${
+                    message.isOwn
+                      ? "bg-black/5 border-[var(--brand)] text-inherit"
+                      : "bg-white/15 border-white/85 text-inherit"
+                  }`}
+                >
+                  <span className="font-semibold text-[11px] opacity-90">{message.reply.author}</span>
+                  <p className="truncate opacity-85 m-0 text-xs">{message.reply.content}</p>
+                </div>
+              )}
+              <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-sm leading-normal">
+                {renderHighlightedContent(message.content, message.searchQuery)}
+              </p>
+              {message.attachments.map((file) => (
+                <MessageAttachment key={file.id} file={file} />
+              ))}
+              <time
+                className={`flex items-center gap-[3px] mt-1 text-xs ${
+                  message.isOwn ? "justify-start text-[var(--text-secondary)] opacity-100" : "justify-end opacity-65"
+                }`}
+                dateTime={message.createdAt}
+              >
+                <Icon name={ICON_NAMES.CLOCK} />
+                {message.time}
+              </time>
+            </div>
+            <DropdownMenu label={CHAT_COPY.MESSAGE_ACTIONS} items={message.actions} />
+          </div>
+          {message.isGroupEnd && (
+            message.senderId && !message.isOwn ? (
+              <Link
+                href={buildAppRoute(APP_ROUTES.USER_PROFILE, { userId: message.senderId })}
+                className="block text-xs text-[var(--text-secondary)] mt-2 hover:underline"
+              >
+                {message.author}
+              </Link>
+            ) : (
+              <p className={`text-xs text-[var(--text-secondary)] mt-2 ${message.isOwn ? "text-right" : ""}`}>
+                {message.author}
+              </p>
+            )
+          )}
+        </div>
+      </article>
+    </Fragment>
+  )
 }

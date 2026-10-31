@@ -7,5 +7,17 @@ export interface ContactRowProps { readonly contact: ReturnType<typeof usePeople
 
 /** Render the reference's compact name/action row. UI only. */
 export function ContactRow({ contact }: ContactRowProps) {
-  return <li className="contact-row"><Button variant="ghost" className="contact-name" disabled={contact.isOpening} onClick={contact.onOpen}>{contact.name}</Button><DropdownMenu label={`Tùy chọn ${contact.name}`} items={contact.menu} /></li>
+  return (
+    <li className="flex items-center min-h-11 px-4 py-1 gap-2 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--input-surface)]">
+      <Button
+        variant="ghost"
+        className="flex-1 min-w-0 text-left truncate text-base text-[var(--text-primary)] hover:text-[var(--brand)] font-normal justify-start p-0"
+        disabled={contact.isOpening}
+        onClick={contact.onOpen}
+      >
+        {contact.name}
+      </Button>
+      <DropdownMenu label={`Tùy chọn ${contact.name}`} items={contact.menu} />
+    </li>
+  )
 }

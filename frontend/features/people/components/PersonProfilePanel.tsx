@@ -9,5 +9,20 @@ export interface PersonProfilePanelProps { readonly state: ReturnType<typeof use
 
 /** Render the selected public profile as a focused dialog. UI only. */
 export function PersonProfilePanel({ state }: PersonProfilePanelProps) {
-  return <Modal title="Hồ sơ" onClose={state.onCloseProfile}>{state.profile.isPending ? <LoadingState label="Đang tải hồ sơ" /> : state.profile.isError || !state.profile.data ? <ErrorState title="Không tìm thấy hồ sơ" /> : <section className="grid justify-items-center gap-3"><Avatar label={state.profile.data.displayName} src={state.profile.data.avatarUrl} size="large" /><h2 className="font-semibold">{state.profile.data.displayName}</h2><p className="quiet-copy">@{state.profile.data.username}</p><p>{state.profile.data.bio}</p></section>}</Modal>
+  return (
+    <Modal title="Hồ sơ" onClose={state.onCloseProfile}>
+      {state.profile.isPending ? (
+        <LoadingState label="Đang tải hồ sơ" />
+      ) : state.profile.isError || !state.profile.data ? (
+        <ErrorState title="Không tìm thấy hồ sơ" />
+      ) : (
+        <section className="grid justify-items-center gap-3">
+          <Avatar label={state.profile.data.displayName} src={state.profile.data.avatarUrl} size="large" />
+          <h2 className="font-semibold text-[var(--text-primary)]">{state.profile.data.displayName}</h2>
+          <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">@{state.profile.data.username}</p>
+          <p className="text-sm text-[var(--text-primary)]">{state.profile.data.bio}</p>
+        </section>
+      )}
+    </Modal>
+  )
 }

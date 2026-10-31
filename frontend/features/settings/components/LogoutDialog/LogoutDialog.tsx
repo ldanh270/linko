@@ -7,5 +7,24 @@ export interface LogoutDialogProps { readonly state: ReturnType<typeof useLogout
 
 /** Render the destructive-session confirmation with shared focus behavior. UI only. */
 export function LogoutDialog({ state }: LogoutDialogProps) {
-  return <Modal title="Đăng xuất khỏi Linko?" onClose={state.onClose}><p className="quiet-copy">Bạn sẽ cần đăng nhập lại để xem tin nhắn.</p>{state.error && <p className="composer-error" role="alert">{state.error}</p>}<div className="mt-6 flex justify-end gap-3"><Button variant="secondary" disabled={state.isPending} onClick={state.onClose}>Ở lại</Button><Button variant="danger" isLoading={state.isPending} onClick={state.onConfirm}>Đăng xuất</Button></div></Modal>
+  return (
+    <Modal title="Đăng xuất khỏi Linko?" onClose={state.onClose}>
+      <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">
+        Bạn sẽ cần đăng nhập lại để xem tin nhắn.
+      </p>
+      {state.error && (
+        <p className="text-xs text-[var(--danger)] mt-2" role="alert">
+          {state.error}
+        </p>
+      )}
+      <div className="mt-6 flex justify-end gap-3">
+        <Button variant="secondary" disabled={state.isPending} onClick={state.onClose}>
+          Ở lại
+        </Button>
+        <Button variant="danger" isLoading={state.isPending} onClick={state.onConfirm}>
+          Đăng xuất
+        </Button>
+      </div>
+    </Modal>
+  )
 }

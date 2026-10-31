@@ -11,7 +11,7 @@ export interface ConversationListProps {
 /** Render the shared compact inbox list. UI only. */
 export function ConversationList({ rows, activeConversationId, isOnline }: ConversationListProps) {
   return (
-    <ul className="conversation-list">
+    <ul className="px-2">
       {rows.map((row) => (
         <ConversationListRow
           key={row.id}
