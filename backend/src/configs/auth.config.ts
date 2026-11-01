@@ -5,7 +5,7 @@ import type { AuthCookieConfiguration } from "../modules/auth/auth.types"
 
 const authEnvironmentSchema = zod.object({
     [AUTH_ENV_KEYS.ACCESS_TOKEN_SECRET]: zod.string().min(32),
-    [AUTH_ENV_KEYS.CLIENT_ORIGIN]: zod.string().url(),
+    [AUTH_ENV_KEYS.CLIENT_ORIGIN]: zod.string().url().transform((origin) => origin.replace(/\/+$/, "")),
     [AUTH_ENV_KEYS.COOKIE_SECURE]: zod.enum(["true", "false"]).default("false"),
     [AUTH_ENV_KEYS.COOKIE_SAME_SITE]: zod.enum(["lax", "strict", "none"]).default("lax"),
 }).superRefine((environment, context) => {
