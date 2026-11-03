@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest"
 import { getWorkspaceLocation, withConversation } from "./workspace.navigation"
 
 describe("workspace navigation", () => {
+  it.each(["/settings", "/people", "/profile", "/profile/bbbbbbbbbbbbbbbbbbbbbbbb", "/notifications"])("keeps %s standalone despite a conversation selection", (path) => {
+    expect(getWorkspaceLocation(path, "aaaaaaaaaaaaaaaaaaaaaaaa")).toEqual({ conversationId: "aaaaaaaaaaaaaaaaaaaaaaaa", isConversationView: false, isDetail: true })
+  })
   it("should_keep_canonical_selection_when_a_query_names_another_chat", () => {
     expect(getWorkspaceLocation("/direct/aaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbb")).toMatchObject({ conversationId: "aaaaaaaaaaaaaaaaaaaaaaaa", isConversationView: true })
   })

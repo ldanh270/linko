@@ -17,6 +17,8 @@ describe("useTypingIndicator", () => {
     expect(result.current.typingUserIds).toEqual(["peer"])
     rerender({ id: "chat-b" })
     expect(result.current.typingUserIds).toEqual([])
+    rerender({ id: "chat-a" })
+    expect(result.current.typingUserIds).toEqual([])
   })
 
   it("ignores self and other chats, expires stale typing and clears on disconnect", () => {

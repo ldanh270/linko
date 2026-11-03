@@ -6,12 +6,15 @@ import { getSharedChatSocket } from "../api/chatSocket"
 
 /** Realtime typing hook tracks users typing in the active conversation. */
 export function useTypingIndicator(conversationId: string, currentUserId?: string) {
-  const [typingState, setTypingState] = useState<{ conversationId: string; ids: readonly string[] }>({ conversationId, ids: [] })
+  const scope = `${conversationId}:${currentUserId ?? ""}`
+  const [typingState, setTypingState] = useState<{ scope: string; ids: readonly string[] }>({ scope, ids: [] })
+  /** Reset during a scope change so returning to a previously visited chat cannot revive expired state. */
+  if (typingState.scope !== scope) setTypingState({ scope, ids: [] })
   const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   useEffect(() => {
     const setTypingUserIds = (update: (current: readonly string[]) => readonly string[]) => {
-      setTypingState((current) => ({ conversationId, ids: update(current.conversationId === conversationId ? current.ids : []) }))
+      setTypingState((current) => ({ scope, ids: update(current.scope === scope ? current.ids : []) }))
     }
     const socket = getSharedChatSocket()
     const timeouts = timeoutsRef.current
@@ -56,7 +59,7 @@ export function useTypingIndicator(conversationId: string, currentUserId?: strin
       timeouts.forEach((timer) => clearTimeout(timer))
       timeouts.clear()
     }
-  }, [conversationId, currentUserId])
+  }, [conversationId, currentUserId, scope])
 
-  return { typingUserIds: typingState.conversationId === conversationId ? typingState.ids : [] }
+  return { typingUserIds: typingState.scope === scope ? typingState.ids : [] }
 }

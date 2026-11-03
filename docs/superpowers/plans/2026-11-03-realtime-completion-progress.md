@@ -19,3 +19,9 @@
 - RED: the real repository incorrectly authorized a participant with leftAt set. Added the missing active-participant filter; full backend suite passed: 47 files / 253 tests, including Redis integration, with backend typecheck passing.
 
 - Task 4 (session acceptance): a new failing auth test proved refresh failure retained the old realtime transport. Both expiry paths now reset the socket session, and an expired bootstrap cannot later restore authenticated UI. Auth tests passed.
+
+- Task 4 (route acceptance): seven Playwright scenarios passed, covering five standalone routes with/without selection at 390px/1440px, no mounted timeline/composer, no hidden mark-read, viewport changes, Back and refresh. Existing profile E2E expectation was corrected to require no chat DOM.
+- RED: browser history test returned about:blank because filter changes replaced the initial entry. Both existing chat-details/inbox-filter effects also failed lint by mirroring URL state into local state. These controls now use the shared URL hook directly; Back/Refresh passed and full frontend lint is clean.
+- RED: visiting A, B then A revived stale typing after its timeout had been cleared. Receiver state now resets for conversation/account scope changes; the expanded regression test passes. Next.js acceptance also caught an import before the client directive; that placement is corrected.
+- Ruling: fixed the two existing URL-state lint errors in the related inbox/chat hooks instead of disabling lint rules. This removes duplicate state, preserves discrete selections in history and satisfies the required URL-source-of-truth rule. No unrelated page redesign was introduced.
+- Full frontend suite before the last acceptance refinements passed 65 files / 212 tests; changed auth/typing/layout tests were rerun successfully. Final build and whole-branch review follow.

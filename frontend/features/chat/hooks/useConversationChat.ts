@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { MESSAGE_FIELDS, type CursorPage, type MessageDto } from "@linko/contracts"
+import { type CursorPage, type MessageDto } from "@linko/contracts"
 import type { InfiniteData } from "@tanstack/react-query"
 import { useCurrentProfile } from "@/features/profile/hooks/useCurrentProfile"
 import { updateInboxItemWithNewMessage } from "@/features/inbox/inbox.cache"

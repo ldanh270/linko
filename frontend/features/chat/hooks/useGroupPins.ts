@@ -1,5 +1,6 @@
-import { CHAT_QUERY_KEYS } from "../chat.constants"
 "use client"
+
+import { CHAT_QUERY_KEYS } from "../chat.constants"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { listPins, pinMessage, unpinMessage } from "@/features/groups/api/pins.api"

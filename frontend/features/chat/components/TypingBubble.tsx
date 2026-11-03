@@ -13,7 +13,7 @@ export interface TypingBubbleProps {
 export function TypingBubble({ names, avatarUrl }: TypingBubbleProps) {
   const { copy } = useI18n()
   return (
-    <div className="flex items-end gap-2 my-1.5 pl-0.5 animate-in fade-in duration-200" aria-live="polite">
+    <div className="flex items-end gap-2 my-1.5 pl-0.5 animate-in fade-in duration-200 motion-reduce:animate-none" aria-live="polite">
       {avatarUrl !== undefined && <Avatar label={names} src={avatarUrl} size="small" />}
       <div className="inline-flex items-center gap-2 bg-surface-subtle border border-border rounded-2xl px-3 py-1.5 shadow-xs">
         <div className="flex items-center gap-1">
