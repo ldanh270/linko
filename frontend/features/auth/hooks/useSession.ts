@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query"
 
 import { AUTH_CLIENT_EVENTS, AUTH_CLIENT_ROUTES, AUTH_SESSION_STATUS } from "../auth.constants"
 import { refreshSession } from "../api/auth.api"
+import { resetSharedChatSocket } from "@/features/chat/api/chatSocket"
 import { useSignOut } from "./useSignOut"
 
 /** Current client-side auth bootstrap state. */
@@ -26,8 +27,11 @@ export function useSession(): SessionState {
 
     useEffect(() => {
         let isMounted = true
+        let isExpired = false
         const handleSessionExpired = () => {
             if (!isMounted) return
+            isExpired = true
+            resetSharedChatSocket()
             setStatus(AUTH_SESSION_STATUS.UNAUTHENTICATED)
             void queryClient.cancelQueries().finally(() => queryClient.clear())
             router.replace(AUTH_CLIENT_ROUTES.LOGIN)
@@ -35,13 +39,8 @@ export function useSession(): SessionState {
 
         window.addEventListener(AUTH_CLIENT_EVENTS.SESSION_EXPIRED, handleSessionExpired)
         void refreshSession().then(() => {
-            if (isMounted) setStatus(AUTH_SESSION_STATUS.AUTHENTICATED)
-        }).catch(() => {
-            if (!isMounted) return
-            setStatus(AUTH_SESSION_STATUS.UNAUTHENTICATED)
-            void queryClient.cancelQueries().finally(() => queryClient.clear())
-            router.replace(AUTH_CLIENT_ROUTES.LOGIN)
-        })
+            if (isMounted && !isExpired) setStatus(AUTH_SESSION_STATUS.AUTHENTICATED)
+        }).catch(handleSessionExpired)
 
         return () => {
             isMounted = false

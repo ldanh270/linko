@@ -7,10 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { AUTH_CLIENT_ROUTES } from "../auth.constants"
 
-const { replaceRoute, router } = vi.hoisted(() => {
+const { replaceRoute, router, resetSocket } = vi.hoisted(() => {
     const replaceRoute = vi.fn()
-    return { replaceRoute, router: { replace: replaceRoute } }
+    return { replaceRoute, router: { replace: replaceRoute }, resetSocket: vi.fn() }
 })
+
+vi.mock("@/features/chat/api/chatSocket", () => ({ resetSharedChatSocket: resetSocket }))
 
 vi.mock("next/navigation", () => ({ useRouter: () => router }))
 vi.mock("@/features/settings/components/NotificationToastsListener", () => ({
@@ -38,6 +40,7 @@ function unauthorizedResponse(): Response {
 beforeEach(() => {
     vi.resetModules()
     replaceRoute.mockReset()
+    resetSocket.mockReset()
 })
 afterEach(() => {
     cleanup()
@@ -69,6 +72,7 @@ describe("useSession", () => {
 
         expect(screen.queryByText("private conversation")).not.toBeInTheDocument()
         await waitFor(() => expect(replaceRoute).toHaveBeenCalledWith(AUTH_CLIENT_ROUTES.LOGIN))
+        expect(resetSocket).toHaveBeenCalled()
         expect(screen.queryByText("private conversation")).not.toBeInTheDocument()
 
         await expect(authApi.authenticatedApiClient.request({ path: API_ROUTES.CONVERSATIONS })).rejects.toMatchObject({ status: 401 })

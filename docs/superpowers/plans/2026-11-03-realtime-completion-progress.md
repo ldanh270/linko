@@ -17,3 +17,5 @@
 
 - Task 4 (server acceptance): native WebSocket tests exercise real Engine.IO/Socket.IO handshakes with two signed accounts, direct/group typing, one delivery for overlapping rooms, private-room delivery in another tab, final disconnect and reconnect using actual MongoDB and Redis.
 - RED: the real repository incorrectly authorized a participant with leftAt set. Added the missing active-participant filter; full backend suite passed: 47 files / 253 tests, including Redis integration, with backend typecheck passing.
+
+- Task 4 (session acceptance): a new failing auth test proved refresh failure retained the old realtime transport. Both expiry paths now reset the socket session, and an expired bootstrap cannot later restore authenticated UI. Auth tests passed.
