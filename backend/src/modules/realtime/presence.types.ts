@@ -20,6 +20,8 @@ export interface PresenceStore extends PresenceReader {
 /** Remote storage exposes readiness without hidden connection attempts. */
 export interface RemotePresenceStore extends PresenceStore {
     readonly isReady: boolean
+    /** Monotonic connection epoch changes even if an outage happens between lifecycle calls. */
+    readonly generation: number
     /** Open the injected remote connection before accepting traffic. */
     initialize(): Promise<void>
     /** Close the owned connection during shutdown. */
@@ -30,6 +32,12 @@ export interface RemotePresenceStore extends PresenceStore {
 export interface PresenceRepository {
     /** Persist final connection time through the system audit aspect. */
     updateLastActive(userId: string, at: Date): Promise<void>
+}
+
+/** Observational persistence cannot reject already-completed presence transitions. */
+export interface PresenceActivityRecorder {
+    /** Record last-active state; infrastructure failures are reported by the injected aspect. */
+    recordOffline(userId: string, at: Date): Promise<void>
 }
 
 /** Lifecycle port shared by the gateway and composition root. */
@@ -48,7 +56,7 @@ export interface PresenceLifecycle extends PresenceReader {
 export interface PresenceDependencies {
     readonly primary?: RemotePresenceStore | null
     readonly fallback: PresenceStore
-    readonly repository: PresenceRepository
+    readonly activityRecorder: PresenceActivityRecorder
     readonly onError: (error: unknown) => void
     readonly onOffline: (userId: string) => void
     readonly now?: () => number

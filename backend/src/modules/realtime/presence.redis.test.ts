@@ -70,7 +70,7 @@ describe.skipIf(!url)("Redis presence integration", () => {
         const { redis, bitmap } = await fixture()
         const service = new PresenceService({
             primary: new RedisPresenceSessions(redis, bitmap), fallback: new MemoryPresenceStore(),
-            repository: { updateLastActive: async () => {} }, onError: (error) => { throw error }, onOffline: () => {},
+            activityRecorder: { recordOffline: async () => {} }, onError: (error) => { throw error }, onOffline: () => {},
         })
         const first = { userId, socketId: "first" }
         const otherId = "507f1f77bcf86cd799439012"
@@ -83,6 +83,22 @@ describe.skipIf(!url)("Redis presence integration", () => {
         expect(await service.getPresenceBatch([userId, otherId])).toEqual({ [userId]: false, [otherId]: true })
         expect(await bitmap.isOnline(userId)).toBe(false)
         expect(await bitmap.isOnline(otherId)).toBe(true)
+    })
+
+    it("reconciles lost keys after a reconnect that occurs between service calls", async () => {
+        const { redis, bitmap, prefix } = await fixture()
+        const primary = new RedisPresenceSessions(redis, bitmap)
+        const service = new PresenceService({ primary, fallback: new MemoryPresenceStore(),
+            activityRecorder: { recordOffline: async () => {} }, onError: (error) => { throw error }, onOffline: () => {} })
+        await service.connect({ userId, socketId: "live-socket" })
+        const generation = primary.generation
+        const keys = await redis.keys(`${prefix}*`)
+        await redis.del(...keys)
+        await new Promise<void>((resolve) => { redis.once("end", () => resolve()); redis.disconnect() })
+        await redis.connect()
+        expect(primary.generation).toBeGreaterThan(generation)
+        expect(await service.getPresenceBatch([userId])).toEqual({ [userId]: true })
+        expect(await bitmap.isOnline(userId)).toBe(true)
     })
 })
 

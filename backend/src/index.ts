@@ -1,4 +1,5 @@
 import "dotenv/config"
+import { BestEffortPresenceActivityRecorder } from "./modules/realtime/presence.activity"
 import mongoose from "mongoose"
 import { createRedisClient } from "./configs/redis.config"
 import { PresenceService } from "./modules/realtime/presence.service"
@@ -36,7 +37,7 @@ const redis = createRedisClient(recordRealtimeFailure)
 if (!redis && process.env.NODE_ENV === "production") recordRealtimeFailure(new Error(PRESENCE_MESSAGES.REDIS_MISSING))
 const presence = new PresenceService({
     primary: redis ? new RedisPresenceSessions(redis, new BitmapPresenceStore(redis)) : null,
-    fallback: new MemoryPresenceStore(), repository: new MongoosePresenceRepository(),
+    fallback: new MemoryPresenceStore(), activityRecorder: new BestEffortPresenceActivityRecorder(new MongoosePresenceRepository(), recordRealtimeFailure),
     onError: recordRealtimeFailure, onOffline: (userId) => realtimeGateway.publishPresence(userId, false),
 })
 const realtimeRepository = new MongooseRealtimeRepository()

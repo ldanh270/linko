@@ -1,4 +1,4 @@
-import { PRESENCE_TIMING } from "./presence.constants"
+import { PRESENCE_MESSAGES, PRESENCE_TIMING } from "./presence.constants"
 import type { PresenceConnection, PresenceDependencies, PresenceLifecycle, RemotePresenceStore } from "./presence.types"
 
 /** Coordinate leases and recovery independently of Redis and Mongoose.
@@ -8,7 +8,7 @@ export class PresenceService implements PresenceLifecycle {
     private readonly active = new Map<string, PresenceConnection>()
     private readonly departed = new Map<string, PresenceConnection>()
     private pending: Promise<unknown> = Promise.resolve()
-    private synchronized = false
+    private synchronizedGeneration: number | null = null
     private timer: ReturnType<typeof setInterval> | null = null
 
     /** Inject storage, fallback and infrastructure failure reporting. */
@@ -50,7 +50,7 @@ export class PresenceService implements PresenceLifecycle {
             if (this.dependencies.primary) this.departed.set(connection.socketId, connection)
             const changed = await this.dependencies.fallback.disconnect(connection, this.now())
             await this.remote((store) => store.disconnect(connection, this.now()))
-            if (changed) await this.dependencies.repository.updateLastActive(connection.userId, new Date(this.now()))
+            if (changed) await this.dependencies.activityRecorder.recordOffline(connection.userId, new Date(this.now()))
             return changed
         })
     }
@@ -71,24 +71,26 @@ export class PresenceService implements PresenceLifecycle {
 
     private async remote<T>(operation: (store: RemotePresenceStore) => Promise<T>): Promise<T | undefined> {
         const primary = this.dependencies.primary
-        if (!primary?.isReady) { this.synchronized = false; return undefined }
+        if (!primary?.isReady) { this.synchronizedGeneration = null; return undefined }
+        const generation = primary.generation
         try {
-            if (!this.synchronized) await this.reconcile(primary)
+            if (this.synchronizedGeneration !== generation) await this.reconcile(primary, generation)
             const result = await operation(primary)
+            if (primary.generation !== generation) throw new Error(PRESENCE_MESSAGES.REDIS_UNAVAILABLE)
             this.departed.clear()
             return result
         } catch (error) {
-            this.synchronized = false
+            this.synchronizedGeneration = null
             this.dependencies.onError(error)
             return undefined
         }
     }
 
-    private async reconcile(primary: RemotePresenceStore): Promise<void> {
+    private async reconcile(primary: RemotePresenceStore, generation: number): Promise<void> {
         for (const connection of this.departed.values()) await primary.disconnect(connection, this.now())
         for (const connection of this.active.values()) await primary.connect(connection, this.now())
         await this.publishExpired(await primary.cleanup(this.now()))
-        this.synchronized = true
+        this.synchronizedGeneration = generation
     }
 
     private async maintain(): Promise<void> {
@@ -101,7 +103,7 @@ export class PresenceService implements PresenceLifecycle {
 
     private async publishExpired(userIds: readonly string[]): Promise<void> {
         for (const userId of userIds) {
-            await this.dependencies.repository.updateLastActive(userId, new Date(this.now()))
+            await this.dependencies.activityRecorder.recordOffline(userId, new Date(this.now()))
             this.dependencies.onOffline(userId)
         }
     }

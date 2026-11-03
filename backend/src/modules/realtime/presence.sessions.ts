@@ -11,11 +11,17 @@ const SESSION_OPERATIONS = { CONNECT: "connect", DISCONNECT: "disconnect", PRUNE
  * @layer Repository
  */
 export class RedisPresenceSessions implements RemotePresenceStore {
+    private connectionGeneration = 0
+    private readonly onReady = (): void => { this.connectionGeneration += 1 }
+
     /** Inject bitmap mapping and connection ownership from the composition root. */
-    constructor(private readonly redis: Redis, private readonly bitmap: BitmapPresenceStore) {}
+    constructor(private readonly redis: Redis, private readonly bitmap: BitmapPresenceStore) { redis.on("ready", this.onReady) }
 
     /** Report transport readiness so orchestration can reconcile before reading. */
     get isReady(): boolean { return this.redis.status === "ready" }
+
+    /** Identify reconnects that happen entirely between heartbeat or snapshot calls. */
+    get generation(): number { return this.connectionGeneration }
 
     /** Establish the configured lazy connection once. */
     async initialize(): Promise<void> {
@@ -24,7 +30,7 @@ export class RedisPresenceSessions implements RemotePresenceStore {
     }
 
     /** Release Redis resources without leaving reconnect timers alive. */
-    async close(): Promise<void> { this.redis.disconnect() }
+    async close(): Promise<void> { this.redis.off("ready", this.onReady); this.redis.disconnect() }
 
     /** Renew a socket lease and return whether the user became online. */
     async connect(connection: PresenceConnection, now: number): Promise<boolean> {

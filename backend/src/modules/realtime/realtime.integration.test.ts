@@ -1,3 +1,4 @@
+import { BestEffortPresenceActivityRecorder } from "./presence.activity"
 import { CONVERSATION_FIELDS, PARTICIPANT_FIELDS } from "../conversation/conversation.constants"
 import { randomUUID } from "node:crypto"
 import { createServer } from "node:http"
@@ -30,7 +31,7 @@ describe.skipIf(!url)("authenticated realtime with MongoDB and Redis", () => {
     const tokens = new AuthTokenService("realtime-integration-test-signing-secret")
     const errors: unknown[] = []
     const presence = new PresenceService({ primary: new RedisPresenceSessions(redis, new BitmapPresenceStore(redis, prefix)),
-        fallback: new MemoryPresenceStore(), repository: new MongoosePresenceRepository(), onError: (error) => errors.push(error),
+        fallback: new MemoryPresenceStore(), activityRecorder: new BestEffortPresenceActivityRecorder(new MongoosePresenceRepository(), (error) => errors.push(error)), onError: (error) => errors.push(error),
         onOffline: (userId) => gateway.publishPresence(userId, false) })
     const gateway = new RealtimeGateway({ repository, tokenVerifier: tokens, typing: new TypingService(repository), presence, onError: (error) => errors.push(error) })
     const http = createServer()
