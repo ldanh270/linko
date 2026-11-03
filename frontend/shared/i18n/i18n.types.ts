@@ -120,6 +120,7 @@ export interface TranslationDictionary {
     readonly retry: string
   }
   readonly chat: {
+    readonly typingStatus: string
     readonly placeholderSendOnEnter: string
     readonly placeholderSendOnClick: string
     readonly sendBtn: string

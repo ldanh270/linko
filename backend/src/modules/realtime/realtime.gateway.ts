@@ -64,41 +64,14 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
                 }
             })
 
-            socket.on(SOCKET_EVENTS.TYPING_START, (payload: unknown) => {
-                if (typeof payload === "object" && payload !== null && "conversationId" in payload) {
-                    const conversationId = (payload as { conversationId: unknown }).conversationId
-                    if (typeof conversationId === "string" && REGEX.MONGO_ID.test(conversationId)) {
-                        void this.dependencies.repository.isCurrentMember(conversationId, userId).then((isMember) => {
-                            if (isMember) {
-                                socket.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, {
-                                    conversationId,
-                                    userId,
-                                    isTyping: true,
-                                })
-                            }
-                        })
-                    }
-                }
-            })
-
-            socket.on(SOCKET_EVENTS.TYPING_STOP, (payload: unknown) => {
-                if (typeof payload === "object" && payload !== null && "conversationId" in payload) {
-                    const conversationId = (payload as { conversationId: unknown }).conversationId
-                    if (typeof conversationId === "string" && REGEX.MONGO_ID.test(conversationId)) {
-                        socket.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, {
-                            conversationId,
-                            userId,
-                            isTyping: false,
-                        })
-                    }
-                }
-            })
+            this.registerTyping(socket, userId)
 
             socket.on(SOCKET_EVENTS.CONVERSATION_JOIN, (conversationId: unknown, acknowledge?: (joined: boolean) => void) => {
                 void this.joinConversation(socket, conversationId).then((joined) => acknowledge?.(joined))
             })
 
             socket.on("disconnect", () => {
+                this.dependencies.typing?.release(socket.id)
                 void presenceService.onDisconnect(userId).then((isOffline) => {
                     if (isOffline) {
                         server.emit(SOCKET_EVENTS.PRESENCE_OFFLINE, {
@@ -164,6 +137,19 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
                 [REALTIME_FIELDS.USER_ID]: userId,
             })
         }
+    }
+
+    private registerTyping(socket: RealtimeSocket, userId: string): void {
+        let pending = Promise.resolve()
+        const enqueue = (payload: unknown, isTyping: boolean): void => {
+            pending = pending.then(async () => {
+                if (!socket.connected) return
+                const event = await this.dependencies.typing?.update({ userId, socketId: socket.id, payload, isTyping })
+                if (event && socket.connected) socket.to(conversationRoom(event.conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, event)
+            }).catch((error: unknown) => this.dependencies.onError?.(error))
+        }
+        socket.on(SOCKET_EVENTS.TYPING_START, (payload: unknown) => enqueue(payload, true))
+        socket.on(SOCKET_EVENTS.TYPING_STOP, (payload: unknown) => enqueue(payload, false))
     }
 
     private requireServer(): Server {

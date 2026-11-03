@@ -1,9 +1,24 @@
+import type { KeyboardEvent } from "react"
 import { act, renderHook } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { useMessageComposer } from "./useMessageComposer"
 import type { ComposerRequest, SendCallbacks } from "../chat.types"
 
 describe("message composer", () => {
+  it("does not send Enter while an IME composition is active", () => {
+    const onSend = vi.fn()
+    const { result } = renderHook(() => useMessageComposer({ onSend, isSending: false, kind: "direct" }))
+    act(() => result.current.onContentChange("Tiếng Việt"))
+    act(() => result.current.onKeyDown({ key: "Enter", nativeEvent: { isComposing: true } } as unknown as KeyboardEvent<HTMLTextAreaElement>))
+    expect(onSend).not.toHaveBeenCalled()
+    expect(result.current.content).toBe("Tiếng Việt")
+  })
+  it("stops typing when the draft is emptied", () => {
+    const onStopTyping = vi.fn()
+    const { result } = renderHook(() => useMessageComposer({ onSend: vi.fn(), onStopTyping, isSending: false, kind: "direct" }))
+    act(() => result.current.onContentChange(""))
+    expect(onStopTyping).toHaveBeenCalledOnce()
+  })
   it("should_preserve_retry_identity_until_content_changes", () => {
     const onSend = vi.fn((_input: ComposerRequest, callbacks: SendCallbacks) => callbacks.onError())
     const { result } = renderHook(() => useMessageComposer({ onSend, isSending: false, kind: "direct" }))

@@ -1,3 +1,4 @@
+import { TypingService } from "./modules/realtime/realtime.typing"
 import "dotenv/config"
 import { createServer } from "node:http"
 
@@ -20,9 +21,12 @@ publicRoutes.get("/", (_request, response) => response.json(ApiResponse.ok({ sta
 const privateRoutes = express.Router()
 
 const authConfig = loadAuthConfig()
+const realtimeRepository = new MongooseRealtimeRepository()
 const realtimeGateway = new RealtimeGateway({
+    typing: new TypingService(realtimeRepository),
+    onError: (error) => logger.error(error instanceof Error ? error : new Error(String(error)), { requestId: "realtime", method: "SOCKET", path: "/socket.io" }),
     tokenVerifier: new AuthTokenService(authConfig.accessTokenSecret),
-    repository: new MongooseRealtimeRepository(),
+    repository: realtimeRepository,
 })
 const app = createApp({ publicRoutes, privateRoutes, logger, authConfig, realtimeGateway })
 const server = createServer(app)

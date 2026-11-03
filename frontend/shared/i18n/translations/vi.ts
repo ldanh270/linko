@@ -120,6 +120,7 @@ export const viTranslations: TranslationDictionary = {
     retry: "Thử lại",
   },
   chat: {
+    typingStatus: "đang soạn tin...",
     placeholderSendOnEnter: "Nhập tin nhắn (Enter để gửi)...",
     placeholderSendOnClick: "Nhập tin nhắn (Ctrl+Enter để gửi)...",
     sendBtn: "Gửi tin nhắn",

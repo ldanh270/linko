@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter, useSearchParams } from "next/navigation"
 import { z } from "zod"
-import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS, SOCKET_EVENTS } from "@linko/contracts"
+import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS } from "@linko/contracts"
 import { useQueryParamState } from "@/shared/url/useQueryParamState"
 import { WORKSPACE_PARAMS } from "@/shared/layout/workspace.constants"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
@@ -17,7 +17,8 @@ import { useGroupPins } from "./useGroupPins"
 import { useMessageComposer } from "./useMessageComposer"
 import { useConversationDetails } from "./useConversationDetails"
 import { useTypingIndicator } from "./useTypingIndicator"
-import { getSharedChatSocket } from "../api/chatSocket"
+import { useTypingEmitter } from "./useTypingEmitter"
+import { useChatPreferences } from "../preferences/useChatPreferences"
 import { mapTimeline } from "../chat.mapper"
 import { CHAT_ACCESS_ERRORS, CHAT_COPY, CHAT_KIND, CHAT_QUERY_KEYS } from "../chat.constants"
 import { ApiError } from "@/shared/http/ApiError"
@@ -40,38 +41,18 @@ export function useConversationPane(item: InboxItemDto) {
   const isComposerDisabled = !query.data || !profile.data || isHistoryUnavailable || isIdentityUnavailable
 
   const queryClient = useQueryClient()
-  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    if (id) {
-      clearInboxItemUnreadCount(queryClient, id)
-    }
-    return () => {
-      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-      getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
-    }
-  }, [id, queryClient])
-
-  const emitTyping = () => {
-    getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_START, { conversationId: id })
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-    typingTimerRef.current = setTimeout(() => {
-      getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
-    }, 2500)
-  }
-
-  const stopTyping = () => {
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-    getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
-  }
+  const { preferences } = useChatPreferences()
+  const { onTyping, onStopTyping } = useTypingEmitter({ conversationId: id, isEnabled: preferences.showTypingIndicator && !isComposerDisabled })
+  useEffect(() => { clearInboxItemUnreadCount(queryClient, id) }, [id, queryClient])
 
   const composer = useMessageComposer({
     kind,
     isSending: send.isPending,
     isDisabled: isComposerDisabled,
-    onTyping: emitTyping,
+    onTyping,
+    onStopTyping,
     onSend: (req, cb) => {
-      stopTyping()
+      onStopTyping()
       send.mutate(req, cb)
     },
   })

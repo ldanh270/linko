@@ -120,6 +120,7 @@ export const enTranslations: TranslationDictionary = {
     retry: "Retry",
   },
   chat: {
+    typingStatus: "is typing...",
     placeholderSendOnEnter: "Type a message (Enter to send)...",
     placeholderSendOnClick: "Type a message (Ctrl+Enter to send)...",
     sendBtn: "Send message",
