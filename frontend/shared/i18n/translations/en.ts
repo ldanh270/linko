@@ -107,6 +107,12 @@ export const enTranslations: TranslationDictionary = {
     logoutBtn: "Sign out of this device",
   },
   notifications: {
+    newMessage: "You have a new message",
+    enableBrowser: "Enable browser notifications",
+    browserEnabled: "Browser notifications enabled",
+    browserDenied: "Notifications are blocked. Change this in your browser site settings.",
+    browserUnsupported: "This browser does not support desktop notifications.",
+    browserDescription: "Receive message alerts while this app is open in a background tab.",
     title: "Notifications",
     eyebrow: "Activity & Updates",
     description: "Track your friend requests, message activity, and system updates.",

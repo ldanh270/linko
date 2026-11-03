@@ -107,6 +107,12 @@ export interface TranslationDictionary {
     readonly logoutBtn: string
   }
   readonly notifications: {
+    readonly newMessage: string
+    readonly enableBrowser: string
+    readonly browserEnabled: string
+    readonly browserDenied: string
+    readonly browserUnsupported: string
+    readonly browserDescription: string
     readonly title: string
     readonly eyebrow: string
     readonly description: string

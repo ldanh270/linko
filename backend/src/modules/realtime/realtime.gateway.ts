@@ -94,14 +94,9 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
         const server = this.requireServer()
         const conversationId = message[MESSAGE_FIELDS.CONVERSATION_ID]
         const senderId = message[MESSAGE_FIELDS.SENDER_ID]
-        server.to(conversationRoom(conversationId))
-            .emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
-
         const memberIds = await this.dependencies.repository.listCurrentMemberIds(conversationId)
-        for (const memberId of memberIds) {
-            if (memberId === senderId) continue
-            server.to(userRoom(memberId)).emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
-        }
+        const rooms = [conversationRoom(conversationId), ...memberIds.filter((id) => id !== senderId).map(userRoom)]
+        server.to(rooms).emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
     }
 
     /** Tell current room listeners to reload the conversation summary. */

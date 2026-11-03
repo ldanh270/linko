@@ -4,7 +4,7 @@ import { SOCKET_EVENTS } from "@linko/contracts"
 import { usePresence } from "./usePresence"
 import { resetSharedChatSocket } from "@/features/chat/api/chatSocket"
 
-const { listeners, emit, disconnect, socketFactory } = vi.hoisted(() => {
+const { listeners, emit, socketFactory } = vi.hoisted(() => {
   const listeners = new Map<string, (...args: unknown[]) => void>()
   const emit = vi.fn((event: string, ids: string[], ack: (statuses: Record<string, boolean>) => void) => {
     if (event === "presence:query") ack(Object.fromEntries(ids.map((id) => [id, true])))

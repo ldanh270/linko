@@ -24,6 +24,8 @@ vi.mock("../api/notification.api", () => ({ getGroupNotificationPreference: getP
 import { ToastContext, type ToastState } from "../../../shared/components/useToast"
 import { getActiveGroupConversationId } from "../notification.constants"
 import { useNotificationToasts } from "./useNotificationToasts"
+vi.mock("@/features/profile/hooks/useCurrentProfile", () => ({ useCurrentProfile: () => ({ data: { id: "me" } }) }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 
 const ACTIVE_CONVERSATION_ID = "507f1f77bcf86cd799439011"
 const OTHER_CONVERSATION_ID = "507f1f77bcf86cd799439012"
@@ -66,12 +68,12 @@ describe("useNotificationToasts", () => {
         renderHook(() => useNotificationToasts(ACTIVE_CONVERSATION_ID), { wrapper: withToast(toast) })
 
         await publishMessage(socket, createMessage(ACTIVE_CONVERSATION_ID))
-        expect(getPreferenceMock).not.toHaveBeenCalled()
+        expect(getPreferenceMock).toHaveBeenCalledTimes(1)
         expect(toast.show).not.toHaveBeenCalled()
 
         await publishMessage(socket, createMessage(OTHER_CONVERSATION_ID))
 
-        expect(getPreferenceMock).toHaveBeenCalledTimes(1)
+        expect(getPreferenceMock).toHaveBeenCalledTimes(2)
         expect(toast.show).toHaveBeenCalledTimes(1)
     })
 
@@ -92,7 +94,7 @@ describe("useNotificationToasts", () => {
 
         await publishMessage(socket, createMessage(OTHER_CONVERSATION_ID))
         await waitFor(() => expect(toast.show).toHaveBeenCalledTimes(1))
-        await publishMessage(socket, createMessage(OTHER_CONVERSATION_ID))
+        await publishMessage(socket, { ...createMessage(OTHER_CONVERSATION_ID), id: "next-message" })
         await waitFor(() => expect(getPreferenceMock).toHaveBeenCalledTimes(2))
 
         expect(toast.show).toHaveBeenCalledTimes(1)
@@ -142,7 +144,7 @@ function withToast(toast: ToastState) {
 
 function createMessage(conversationId: string): MessageDto {
     return {
-        [MESSAGE_FIELDS.ID]: "507f1f77bcf86cd799439013",
+        [MESSAGE_FIELDS.ID]: conversationId,
         [MESSAGE_FIELDS.CONVERSATION_ID]: conversationId,
         [MESSAGE_FIELDS.SENDER_ID]: "507f1f77bcf86cd799439014",
         [MESSAGE_FIELDS.CLIENT_MESSAGE_ID]: "notification-message",
