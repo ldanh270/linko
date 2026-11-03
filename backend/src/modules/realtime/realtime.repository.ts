@@ -30,6 +30,7 @@ export class MongooseRealtimeRepository implements RealtimeRepository {
                 $elemMatch: {
                     [REALTIME_MODEL_FIELDS.PARTICIPANT_USER_ID]: new mongoose.Types.ObjectId(userId),
                     [REALTIME_MODEL_FIELDS.PARTICIPANT_DEL_FLAG]: { $ne: true },
+                    [REALTIME_MODEL_FIELDS.PARTICIPANT_LEFT_AT]: null,
                 },
             },
         })) !== null
