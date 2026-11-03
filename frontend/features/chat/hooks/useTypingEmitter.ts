@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react"
 import { SOCKET_EVENTS, TYPING_TIMING } from "@linko/contracts"
-import { getSharedChatSocket } from "../api/chatSocket"
+import { getSharedChatSocket, type ChatSocket } from "../api/chatSocket"
 
 /** Recipient and sender privacy preference for ephemeral typing updates. */
 export interface TypingEmitterOptions {
@@ -17,21 +17,25 @@ export interface TypingEmitterOptions {
 export function useTypingEmitter({ conversationId, isEnabled }: TypingEmitterOptions) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastRefresh = useRef<number | null>(null)
+  const senderSocket = useRef<ChatSocket | null>(null)
 
   const onStopTyping = useCallback(() => {
     if (timer.current) clearTimeout(timer.current)
     timer.current = null
     const wasTyping = lastRefresh.current !== null
     lastRefresh.current = null
-    const socket = getSharedChatSocket()
-    if (wasTyping && socket.connected) socket.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId })
+    const socket = senderSocket.current
+    senderSocket.current = null
+    if (wasTyping && socket?.connected) socket.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId })
   }, [conversationId])
 
   useEffect(() => onStopTyping, [onStopTyping, isEnabled])
 
   const onTyping = useCallback(() => {
+    if (!isEnabled) return
     const socket = getSharedChatSocket()
-    if (!isEnabled || !socket.connected) return
+    if (!socket.connected) return
+    senderSocket.current = socket
     const now = Date.now()
     if (lastRefresh.current === null || now - lastRefresh.current >= TYPING_TIMING.REFRESH_MS) {
       socket.emit(SOCKET_EVENTS.TYPING_START, { conversationId })

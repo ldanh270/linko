@@ -3,11 +3,23 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { SOCKET_EVENTS } from "@linko/contracts"
 import { useTypingEmitter } from "./useTypingEmitter"
 
-const { socket } = vi.hoisted(() => ({ socket: { connected: true, emit: vi.fn() } }))
-vi.mock("../api/chatSocket", () => ({ getSharedChatSocket: () => socket }))
-afterEach(() => { vi.useRealTimers(); socket.emit.mockClear(); socket.connected = true })
+const { socket, getSocket } = vi.hoisted(() => {
+  const socket = { connected: true, emit: vi.fn() }
+  return { socket, getSocket: vi.fn(() => socket) }
+})
+vi.mock("../api/chatSocket", () => ({ getSharedChatSocket: getSocket }))
+afterEach(() => { vi.useRealTimers(); socket.emit.mockClear(); getSocket.mockClear(); socket.connected = true })
 
 describe("useTypingEmitter", () => {
+  it("does not recreate a socket when logout resets the session before unmount", () => {
+    const { result, unmount } = renderHook(() => useTypingEmitter({ conversationId: "chat-a", isEnabled: true }))
+    act(() => result.current.onTyping())
+    const lookups = getSocket.mock.calls.length
+    socket.connected = false
+    unmount()
+    expect(getSocket).toHaveBeenCalledTimes(lookups)
+    expect(socket.emit).toHaveBeenCalledTimes(1)
+  })
   it("refreshes at most once a second and stops after idle", () => {
     vi.useFakeTimers()
     const { result } = renderHook(() => useTypingEmitter({ conversationId: "chat-a", isEnabled: true }))
