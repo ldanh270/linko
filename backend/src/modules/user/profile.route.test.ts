@@ -78,7 +78,7 @@ function createTestApp(options: { readonly imageStorage?: ProfileImageStorage } 
         repository: new MongooseFriendRepository(),
         transactionRunner: { run: withTransaction },
     }))))
-    app.use(API_ROUTES.USERS, createProfileRouter(new ProfileController(service)))
+    app.use(API_ROUTES.USERS, createProfileRouter(new ProfileController(service, { getPresenceBatch: async () => ({}) })))
     app.use(createGlobalErrorHandler(logger))
     return app
 }

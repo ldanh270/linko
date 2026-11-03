@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useRef, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { z } from "zod"
-import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS, SOCKET_EVENTS } from "@linko/contracts"
+import { CONVERSATION_TYPE, type InboxItemDto, INBOX_FIELDS, USER_PROFILE_FIELDS, PIN_LIMITS } from "@linko/contracts"
 import { useQueryParamState } from "@/shared/url/useQueryParamState"
-import { WORKSPACE_PARAMS } from "@/shared/layout/workspace.constants"
+import { WORKSPACE_PARAMS, WORKSPACE_BOOLEAN_VALUES } from "@/shared/layout/workspace.constants"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
 import { useWorkspaceNavigation } from "@/shared/layout/useWorkspaceNavigation"
 import { useCurrentProfile } from "@/features/profile/hooks/useCurrentProfile"
@@ -17,11 +17,14 @@ import { useGroupPins } from "./useGroupPins"
 import { useMessageComposer } from "./useMessageComposer"
 import { useConversationDetails } from "./useConversationDetails"
 import { useTypingIndicator } from "./useTypingIndicator"
-import { getSharedChatSocket } from "../api/chatSocket"
+import { useTypingEmitter } from "./useTypingEmitter"
+import { useChatPreferences } from "../preferences/useChatPreferences"
 import { mapTimeline } from "../chat.mapper"
 import { CHAT_ACCESS_ERRORS, CHAT_COPY, CHAT_KIND, CHAT_QUERY_KEYS } from "../chat.constants"
 import { ApiError } from "@/shared/http/ApiError"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
+
+const DETAILS_SCHEMA = z.string().transform((value) => value === WORKSPACE_BOOLEAN_VALUES.TRUE || value === WORKSPACE_BOOLEAN_VALUES.LEGACY_TRUE)
 
 /** Prepare conversation data and callbacks without coupling JSX to query/mutation details. */
 export function useConversationPane(item: InboxItemDto) {
@@ -40,38 +43,18 @@ export function useConversationPane(item: InboxItemDto) {
   const isComposerDisabled = !query.data || !profile.data || isHistoryUnavailable || isIdentityUnavailable
 
   const queryClient = useQueryClient()
-  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    if (id) {
-      clearInboxItemUnreadCount(queryClient, id)
-    }
-    return () => {
-      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-      getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
-    }
-  }, [id, queryClient])
-
-  const emitTyping = () => {
-    getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_START, { conversationId: id })
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-    typingTimerRef.current = setTimeout(() => {
-      getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
-    }, 2500)
-  }
-
-  const stopTyping = () => {
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-    getSharedChatSocket().emit(SOCKET_EVENTS.TYPING_STOP, { conversationId: id })
-  }
+  const { preferences } = useChatPreferences()
+  const { onTyping, onStopTyping } = useTypingEmitter({ conversationId: id, isEnabled: preferences.showTypingIndicator && !isComposerDisabled })
+  useEffect(() => { clearInboxItemUnreadCount(queryClient, id) }, [id, queryClient])
 
   const composer = useMessageComposer({
     kind,
     isSending: send.isPending,
     isDisabled: isComposerDisabled,
-    onTyping: emitTyping,
+    onTyping,
+    onStopTyping,
     onSend: (req, cb) => {
-      stopTyping()
+      onStopTyping()
       send.mutate(req, cb)
     },
   })
@@ -174,42 +157,11 @@ export function useConversationPane(item: InboxItemDto) {
     }
   }, [isSearchOpen, search, onCloseSearch])
 
-  const searchParams = useSearchParams()
-  const urlDetailsParam = searchParams.get(WORKSPACE_PARAMS.DETAILS)
-  const [isDetailsOpen, setIsDetailsOpen] = useState(
-    urlDetailsParam === "true" || urlDetailsParam === "1"
+  const { value: isDetailsOpen, setValue: setDetailsOpen } = useQueryParamState(
+    WORKSPACE_PARAMS.DETAILS, DETAILS_SCHEMA, false,
   )
-
-  useEffect(() => {
-    const isParamOpen = urlDetailsParam === "true" || urlDetailsParam === "1"
-    setIsDetailsOpen(isParamOpen)
-  }, [urlDetailsParam])
-
-  const syncDetailsToUrl = useCallback((nextOpen: boolean) => {
-    if (typeof window === "undefined") return
-    const params = new URLSearchParams(window.location.search)
-    if (nextOpen) {
-      params.set(WORKSPACE_PARAMS.DETAILS, "true")
-    } else {
-      params.delete(WORKSPACE_PARAMS.DETAILS)
-    }
-    const qs = params.toString()
-    const nextUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}`
-    window.history.replaceState(null, "", nextUrl)
-  }, [])
-
-  const onToggleDetails = useCallback(() => {
-    setIsDetailsOpen((prev) => {
-      const next = !prev
-      syncDetailsToUrl(next)
-      return next
-    })
-  }, [syncDetailsToUrl])
-
-  const onCloseDetails = useCallback(() => {
-    setIsDetailsOpen(false)
-    syncDetailsToUrl(false)
-  }, [syncDetailsToUrl])
+  const onToggleDetails = useCallback(() => setDetailsOpen(!isDetailsOpen), [isDetailsOpen, setDetailsOpen])
+  const onCloseDetails = useCallback(() => setDetailsOpen(false), [setDetailsOpen])
 
   const details = useConversationDetails({
     item,

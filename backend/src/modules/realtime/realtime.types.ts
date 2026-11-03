@@ -1,3 +1,5 @@
+import type { PresenceLifecycle } from "./presence.types"
+import type { TypingHandler } from "./realtime.typing"
 import type { MessageDto } from "@linko/contracts"
 import type { Types } from "mongoose"
 import type { Socket } from "socket.io"
@@ -49,6 +51,9 @@ export interface RealtimeConversationNotifier {
 
 /** Dependencies for the Socket.IO authorization and event gateway. */
 export interface RealtimeGatewayDependencies {
+    readonly presence?: PresenceLifecycle
+    readonly typing?: TypingHandler
+    readonly onError?: (error: unknown) => void
     readonly tokenVerifier: RealtimeTokenVerifier
     readonly repository: RealtimeRepository
 }

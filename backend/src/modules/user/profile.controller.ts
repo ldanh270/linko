@@ -4,7 +4,7 @@ import mongoose from "mongoose"
 
 import { HttpStatusCode } from "../../configs/constants/httpStatusCode"
 import { ApiResponse } from "../../shared/http/ApiResponse"
-import { presenceService } from "../realtime/presence.service"
+import type { PresenceReader } from "../realtime/presence.types"
 import { PROFILE_FIELDS, PROFILE_ROUTE_PARAMS } from "./profile.constants"
 import { ProfileService } from "./profile.service"
 import type { UpdateProfileInput } from "./profile.types"
@@ -15,7 +15,7 @@ import type { UpdateProfileInput } from "./profile.types"
  */
 export class ProfileController {
     /** Bind profile use cases without coupling business rules to Express. */
-    constructor(private readonly service: ProfileService) {}
+    constructor(private readonly service: ProfileService, private readonly presence: PresenceReader) {}
 
     /** Return private profile data for the authenticated owner. */
     readonly getMine: RequestHandler<Record<string, string>, ApiEnvelope<ProfileDto>, Record<string, never>> = async (request, response) => {
@@ -26,8 +26,7 @@ export class ProfileController {
     /** Return batch presence statuses for requested user IDs. */
     readonly getPresence: RequestHandler<Record<string, string>, ApiEnvelope<Record<string, boolean>>, Record<string, never>, { ids?: string }> = async (request, response) => {
         const rawIds = typeof request.query.ids === "string" ? request.query.ids.split(",") : []
-        const userIds = rawIds.filter((id) => mongoose.Types.ObjectId.isValid(id))
-        const presence = await presenceService.getPresenceBatch(userIds)
+        const presence = await this.presence.getPresenceBatch([...new Set(rawIds)])
         response.status(HttpStatusCode.OK).json(ApiResponse.ok(presence))
     }
 

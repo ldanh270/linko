@@ -19,6 +19,13 @@ const CONVERSATION_ID = new mongoose.Types.ObjectId("507f1f77bcf86cd799439013")
 const MESSAGE_ID = "507f1f77bcf86cd799439014"
 
 describe("RealtimeGateway", () => {
+    it("emits one delivery for overlapping conversation and private recipient rooms", async () => {
+        const transport = createTransport()
+        const gateway = createGateway({ repository: { listCurrentMemberIds: async () => [OTHER_USER_ID.toString()] } })
+        gateway.register(transport.server)
+        await gateway.publishMessage(createMessage())
+        expect(transport.emit).toHaveBeenCalledTimes(1)
+    })
     it("should_reject_a_socket_without_a_valid_access_token", async () => {
         const gateway = createGateway({ tokenVerifier: { verifyAccessToken: vi.fn().mockReturnValue(null) } })
 
@@ -67,7 +74,7 @@ describe("RealtimeGateway", () => {
         await gateway.publishMessage(message)
 
         expect(transport.emit).toHaveBeenCalledWith(SOCKET_EVENTS.MESSAGE_CREATED, message)
-        expect(transport.server.to).toHaveBeenCalledWith(expect.stringContaining(CONVERSATION_ID.toString()))
+        expect(transport.server.to).toHaveBeenCalledWith(expect.arrayContaining([expect.stringContaining(CONVERSATION_ID.toString())]))
     })
 
     it("should_fan_out_message_events_to_other_current_members_private_rooms", async () => {
@@ -80,8 +87,8 @@ describe("RealtimeGateway", () => {
         await gateway.publishMessage(message)
 
         expect(listCurrentMemberIds).toHaveBeenCalledWith(CONVERSATION_ID.toString())
-        expect(transport.server.to).toHaveBeenCalledWith(userRoom(OTHER_USER_ID.toString()))
-        expect(transport.server.to).not.toHaveBeenCalledWith(userRoom(USER_ID.toString()))
+        expect(transport.server.to).toHaveBeenCalledWith(expect.arrayContaining([userRoom(OTHER_USER_ID.toString())]))
+        expect(transport.server.to).not.toHaveBeenCalledWith(expect.arrayContaining([userRoom(USER_ID.toString())]))
         expect(transport.emit).toHaveBeenCalledWith(SOCKET_EVENTS.MESSAGE_CREATED, message)
     })
 

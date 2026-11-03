@@ -1,3 +1,4 @@
+import { presenceQuerySchema } from "../realtime/presence.schema"
 import { USER_ROUTE_PATHS } from "@linko/contracts"
 import express, { type Router } from "express"
 
@@ -10,7 +11,7 @@ import { parseProfileImages } from "./profile.upload"
 export function createProfileRouter(controller: ProfileController): Router {
     const router = express.Router()
     router.get(USER_ROUTE_PATHS.ME, controller.getMine)
-    router.get(USER_ROUTE_PATHS.PRESENCE, controller.getPresence)
+    router.get(USER_ROUTE_PATHS.PRESENCE, validate(presenceQuerySchema), controller.getPresence)
     router.get(USER_ROUTE_PATHS.BY_ID, validate(publicProfileParamsSchema), controller.getPublic)
     router.patch(USER_ROUTE_PATHS.ME, parseProfileImages, validate(updateProfileSchema), controller.updateMine)
     return router

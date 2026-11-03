@@ -1,69 +1,44 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
-import { getSharedChatSocket } from "@/features/chat/api/chatSocket"
-import { notificationSound } from "@/shared/sound/notificationSound"
+import { useEffect, useRef, useState } from "react"
+import { useI18n } from "@/shared/i18n/useI18n"
+import { getBrowserNotificationPermission } from "../api/browserNotification"
+import { NOTIFICATION_PERMISSION } from "../notification.constants"
 
-/** Realtime browser push notification integration. */
+/**
+ * Manage permission through explicit user gestures without creating another socket subscription.
+ * @returns Permission state, accessible copy and the enable action for settings UI.
+ */
 export function usePushNotifications() {
-  const [permission, setPermission] = useState<NotificationPermission>(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      return Notification.permission
-    }
-    return "default"
-  })
+  const [permission, setPermission] = useState(getBrowserNotificationPermission)
+  const [isRequesting, setRequesting] = useState(false)
+  const inFlight = useRef(false)
+  const { copy } = useI18n()
+  const isSupported = typeof window !== "undefined" && "Notification" in window
+  useEffect(() => {
+    const refresh = () => setPermission(getBrowserNotificationPermission())
+    window.addEventListener("focus", refresh)
+    return () => window.removeEventListener("focus", refresh)
+  }, [])
 
   const requestPermission = async (): Promise<boolean> => {
-    if (typeof window === "undefined" || !("Notification" in window)) return false
+    if (!isSupported || inFlight.current || getBrowserNotificationPermission() === NOTIFICATION_PERMISSION.DENIED) return false
+    inFlight.current = true
+    setRequesting(true)
     try {
       const result = await Notification.requestPermission()
       setPermission(result)
-      return result === "granted"
-    } catch {
-      return false
-    }
+      return result === NOTIFICATION_PERMISSION.GRANTED
+    } catch { return false }
+    finally { inFlight.current = false; setRequesting(false) }
   }
-
-  const sendPushNotification = (title: string, options?: NotificationOptions) => {
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-      try {
-        new Notification(title, {
-          icon: "/favicon.ico",
-          ...options,
-        })
-      } catch {
-        // Fallback or ignored if browser blocks
-      }
-    }
-  }
-
-  // Listen to background messages when document is hidden
-  useEffect(() => {
-    if (typeof window === "undefined" || !("Notification" in window)) return
-    const socket = getSharedChatSocket()
-
-    const onMessage = (message: MessageDto) => {
-      if (document.hidden) {
-        if (Notification.permission === "granted") {
-          sendPushNotification("Linko: Tin nhắn mới", {
-            body: message.content || "Bạn vừa nhận được một tệp đính kèm mới.",
-          })
-        }
-        notificationSound.play()
-      }
-    }
-
-    socket.on(SOCKET_EVENTS.MESSAGE_CREATED, onMessage)
-    return () => {
-      socket.off(SOCKET_EVENTS.MESSAGE_CREATED, onMessage)
-    }
-  }, [])
-
+  const isEnabled = permission === NOTIFICATION_PERMISSION.GRANTED
+  const isDenied = permission === NOTIFICATION_PERMISSION.DENIED
   return {
-    permission,
-    isSupported: typeof window !== "undefined" && "Notification" in window,
-    requestPermission,
-    sendPushNotification,
+    permission, isSupported, isRequesting, requestPermission,
+    onEnable: () => { void requestPermission() },
+    isDisabled: !isSupported || isEnabled || isDenied,
+    label: isEnabled ? copy.notifications.browserEnabled : copy.notifications.enableBrowser,
+    description: !isSupported ? copy.notifications.browserUnsupported : isDenied ? copy.notifications.browserDenied : copy.notifications.browserDescription,
   }
 }

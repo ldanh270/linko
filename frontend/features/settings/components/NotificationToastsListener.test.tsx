@@ -10,6 +10,8 @@ vi.mock("@/features/chat/api/chatSocket", () => ({
   createChatSocket: socketMock,
   getSharedChatSocket: socketMock,
 }))
+vi.mock("@/features/profile/hooks/useCurrentProfile", () => ({ useCurrentProfile: () => ({ data: { id: "me" } }) }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("../api/notification.api", () => ({ getGroupNotificationPreference: preferenceMock }))
 vi.mock("@/shared/layout/useWorkspaceNavigation", () => ({ useWorkspaceNavigation: () => ({ conversationId: "aaaaaaaaaaaaaaaaaaaaaaaa", isConversationView: false, isDetail: false }) }))
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })

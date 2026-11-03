@@ -107,6 +107,12 @@ export interface TranslationDictionary {
     readonly logoutBtn: string
   }
   readonly notifications: {
+    readonly newMessage: string
+    readonly enableBrowser: string
+    readonly browserEnabled: string
+    readonly browserDenied: string
+    readonly browserUnsupported: string
+    readonly browserDescription: string
     readonly title: string
     readonly eyebrow: string
     readonly description: string
@@ -120,6 +126,7 @@ export interface TranslationDictionary {
     readonly retry: string
   }
   readonly chat: {
+    readonly typingStatus: string
     readonly placeholderSendOnEnter: string
     readonly placeholderSendOnClick: string
     readonly sendBtn: string

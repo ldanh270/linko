@@ -107,6 +107,12 @@ export const viTranslations: TranslationDictionary = {
     logoutBtn: "Đăng xuất khỏi thiết bị",
   },
   notifications: {
+    newMessage: "Bạn có tin nhắn mới",
+    enableBrowser: "Bật thông báo trình duyệt",
+    browserEnabled: "Đã bật thông báo trình duyệt",
+    browserDenied: "Thông báo đang bị chặn. Hãy đổi quyền trong cài đặt trang của trình duyệt.",
+    browserUnsupported: "Trình duyệt này không hỗ trợ thông báo trên màn hình.",
+    browserDescription: "Nhận thông báo tin nhắn khi ứng dụng còn mở trong tab nền.",
     title: "Thông báo",
     eyebrow: "Hoạt động & Cập nhật",
     description: "Theo dõi lời mời kết bạn, hoạt động tin nhắn và thông báo hệ thống của bạn.",
@@ -120,6 +126,7 @@ export const viTranslations: TranslationDictionary = {
     retry: "Thử lại",
   },
   chat: {
+    typingStatus: "đang soạn tin...",
     placeholderSendOnEnter: "Nhập tin nhắn (Enter để gửi)...",
     placeholderSendOnClick: "Nhập tin nhắn (Ctrl+Enter để gửi)...",
     sendBtn: "Gửi tin nhắn",

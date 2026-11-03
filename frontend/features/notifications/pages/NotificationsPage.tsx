@@ -3,6 +3,7 @@
 import { Button } from "@/shared/components/Button"
 import { Avatar } from "@/shared/components/Avatar"
 import { NotificationsListSkeleton } from "@/shared/components/Skeleton"
+import { BrowserNotificationPermission } from "../components/BrowserNotificationPermission"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EmptyState } from "@/shared/components/EmptyState"
 import { PageHeader } from "@/shared/components/PageHeader"
@@ -29,6 +30,8 @@ export function NotificationsPage() {
         title={copy.notifications.title}
         description={copy.notifications.description}
       />
+
+      <BrowserNotificationPermission />
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 border-b border-border pb-3">

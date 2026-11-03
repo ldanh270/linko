@@ -12,6 +12,7 @@ export class NotificationSoundPlayer {
   private lastPlayedAt: number = 0
   public static readonly COOLDOWN_MS = 800
 
+  /** Restore the user preference without requiring browser storage support. */
   constructor() {
     if (typeof window !== "undefined") {
       try {
@@ -25,10 +26,15 @@ export class NotificationSoundPlayer {
     }
   }
 
+  /** Read the latest stored preference so changes in another tab take effect. */
   isEnabled(): boolean {
-    return this.enabled
+    try {
+      const stored = typeof window !== "undefined" ? localStorage.getItem(SOUND_STORAGE_KEY) : null
+      return stored === null ? this.enabled : stored === "true"
+    } catch { return this.enabled }
   }
 
+  /** Persist the explicit user choice for later alerts. */
   setEnabled(value: boolean): void {
     this.enabled = value
     if (typeof window !== "undefined") {
@@ -60,12 +66,14 @@ export class NotificationSoundPlayer {
     }
   }
 
+  /** Reset playback timing for an explicit preview action. */
   resetCooldown(): void {
     this.lastPlayedAt = 0
   }
 
+  /** Play at most once per cooldown, respecting permission and sound preference. */
   play(): void {
-    if (!this.enabled || typeof window === "undefined") return
+    if (!this.isEnabled() || typeof window === "undefined") return
 
     const now = Date.now()
     if (now - this.lastPlayedAt < NotificationSoundPlayer.COOLDOWN_MS) {
@@ -115,4 +123,5 @@ export class NotificationSoundPlayer {
   }
 }
 
+/** Shared sound output for message delivery and explicit settings previews. */
 export const notificationSound = new NotificationSoundPlayer()

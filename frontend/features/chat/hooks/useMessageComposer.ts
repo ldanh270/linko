@@ -14,10 +14,11 @@ export interface MessageComposerOptions {
   readonly isDisabled?: boolean
   readonly onSend: (input: ComposerRequest, callbacks: SendCallbacks) => void
   readonly onTyping?: () => void
+  readonly onStopTyping?: () => void
 }
 
 /** Own a recipient-scoped draft, upload validation and stable retry identity. */
-export function useMessageComposer({ kind, isSending, isDisabled = false, onSend, onTyping }: MessageComposerOptions) {
+export function useMessageComposer({ kind, isSending, isDisabled = false, onSend, onTyping, onStopTyping }: MessageComposerOptions) {
   const [content, setContent] = useState("")
   const [replyId, setReplyId] = useState<string | null>(null)
   const [files, setFiles] = useState<readonly File[]>([])
@@ -33,7 +34,8 @@ export function useMessageComposer({ kind, isSending, isDisabled = false, onSend
     setContent(value)
     retryId.current = null
     setShowMentions(kind === CHAT_KIND.GROUP && value.endsWith("@"))
-    onTyping?.()
+    if (value.trim()) onTyping?.()
+    else onStopTyping?.()
   }
 
   const validateFiles = (selected: readonly File[]): string | null => {
@@ -155,6 +157,7 @@ export function useMessageComposer({ kind, isSending, isDisabled = false, onSend
     onMention,
     onSubmit,
     onKeyDown,
+    onBlur: onStopTyping,
     onEmoji: () => {},
     canSend: Boolean(content.trim() || files.length) && !fileError && !isSending && !isDisabled,
   }

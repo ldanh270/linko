@@ -6,7 +6,7 @@ export const CHAT_ACCESS_ERRORS: ReadonlySet<string> = new Set([ERROR_CODES.UNAU
 /** Conversation behavior values and copy reused by hooks and presentation. */
 export const CHAT_KIND = { GROUP: "group", DIRECT: "direct" } as const
 /** Chat query key groups centralize cache identity. */
-export const CHAT_QUERY_KEYS = { MESSAGES: "messages", MEMBERS: "members", PREFERENCE: "group-preference" } as const
+export const CHAT_QUERY_KEYS = { MESSAGES: "messages", MEMBERS: "members", PINS: "pins", PREFERENCE: "group-preference" } as const
 /** User-facing chat messages shared by timeline and composer. */
 export const CHAT_COPY = {
   MEMBER: "Thành viên", PRIVATE: "Tin nhắn riêng", GROUP: "Nhóm riêng", SEND_ERROR: "Tin nhắn chưa gửi được. Hãy thử lại.",

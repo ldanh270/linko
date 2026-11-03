@@ -1,4 +1,4 @@
-import { MESSAGE_FIELDS, SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
+import { MESSAGE_FIELDS, PRESENCE_STATUS, SOCKET_LIFECYCLE, SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
 import { REGEX } from "../../configs/constants/regex"
 import {
     conversationRoom,
@@ -14,7 +14,7 @@ import type {
     SocketIdentity,
 } from "./realtime.types"
 import { authenticateRealtimeSocket } from "./realtime.auth"
-import { presenceService } from "./presence.service"
+import { presenceIdsSchema } from "./presence.schema"
 import type { Server } from "socket.io"
 
 /** Authenticate sockets and authorize every conversation room transition.
@@ -49,65 +49,31 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
             }
             void socket.join(userRoom(userId))
 
-            void presenceService.onConnect(userId).then((isFirst) => {
-                if (isFirst) {
-                    socket.broadcast.emit(SOCKET_EVENTS.PRESENCE_ONLINE, { userId, status: "online" })
-                }
+            const connection = { userId, socketId: socket.id }
+            const presence = this.dependencies.presence
+            void presence?.connect(connection).then((changed) => {
+                if (changed) this.publishPresence(userId, true)
+            }).catch((error: unknown) => this.dependencies.onError?.(error))
+
+            socket.on(SOCKET_EVENTS.PRESENCE_QUERY, (input: unknown, acknowledge?: unknown) => {
+                if (typeof acknowledge !== "function") return
+                const parsed = presenceIdsSchema.safeParse(input)
+                if (!parsed.success || !presence) { acknowledge({}); return }
+                void presence.getPresenceBatch(parsed.data).then((snapshot) => acknowledge(snapshot))
+                    .catch((error: unknown) => { this.dependencies.onError?.(error); acknowledge({}) })
             })
 
-            socket.on(SOCKET_EVENTS.PRESENCE_QUERY, (userIds: unknown, acknowledge?: (res: Record<string, boolean>) => void) => {
-                if (Array.isArray(userIds)) {
-                    const validIds = userIds.filter((id): id is string => typeof id === "string" && REGEX.MONGO_ID.test(id))
-                    void presenceService.getPresenceBatch(validIds).then((res) => acknowledge?.(res))
-                } else {
-                    acknowledge?.({})
-                }
-            })
-
-            socket.on(SOCKET_EVENTS.TYPING_START, (payload: unknown) => {
-                if (typeof payload === "object" && payload !== null && "conversationId" in payload) {
-                    const conversationId = (payload as { conversationId: unknown }).conversationId
-                    if (typeof conversationId === "string" && REGEX.MONGO_ID.test(conversationId)) {
-                        void this.dependencies.repository.isCurrentMember(conversationId, userId).then((isMember) => {
-                            if (isMember) {
-                                socket.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, {
-                                    conversationId,
-                                    userId,
-                                    isTyping: true,
-                                })
-                            }
-                        })
-                    }
-                }
-            })
-
-            socket.on(SOCKET_EVENTS.TYPING_STOP, (payload: unknown) => {
-                if (typeof payload === "object" && payload !== null && "conversationId" in payload) {
-                    const conversationId = (payload as { conversationId: unknown }).conversationId
-                    if (typeof conversationId === "string" && REGEX.MONGO_ID.test(conversationId)) {
-                        socket.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, {
-                            conversationId,
-                            userId,
-                            isTyping: false,
-                        })
-                    }
-                }
-            })
+            this.registerTyping(socket, userId)
 
             socket.on(SOCKET_EVENTS.CONVERSATION_JOIN, (conversationId: unknown, acknowledge?: (joined: boolean) => void) => {
                 void this.joinConversation(socket, conversationId).then((joined) => acknowledge?.(joined))
             })
 
-            socket.on("disconnect", () => {
-                void presenceService.onDisconnect(userId).then((isOffline) => {
-                    if (isOffline) {
-                        server.emit(SOCKET_EVENTS.PRESENCE_OFFLINE, {
-                            userId,
-                            status: "offline",
-                            lastActive: new Date().toISOString(),
-                        })
-                    }
-                })
+            socket.on(SOCKET_LIFECYCLE.DISCONNECT, () => {
+                this.dependencies.typing?.release(socket.id)
+                void presence?.disconnect(connection).then((changed) => {
+                    if (changed) this.publishPresence(userId, false)
+                }).catch((error: unknown) => this.dependencies.onError?.(error))
             })
         })
     }
@@ -128,14 +94,9 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
         const server = this.requireServer()
         const conversationId = message[MESSAGE_FIELDS.CONVERSATION_ID]
         const senderId = message[MESSAGE_FIELDS.SENDER_ID]
-        server.to(conversationRoom(conversationId))
-            .emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
-
         const memberIds = await this.dependencies.repository.listCurrentMemberIds(conversationId)
-        for (const memberId of memberIds) {
-            if (memberId === senderId) continue
-            server.to(userRoom(memberId)).emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
-        }
+        const rooms = [conversationRoom(conversationId), ...memberIds.filter((id) => id !== senderId).map(userRoom)]
+        server.to(rooms).emit(SOCKET_EVENTS.MESSAGE_CREATED, message)
     }
 
     /** Tell current room listeners to reload the conversation summary. */
@@ -164,6 +125,27 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
                 [REALTIME_FIELDS.USER_ID]: userId,
             })
         }
+    }
+
+    /** Publish safe lifecycle transitions, including lease expiry without a disconnect event. */
+    publishPresence(userId: string, isOnline: boolean): void {
+        this.requireServer().emit(isOnline ? SOCKET_EVENTS.PRESENCE_ONLINE : SOCKET_EVENTS.PRESENCE_OFFLINE, {
+            userId, status: isOnline ? PRESENCE_STATUS.ONLINE : PRESENCE_STATUS.OFFLINE,
+            ...(!isOnline ? { lastActive: new Date().toISOString() } : {}),
+        })
+    }
+
+    private registerTyping(socket: RealtimeSocket, userId: string): void {
+        let pending = Promise.resolve()
+        const enqueue = (payload: unknown, isTyping: boolean): void => {
+            pending = pending.then(async () => {
+                if (!socket.connected) return
+                const event = await this.dependencies.typing?.update({ userId, socketId: socket.id, payload, isTyping })
+                if (event && socket.connected) socket.to(conversationRoom(event.conversationId)).emit(SOCKET_EVENTS.TYPING_UPDATE, event)
+            }).catch((error: unknown) => this.dependencies.onError?.(error))
+        }
+        socket.on(SOCKET_EVENTS.TYPING_START, (payload: unknown) => enqueue(payload, true))
+        socket.on(SOCKET_EVENTS.TYPING_STOP, (payload: unknown) => enqueue(payload, false))
     }
 
     private requireServer(): Server {

@@ -1,176 +1,65 @@
 import type Redis from "ioredis"
+import { PRESENCE_KEYS, PRESENCE_MESSAGES } from "./presence.constants"
+import { ALLOCATE_PRESENCE_OFFSET } from "./presence.scripts"
+import type { PresenceReader } from "./presence.types"
 
-const PRESENCE_BITMAP_KEY = "presence:bitmap"
-const PRESENCE_OFFSETS_HASH = "presence:user_offsets"
-const PRESENCE_COUNTER_KEY = "presence:user_offsets:counter"
-
-/**
- * High-performance presence store using Redis Bitmaps (SETBIT/GETBIT/BITCOUNT),
- * with an automatic, zero-overhead In-Memory bit vector fallback.
- *
- * Each user is represented by exactly 1 bit (0 = offline, 1 = online).
- * 1 million users require only ~128 KB of memory.
- *
- * @pattern Strategy
+/** Store compact Redis bitmap flags independently of connection lifecycle.
+ * @pattern Adapter
+ * @layer Repository
  */
-export class BitmapPresenceStore {
-    private inMemoryBuffer = new Uint8Array(131072) // 128KB in-memory bit vector
-    private inMemoryOffsets = new Map<string, number>()
-    private nextOffset = 0
-    private isRedisConnected = false
+export class BitmapPresenceStore implements PresenceReader {
+    /** Keys are exposed to the session adapter so both mutate the same bitmap atomically. */
+    readonly keys: { readonly bitmap: string; readonly offsets: string; readonly counter: string; readonly deadlines: string; readonly sessions: string }
 
-    constructor(private readonly redis: Redis | null = null) {
-        if (this.redis) {
-            void this.redis.connect().then(() => {
-                this.isRedisConnected = true
-            }).catch(() => {
-                this.isRedisConnected = false
-            })
+    /** Inject an already-owned Redis connection; tests use an isolated namespace. */
+    constructor(private readonly redis: Redis, prefix: string = PRESENCE_KEYS.PREFIX) {
+        this.keys = {
+            bitmap: `${prefix}${PRESENCE_KEYS.BITMAP}`, offsets: `${prefix}${PRESENCE_KEYS.OFFSETS}`,
+            counter: `${prefix}${PRESENCE_KEYS.COUNTER}`, deadlines: `${prefix}${PRESENCE_KEYS.DEADLINES}`,
+            sessions: `${prefix}${PRESENCE_KEYS.SESSIONS}`,
         }
     }
 
-    /** Resolve or assign an integer bit offset for a MongoDB ObjectId string. */
+    /** Allocate only on writes, keeping concurrent writers on one stable offset. */
     async getOffset(userId: string): Promise<number> {
-        if (this.isRedisConnected && this.redis) {
-            try {
-                const existing = await this.redis.hget(PRESENCE_OFFSETS_HASH, userId)
-                if (existing !== null) return parseInt(existing, 10)
-
-                const next = await this.redis.incr(PRESENCE_COUNTER_KEY)
-                await this.redis.hset(PRESENCE_OFFSETS_HASH, userId, next.toString())
-                return next
-            } catch {
-                // Fall back to in-memory if Redis command fails
-            }
-        }
-
-        let offset = this.inMemoryOffsets.get(userId)
-        if (offset === undefined) {
-            offset = ++this.nextOffset
-            this.inMemoryOffsets.set(userId, offset)
-        }
-        return offset
+        return Number(await this.redis.eval(ALLOCATE_PRESENCE_OFFSET, 2, this.keys.offsets, this.keys.counter, userId))
     }
 
-    /** Set bit to 1 for this user (online). */
+    /** Set the user's bit without changing its public ObjectId identity. */
     async setOnline(userId: string): Promise<void> {
-        const offset = await this.getOffset(userId)
-        if (this.isRedisConnected && this.redis) {
-            try {
-                await this.redis.setbit(PRESENCE_BITMAP_KEY, offset, 1)
-                return
-            } catch {
-                // Fallback to in-memory
-            }
-        }
-        this.setInMemoryBit(offset, 1)
+        await this.redis.setbit(this.keys.bitmap, await this.getOffset(userId), 1)
     }
 
-    /** Set bit to 0 for this user (offline). */
+    /** Clear existing flags without allocating offsets for unknown users. */
     async setOffline(userId: string): Promise<void> {
-        const offset = await this.getOffset(userId)
-        if (this.isRedisConnected && this.redis) {
-            try {
-                await this.redis.setbit(PRESENCE_BITMAP_KEY, offset, 0)
-                return
-            } catch {
-                // Fallback to in-memory
-            }
-        }
-        this.setInMemoryBit(offset, 0)
+        const offset = await this.redis.hget(this.keys.offsets, userId)
+        if (offset !== null) await this.redis.setbit(this.keys.bitmap, Number(offset), 0)
     }
 
-    /** Check if a single user is online (bit === 1). */
+    /** Read one account without modifying the mapping. */
     async isOnline(userId: string): Promise<boolean> {
-        const offset = await this.getOffset(userId)
-        if (this.isRedisConnected && this.redis) {
-            try {
-                const bit = await this.redis.getbit(PRESENCE_BITMAP_KEY, offset)
-                return bit === 1
-            } catch {
-                // Fallback to in-memory
-            }
-        }
-        return this.getInMemoryBit(offset) === 1
+        return (await this.getPresenceBatch([userId]))[userId] ?? false
     }
 
-    /** Query batch presence statuses efficiently via Redis pipeline or in-memory lookup. */
+    /** Batch mapping lookup and pipeline only existing offsets; command errors propagate. */
     async getPresenceBatch(userIds: readonly string[]): Promise<Record<string, boolean>> {
-        const result: Record<string, boolean> = {}
-        if (!userIds.length) return result
-
-        const offsets = await Promise.all(userIds.map((id) => this.getOffset(id)))
-
-        if (this.isRedisConnected && this.redis) {
-            try {
-                const pipeline = this.redis.pipeline()
-                for (const offset of offsets) {
-                    pipeline.getbit(PRESENCE_BITMAP_KEY, offset)
-                }
-                const execResults = await pipeline.exec()
-                if (execResults) {
-                    for (let i = 0; i < userIds.length; i++) {
-                        const [err, val] = execResults[i]
-                        result[userIds[i]] = !err && val === 1
-                    }
-                    return result
-                }
-            } catch {
-                // Fallback to in-memory
-            }
-        }
-
-        for (let i = 0; i < userIds.length; i++) {
-            result[userIds[i]] = this.getInMemoryBit(offsets[i]) === 1
-        }
+        const ids = [...new Set(userIds)]
+        const result: Record<string, boolean> = Object.fromEntries(ids.map((id) => [id, false]))
+        if (!ids.length) return result
+        const offsets = await this.redis.hmget(this.keys.offsets, ...ids)
+        const known = ids.flatMap((id, index) => offsets[index] === null ? [] : [{ id, offset: Number(offsets[index]) }])
+        if (!known.length) return result
+        const pipeline = this.redis.pipeline()
+        for (const { offset } of known) pipeline.getbit(this.keys.bitmap, offset)
+        const replies = await pipeline.exec()
+        if (!replies || replies.length !== known.length) throw new Error(PRESENCE_MESSAGES.PIPELINE_FAILED)
+        replies.forEach(([error, bit], index) => {
+            if (error) throw error
+            result[known[index].id] = bit === 1
+        })
         return result
     }
 
-    /** Total count of currently online users (BITCOUNT). */
-    async getOnlineCount(): Promise<number> {
-        if (this.isRedisConnected && this.redis) {
-            try {
-                return await this.redis.bitcount(PRESENCE_BITMAP_KEY)
-            } catch {
-                // Fallback
-            }
-        }
-        let count = 0
-        for (let i = 0; i < this.inMemoryBuffer.length; i++) {
-            const byte = this.inMemoryBuffer[i]
-            if (byte > 0) {
-                let b = byte
-                while (b > 0) {
-                    b &= b - 1
-                    count++
-                }
-            }
-        }
-        return count
-    }
-
-    private setInMemoryBit(offset: number, value: 0 | 1): void {
-        const byteIndex = Math.floor(offset / 8)
-        const bitIndex = 7 - (offset % 8) // Redis big-endian bit numbering standard
-
-        if (byteIndex >= this.inMemoryBuffer.length) {
-            const newBuffer = new Uint8Array(Math.max(this.inMemoryBuffer.length * 2, byteIndex + 1024))
-            newBuffer.set(this.inMemoryBuffer)
-            this.inMemoryBuffer = newBuffer
-        }
-
-        if (value === 1) {
-            this.inMemoryBuffer[byteIndex] |= (1 << bitIndex)
-        } else {
-            this.inMemoryBuffer[byteIndex] &= ~(1 << bitIndex)
-        }
-    }
-
-    private getInMemoryBit(offset: number): 0 | 1 {
-        const byteIndex = Math.floor(offset / 8)
-        const bitIndex = 7 - (offset % 8)
-
-        if (byteIndex >= this.inMemoryBuffer.length) return 0
-        return ((this.inMemoryBuffer[byteIndex] & (1 << bitIndex)) !== 0) ? 1 : 0
-    }
+    /** Count online flags without loading the entire bitmap into application memory. */
+    getOnlineCount(): Promise<number> { return this.redis.bitcount(this.keys.bitmap) }
 }

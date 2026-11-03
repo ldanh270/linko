@@ -2,22 +2,14 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { MESSAGE_FIELDS, type CursorPage, type MessageDto } from "@linko/contracts"
+import { type CursorPage, type MessageDto } from "@linko/contracts"
 import type { InfiniteData } from "@tanstack/react-query"
 import { useCurrentProfile } from "@/features/profile/hooks/useCurrentProfile"
 import { updateInboxItemWithNewMessage } from "@/features/inbox/inbox.cache"
-import { notificationSound } from "@/shared/sound/notificationSound"
 import { listMessages, sendMessage } from "../api/messages.api"
 import { sendMessageFiles } from "../api/attachments.api"
 import { getSharedChatSocket, mergeMessageById, subscribeToConversation } from "../api/chatSocket"
 import { CHAT_QUERY_KEYS } from "../chat.constants"
-
-const FRESH_MESSAGE_MAX_AGE_MS = 10_000
-
-function isFreshMessage(createdAt: string): boolean {
-  const ageMs = Date.now() - new Date(createdAt).getTime()
-  return ageMs >= 0 && ageMs < FRESH_MESSAGE_MAX_AGE_MS
-}
 
 interface SendMessageMutationInput {
   readonly clientMessageId: string
@@ -149,14 +141,7 @@ export function useConversationChat(conversationId: string) {
             ),
           }
         })
-        if (
-          isFreshMessage(message[MESSAGE_FIELDS.CREATED_AT]) &&
-          currentUserIdRef.current &&
-          message[MESSAGE_FIELDS.SENDER_ID] !== currentUserIdRef.current
-        ) {
-          notificationSound.play()
-        }
-        updateInboxItemWithNewMessage(queryClient, message, { incrementUnread: false })
+
       },
       { initialMessages: cachedMessages },
     )

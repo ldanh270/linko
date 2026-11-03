@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createElement, type ReactNode } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import type { MessageDto } from "@linko/contracts"
 
 import * as inboxCache from "@/features/inbox/inbox.cache"
@@ -48,6 +48,8 @@ vi.mock("../api/chatSocket", () => ({
   mergeMessageById: (list: readonly MessageDto[], item: MessageDto) => [...list.filter((m) => m.id !== item.id && m.clientMessageId !== item.clientMessageId), item],
 }))
 
+afterEach(() => vi.clearAllMocks())
+
 describe("useConversationChat inbox synchronization", () => {
   it("should_synchronize_inbox_cache_when_send_mutation_succeeds", async () => {
     const queryClient = new QueryClient()
@@ -75,7 +77,7 @@ describe("useConversationChat inbox synchronization", () => {
     })
   })
 
-  it("should_synchronize_inbox_cache_when_realtime_message_is_received", async () => {
+  it("leaves realtime unread updates to the global notification subscription", async () => {
     const queryClient = new QueryClient()
     const syncSpy = vi.spyOn(inboxCache, "updateInboxItemWithNewMessage")
 
@@ -97,10 +99,10 @@ describe("useConversationChat inbox synchronization", () => {
       socketMessageCallback?.(incoming)
     })
 
-    expect(syncSpy).toHaveBeenCalledWith(queryClient, incoming, { incrementUnread: false })
+    expect(syncSpy).not.toHaveBeenCalled()
   })
 
-  it("should_play_sound_only_for_fresh_messages_from_others", () => {
+  it("leaves all sound delivery to the global notification subscription", () => {
     const queryClient = new QueryClient()
     const playSpy = vi.spyOn(notificationSound, "play").mockImplementation(() => {})
 
@@ -109,7 +111,7 @@ describe("useConversationChat inbox synchronization", () => {
 
     renderHook(() => useConversationChat("conv-abc"), { wrapper })
 
-    // 1. Fresh message from other user -> plays
+    /** Timeline delivery must not duplicate the global listener audio. */
     const freshMessage: MessageDto = {
       ...mockMessage,
       id: "fresh-1",
@@ -119,9 +121,9 @@ describe("useConversationChat inbox synchronization", () => {
     act(() => {
       socketMessageCallback?.(freshMessage)
     })
-    expect(playSpy).toHaveBeenCalledTimes(1)
+    expect(playSpy).not.toHaveBeenCalled()
 
-    // 2. Historical message (>10s old) from other user -> does NOT play
+    /** History recovery must not replay sound. */
     const oldDate = new Date(Date.now() - 60_000).toISOString()
     const historicalMessage: MessageDto = {
       ...mockMessage,
@@ -132,9 +134,9 @@ describe("useConversationChat inbox synchronization", () => {
     act(() => {
       socketMessageCallback?.(historicalMessage)
     })
-    expect(playSpy).toHaveBeenCalledTimes(1) // Still 1
+    expect(playSpy).not.toHaveBeenCalled()
 
-    // 3. Fresh message from current user -> does NOT play
+    /** Own events also remain silent in the timeline subscriber. */
     const ownMessage: MessageDto = {
       ...mockMessage,
       id: "own-1",
@@ -144,7 +146,7 @@ describe("useConversationChat inbox synchronization", () => {
     act(() => {
       socketMessageCallback?.(ownMessage)
     })
-    expect(playSpy).toHaveBeenCalledTimes(1) // Still 1
+    expect(playSpy).not.toHaveBeenCalled()
 
     playSpy.mockRestore()
   })

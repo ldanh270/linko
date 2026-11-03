@@ -1,8 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { CONVERSATION_KIND, CONVERSATION_TYPE, CONVERSATION_QUERY_PARAMS, type ConversationKind } from "@linko/contracts"
 import { z } from "zod"
 import { useQueryParamState } from "@/shared/url/useQueryParamState"
@@ -19,17 +17,10 @@ const KIND_SCHEMA = z.enum([CONVERSATION_KIND.ALL, CONVERSATION_KIND.GROUP, CONV
 
 /** Own shared inbox/group listing queries, URL filters and compact row mapping. */
 export function useInboxPage(fixedKind?: ConversationKind) {
-  const router = useRouter(), pathname = usePathname(), params = useSearchParams()
   const profile = useCurrentProfile()
   const { conversationId } = useWorkspaceNavigation()
-  const { value: kindFromUrl } = useQueryParamState(CONVERSATION_QUERY_PARAMS.KIND, KIND_SCHEMA, CONVERSATION_KIND.ALL)
-  const [activeKind, setActiveKind] = useState<ConversationKind>(fixedKind ?? kindFromUrl)
-
-  useEffect(() => {
-    setActiveKind(fixedKind ?? kindFromUrl)
-  }, [fixedKind, kindFromUrl])
-
-  const effectiveKind = fixedKind ?? activeKind
+  const { value: kindFromUrl, setValue: setKind } = useQueryParamState(CONVERSATION_QUERY_PARAMS.KIND, KIND_SCHEMA, CONVERSATION_KIND.ALL)
+  const effectiveKind = fixedKind ?? kindFromUrl
   const { value: cursor, setValue: setCursor } = useQueryParamState(CONVERSATION_QUERY_PARAMS.CURSOR, z.string(), "")
   const { value: search, setValue: setSearch, revision: searchRevision, cancelPending: cancelSearch } = useQueryParamState(WORKSPACE_PARAMS.SEARCH, z.string(), "")
   const query = useQuery({ queryKey: [...INBOX_QUERY_KEY, effectiveKind, cursor], queryFn: ({ signal }) => listInbox({ kind: effectiveKind, cursor: cursor || undefined, signal }) })
@@ -52,16 +43,7 @@ export function useInboxPage(fixedKind?: ConversationKind) {
 
   const changeKind = (value: ConversationKind) => {
     cancelSearch()
-    setActiveKind(value)
-    if (typeof window !== "undefined") {
-      const next = new URLSearchParams(window.location.search)
-      next.delete(CONVERSATION_QUERY_PARAMS.CURSOR)
-      if (value === CONVERSATION_KIND.ALL) next.delete(CONVERSATION_QUERY_PARAMS.KIND)
-      else next.set(CONVERSATION_QUERY_PARAMS.KIND, value)
-      const qs = next.toString()
-      const nextUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}`
-      window.history.replaceState(null, "", nextUrl)
-    }
+    setKind(value, { resetKeys: [CONVERSATION_QUERY_PARAMS.CURSOR] })
   }
   const onSearchChange = (value: string) => {
     setSearch(value, { history: "replace", debounceMs: 250, resetKeys: [CONVERSATION_QUERY_PARAMS.CURSOR] })

@@ -114,8 +114,9 @@ export function MessageComposer({ state }: MessageComposerProps) {
             maxLength={MESSAGE_LIMITS.MAX_CONTENT_LENGTH}
             placeholder={placeholder}
             value={state.composer.content}
-            onChange={(e) => state.composer.onContentChange(e.target.value)}
+            onChange={state.composer.onInputChange}
             onKeyDown={state.composer.onKeyDown}
+            onBlur={state.composer.onBlur}
             aria-label="Soạn tin nhắn"
             className="w-full min-w-0 bg-transparent py-2.5 pl-3.5 pr-10 text-sm text-text-primary placeholder:text-text-secondary placeholder:opacity-90 outline-none resize-none leading-relaxed"
           />

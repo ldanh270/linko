@@ -18,7 +18,6 @@ import { useFriendActions } from "@/features/people/hooks/useFriendActions"
 import { listInbox } from "@/features/inbox/api/inbox.api"
 import { INBOX_QUERY_KEY } from "@/features/inbox/inbox.constants"
 import { APP_ROUTES, buildAppRoute } from "@/shared/layout/route.constants"
-import { usePushNotifications } from "./usePushNotifications"
 
 export type NotificationFilter = "all" | "requests" | "messages"
 
@@ -40,7 +39,6 @@ export interface NotificationItem {
 export function useNotificationsPage() {
   const router = useRouter()
   const [filter, setFilter] = useState<NotificationFilter>("all")
-  const push = usePushNotifications()
   const friendActions = useFriendActions()
 
   const requestsQuery = useQuery({
@@ -131,7 +129,6 @@ export function useNotificationsPage() {
     items: filteredItems,
     filter,
     setFilter,
-    push,
     isLoading: requestsQuery.isPending || inboxQuery.isPending,
     isError: requestsQuery.isError || inboxQuery.isError,
     onRetry: () => {
