@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task after user approval. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** Đề xuất để duyệt; chưa được phép implement.
+**Status:** Đã được người dùng duyệt và implement trên `codex/realtime-completion`. Xem [execution ledger](2026-11-03-realtime-completion-progress.md) để biết các commit, quyết định và kết quả kiểm chứng.
 
 **Goal:** Hoàn thiện typing bubble, online status dùng Redis bitmap, trang phụ toàn chiều rộng và thông báo tin nhắn qua socket trên toàn app.
 
