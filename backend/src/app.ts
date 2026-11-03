@@ -1,3 +1,4 @@
+import type { PresenceReader } from "./modules/realtime/presence.types"
 import { API_ROUTES, ERROR_CODES } from "@linko/contracts"
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -83,6 +84,7 @@ export interface AppDependencies {
     privateRoutes: Router
     logger: ServerLogger
     authConfig: AuthRuntimeConfig
+    presence?: PresenceReader
     realtimeGateway?: RealtimeGateway
 }
 
@@ -174,7 +176,7 @@ export function createApp(dependencies: AppDependencies): Express {
         imageStorage: new R2ProfileImageStorage(),
         cleanupFailureRecorder: new LoggerProfileImageCleanupFailureRecorder(dependencies.logger),
     })
-    const profileController = new ProfileController(profileService)
+    const profileController = new ProfileController(profileService, dependencies.presence ?? { getPresenceBatch: async (ids) => Object.fromEntries(ids.map((id) => [id, false])) })
     const membershipController = new MembershipController(membershipService)
     const conversationController = new ConversationController(conversationService)
     const conversationLifecycleController = new ConversationLifecycleController(conversationLifecycleService)

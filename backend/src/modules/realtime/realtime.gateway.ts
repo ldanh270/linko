@@ -1,4 +1,4 @@
-import { MESSAGE_FIELDS, SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
+import { MESSAGE_FIELDS, PRESENCE_STATUS, SOCKET_LIFECYCLE, SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
 import { REGEX } from "../../configs/constants/regex"
 import {
     conversationRoom,
@@ -14,7 +14,7 @@ import type {
     SocketIdentity,
 } from "./realtime.types"
 import { authenticateRealtimeSocket } from "./realtime.auth"
-import { presenceService } from "./presence.service"
+import { presenceIdsSchema } from "./presence.schema"
 import type { Server } from "socket.io"
 
 /** Authenticate sockets and authorize every conversation room transition.
@@ -49,19 +49,18 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
             }
             void socket.join(userRoom(userId))
 
-            void presenceService.onConnect(userId).then((isFirst) => {
-                if (isFirst) {
-                    socket.broadcast.emit(SOCKET_EVENTS.PRESENCE_ONLINE, { userId, status: "online" })
-                }
-            })
+            const connection = { userId, socketId: socket.id }
+            const presence = this.dependencies.presence
+            void presence?.connect(connection).then((changed) => {
+                if (changed) this.publishPresence(userId, true)
+            }).catch((error: unknown) => this.dependencies.onError?.(error))
 
-            socket.on(SOCKET_EVENTS.PRESENCE_QUERY, (userIds: unknown, acknowledge?: (res: Record<string, boolean>) => void) => {
-                if (Array.isArray(userIds)) {
-                    const validIds = userIds.filter((id): id is string => typeof id === "string" && REGEX.MONGO_ID.test(id))
-                    void presenceService.getPresenceBatch(validIds).then((res) => acknowledge?.(res))
-                } else {
-                    acknowledge?.({})
-                }
+            socket.on(SOCKET_EVENTS.PRESENCE_QUERY, (input: unknown, acknowledge?: unknown) => {
+                if (typeof acknowledge !== "function") return
+                const parsed = presenceIdsSchema.safeParse(input)
+                if (!parsed.success || !presence) { acknowledge({}); return }
+                void presence.getPresenceBatch(parsed.data).then((snapshot) => acknowledge(snapshot))
+                    .catch((error: unknown) => { this.dependencies.onError?.(error); acknowledge({}) })
             })
 
             this.registerTyping(socket, userId)
@@ -70,17 +69,11 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
                 void this.joinConversation(socket, conversationId).then((joined) => acknowledge?.(joined))
             })
 
-            socket.on("disconnect", () => {
+            socket.on(SOCKET_LIFECYCLE.DISCONNECT, () => {
                 this.dependencies.typing?.release(socket.id)
-                void presenceService.onDisconnect(userId).then((isOffline) => {
-                    if (isOffline) {
-                        server.emit(SOCKET_EVENTS.PRESENCE_OFFLINE, {
-                            userId,
-                            status: "offline",
-                            lastActive: new Date().toISOString(),
-                        })
-                    }
-                })
+                void presence?.disconnect(connection).then((changed) => {
+                    if (changed) this.publishPresence(userId, false)
+                }).catch((error: unknown) => this.dependencies.onError?.(error))
             })
         })
     }
@@ -137,6 +130,14 @@ export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMember
                 [REALTIME_FIELDS.USER_ID]: userId,
             })
         }
+    }
+
+    /** Publish safe lifecycle transitions, including lease expiry without a disconnect event. */
+    publishPresence(userId: string, isOnline: boolean): void {
+        this.requireServer().emit(isOnline ? SOCKET_EVENTS.PRESENCE_ONLINE : SOCKET_EVENTS.PRESENCE_OFFLINE, {
+            userId, status: isOnline ? PRESENCE_STATUS.ONLINE : PRESENCE_STATUS.OFFLINE,
+            ...(!isOnline ? { lastActive: new Date().toISOString() } : {}),
+        })
     }
 
     private registerTyping(socket: RealtimeSocket, userId: string): void {

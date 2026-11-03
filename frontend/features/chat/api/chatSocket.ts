@@ -1,3 +1,4 @@
+import { resetSocketSession } from "@/shared/realtime/socketSession"
 import {
     MESSAGE_FIELDS,
     SOCKET_AUTH_FIELDS,
@@ -47,6 +48,7 @@ export function getSharedChatSocket(): ChatSocket {
 
 /** Disconnect and reset the shared socket connection upon user logout. */
 export function resetSharedChatSocket(): void {
+    resetSocketSession()
     if (sharedSocketInstance) {
         sharedSocketInstance.disconnect()
         sharedSocketInstance = null

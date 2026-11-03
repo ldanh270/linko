@@ -1,65 +1,108 @@
-import mongoose from "mongoose"
-import User from "../../models/User"
-import { BitmapPresenceStore } from "./presence.bitmap"
-import { createRedisClient } from "../../configs/redis.config"
+import { PRESENCE_TIMING } from "./presence.constants"
+import type { PresenceConnection, PresenceDependencies, PresenceLifecycle, RemotePresenceStore } from "./presence.types"
 
-/**
- * Coordinate user online/offline lifecycle and multi-connection presence.
- *
+/** Coordinate leases and recovery independently of Redis and Mongoose.
  * @layer Service
  */
-export class PresenceService {
-    private readonly store: BitmapPresenceStore
-    private readonly socketCounts = new Map<string, number>()
+export class PresenceService implements PresenceLifecycle {
+    private readonly active = new Map<string, PresenceConnection>()
+    private readonly departed = new Map<string, PresenceConnection>()
+    private pending: Promise<unknown> = Promise.resolve()
+    private synchronized = false
+    private timer: ReturnType<typeof setInterval> | null = null
 
-    constructor(store?: BitmapPresenceStore) {
-        this.store = store ?? new BitmapPresenceStore(createRedisClient())
+    /** Inject storage, fallback and infrastructure failure reporting. */
+    constructor(private readonly dependencies: PresenceDependencies) {}
+
+    /** Initialize storage and start bounded lease renewal before traffic. */
+    async start(): Promise<void> {
+        if (this.timer) return
+        try { await this.dependencies.primary?.initialize() }
+        catch (error) { this.dependencies.onError(error) }
+        await this.enqueue(() => this.maintain())
+        this.timer = setInterval(() => { void this.enqueue(() => this.maintain()).catch(this.dependencies.onError) }, PRESENCE_TIMING.HEARTBEAT_MS)
+        this.timer.unref()
     }
 
-    /** Handle a new socket connection for this user. */
-    async onConnect(userId: string): Promise<boolean> {
-        const count = (this.socketCounts.get(userId) ?? 0) + 1
-        this.socketCounts.set(userId, count)
+    /** Stop renewal and close owned resources after pending operations settle. */
+    async stop(): Promise<void> {
+        if (this.timer) clearInterval(this.timer)
+        this.timer = null
+        await this.pending
+        await this.dependencies.primary?.close()
+    }
 
-        if (count === 1) {
-            await this.store.setOnline(userId)
-            return true // Transitioned from offline to online
+    /** Register a socket idempotently, serializing reads and lifecycle transitions. */
+    connect(connection: PresenceConnection): Promise<boolean> {
+        return this.enqueue(async () => {
+            this.active.set(connection.socketId, connection)
+            this.departed.delete(connection.socketId)
+            const changed = await this.dependencies.fallback.connect(connection, this.now())
+            await this.remote((store) => store.connect(connection, this.now()))
+            return changed
+        })
+    }
+
+    /** Remove exactly one socket and persist lastActive after its final local connection. */
+    disconnect(connection: PresenceConnection): Promise<boolean> {
+        return this.enqueue(async () => {
+            if (!this.active.delete(connection.socketId)) return false
+            if (this.dependencies.primary) this.departed.set(connection.socketId, connection)
+            const changed = await this.dependencies.fallback.disconnect(connection, this.now())
+            await this.remote((store) => store.disconnect(connection, this.now()))
+            if (changed) await this.dependencies.repository.updateLastActive(connection.userId, new Date(this.now()))
+            return changed
+        })
+    }
+
+    /** Prefer reconciled Redis; failures are logged before using the local mirror. */
+    getPresenceBatch(userIds: readonly string[]): Promise<Record<string, boolean>> {
+        return this.enqueue(async () => await this.remote((store) => store.getPresenceBatch(userIds))
+            ?? this.dependencies.fallback.getPresenceBatch(userIds))
+    }
+
+    private now(): number { return this.dependencies.now?.() ?? Date.now() }
+
+    private enqueue<T>(operation: () => Promise<T>): Promise<T> {
+        const next = this.pending.then(operation)
+        this.pending = next.catch(() => {})
+        return next
+    }
+
+    private async remote<T>(operation: (store: RemotePresenceStore) => Promise<T>): Promise<T | undefined> {
+        const primary = this.dependencies.primary
+        if (!primary?.isReady) { this.synchronized = false; return undefined }
+        try {
+            if (!this.synchronized) await this.reconcile(primary)
+            const result = await operation(primary)
+            this.departed.clear()
+            return result
+        } catch (error) {
+            this.synchronized = false
+            this.dependencies.onError(error)
+            return undefined
         }
-        return false
     }
 
-    /** Handle a socket disconnection for this user. */
-    async onDisconnect(userId: string): Promise<boolean> {
-        const current = this.socketCounts.get(userId) ?? 1
-        const count = Math.max(0, current - 1)
+    private async reconcile(primary: RemotePresenceStore): Promise<void> {
+        for (const connection of this.departed.values()) await primary.disconnect(connection, this.now())
+        for (const connection of this.active.values()) await primary.connect(connection, this.now())
+        await this.publishExpired(await primary.cleanup(this.now()))
+        this.synchronized = true
+    }
 
-        if (count === 0) {
-            this.socketCounts.delete(userId)
-            await this.store.setOffline(userId)
-            if (mongoose.connection.readyState === 1) {
-                void User.findByIdAndUpdate(userId, { lastActive: new Date() }).catch(() => {})
-            }
-            return true // Transitioned from online to offline
+    private async maintain(): Promise<void> {
+        for (const connection of this.active.values()) await this.dependencies.fallback.connect(connection, this.now())
+        await this.remote(async (store) => {
+            for (const connection of this.active.values()) await store.connect(connection, this.now())
+            await this.publishExpired(await store.cleanup(this.now()))
+        })
+    }
+
+    private async publishExpired(userIds: readonly string[]): Promise<void> {
+        for (const userId of userIds) {
+            await this.dependencies.repository.updateLastActive(userId, new Date(this.now()))
+            this.dependencies.onOffline(userId)
         }
-
-        this.socketCounts.set(userId, count)
-        return false
-    }
-
-    /** Query batch presence states for an array of user IDs. */
-    async getPresenceBatch(userIds: readonly string[]): Promise<Record<string, boolean>> {
-        return this.store.getPresenceBatch(userIds)
-    }
-
-    /** Check if a single user is currently online. */
-    async isOnline(userId: string): Promise<boolean> {
-        return this.store.isOnline(userId)
-    }
-
-    /** Get total number of online users. */
-    async getOnlineCount(): Promise<number> {
-        return this.store.getOnlineCount()
     }
 }
-
-export const presenceService = new PresenceService()
