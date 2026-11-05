@@ -38,5 +38,9 @@ export function useLocationMap(shares: readonly LocationShareDto[]) {
     }).catch(() => { if (!disposed) setFailed(true) })
     return () => { disposed = true }
   }, [shares, name])
-  return { ref, failed }
+  const recenter = () => {
+    const points = shares.flatMap((share) => share.position ? [[share.position.latitude, share.position.longitude] as [number, number]] : [])
+    if (points.length) mapRef.current?.fitBounds(points, { padding: [24, 24], maxZoom: 16 })
+  }
+  return { ref, failed, recenter }
 }
