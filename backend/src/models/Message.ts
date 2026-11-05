@@ -3,10 +3,12 @@ import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 import { MESSAGE_INDEX_NAMES, MESSAGE_MODEL_FIELDS } from "#/modules/message/message.constants"
 import { ATTACHMENT_FIELDS } from "#/modules/attachment/attachment.constants"
-import { MESSAGE_LIMITS } from "@linko/contracts"
+import { MESSAGE_LIMITS, CHAT_MESSAGE_KIND } from "@linko/contracts"
 
 const messageSchema = new mongoose.Schema(
     {
+        [MESSAGE_MODEL_FIELDS.KIND]: { type: String, enum: Object.values(CHAT_MESSAGE_KIND), default: CHAT_MESSAGE_KIND.TEXT },
+        [MESSAGE_MODEL_FIELDS.RESOURCE_ID]: { type: mongoose.Schema.Types.ObjectId, default: null },
         [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Conversation",

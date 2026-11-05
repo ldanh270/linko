@@ -1,4 +1,5 @@
 import type { ConversationStatus, ConversationType, MessageDto } from "@linko/contracts"
+import type { ChatMessageKind } from "@linko/contracts"
 import type { Types } from "mongoose"
 
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
@@ -11,6 +12,8 @@ export type ObjectId = Types.ObjectId
 
 /** Persisted message fields required by service rules and response mapping. */
 export interface MessageRecord {
+    readonly kind?: ChatMessageKind
+    readonly resourceId?: ObjectId | null
     readonly id: ObjectId
     readonly conversationId: ObjectId
     readonly senderId: ObjectId
@@ -34,6 +37,8 @@ export interface ConversationMessageAccessRecord {
 
 /** Validated content and idempotency data ready for persistence. */
 export interface CreateMessageRecord {
+    readonly kind?: ChatMessageKind
+    readonly resourceId?: ObjectId | null
     readonly conversationId: ObjectId
     readonly senderId: ObjectId
     readonly clientMessageId: string
