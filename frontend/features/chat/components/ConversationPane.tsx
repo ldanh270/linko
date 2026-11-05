@@ -1,5 +1,8 @@
 "use client"
 
+import { ConversationUtilities } from "@/features/utilities/components/ConversationUtilities"
+import { PinnedStrip } from "@/features/utilities/components/PinnedStrip"
+import { UtilityPeopleProvider } from "@/features/utilities/components/UtilityPeopleProvider"
 import type { InboxItemDto } from "@linko/contracts"
 import { MessageTimelineSkeleton } from "@/shared/components/Skeleton"
 import { ErrorState } from "@/shared/components/ErrorState"
@@ -17,11 +20,14 @@ export interface ConversationPaneProps { readonly item: InboxItemDto }
 export function ConversationPane({ item }: ConversationPaneProps) {
   const state = useConversationPane(item)
   return (
-    <div className="relative flex h-full w-full min-h-0 overflow-hidden">
+    <UtilityPeopleProvider people={state.authors}><div className="relative flex h-full w-full min-h-0 overflow-hidden">
       {/* Primary chat column */}
       <div className="flex flex-1 min-w-0 flex-col h-full min-h-0 bg-surface">
         {/* Conversation header */}
         <ConversationHeader header={state.header} />
+        <PinnedStrip pins={state.pins.query.data ?? []} error={state.pins.query.isError} onRetry={() => void state.pins.query.refetch()} />
+        {state.messageContext.query.isFetching && <p role="status" className="px-4 py-2 text-xs text-text-secondary">Đang tải tin nhắn gốc…</p>}
+        {state.messageContext.query.isError && <ErrorState title="Tin nhắn gốc không khả dụng hoặc bạn không còn quyền xem" onRetry={() => void state.messageContext.query.refetch()} />}
 
         {/* In-chat message search bar */}
         {state.searchState.isOpen && (
@@ -55,10 +61,11 @@ export function ConversationPane({ item }: ConversationPaneProps) {
         <MessageComposer state={state} />
       </div>
 
+      <ConversationUtilities conversationId={state.conversationId} conversationName={state.header.title} />
       {/* Slide-over conversation details sheet */}
       {state.details.isOpen && (
         <ConversationDetailsSheet details={state.details} onClose={state.details.onClose} />
       )}
-    </div>
+    </div></UtilityPeopleProvider>
   )
 }

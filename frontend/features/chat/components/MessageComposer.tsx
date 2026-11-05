@@ -1,5 +1,6 @@
 "use client"
 
+import { ComposerUtilityMenu } from "@/features/utilities/components/ComposerUtilityMenu"
 import { MESSAGE_LIMITS } from "@linko/contracts"
 import { Button } from "@/shared/components/Button"
 import { IconButton } from "@/shared/components/IconButton"
@@ -83,6 +84,7 @@ export function MessageComposer({ state }: MessageComposerProps) {
         className="flex items-end gap-2.5 px-4 py-3.5"
         aria-label="Soạn tin nhắn"
       >
+        <ComposerUtilityMenu disabled={state.isComposerDisabled || state.composer.isSending} />
         {/* Attachment Upload Button */}
         <label
           htmlFor="composer-file-input"

@@ -11,12 +11,14 @@ import type { ReactNode } from "react"
 export interface NavigationRailProps {
   readonly links: readonly NavigationItemProps[]
   readonly account: ReactNode
+  readonly utilityAction?: ReactNode
 }
 
 /** Render the 75px reference rail with centered destinations and bottom account/preference actions. UI only. */
 export function NavigationRail({
   links,
   account,
+  utilityAction,
 }: NavigationRailProps) {
   const { copy } = useI18n()
 
@@ -50,6 +52,7 @@ export function NavigationRail({
 
       {/* Account and preferences */}
       <div className="grid place-items-center gap-3 pb-4">
+        {utilityAction}
         {account}
       </div>
     </aside>

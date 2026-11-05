@@ -1,5 +1,7 @@
 "use client"
 
+import { UtilitiesSession } from "@/features/utilities/components/UtilitiesSession"
+import { ReminderInboxButton } from "@/features/utilities/components/ReminderInboxButton"
 import type { ReactNode } from "react"
 
 import { AppShell } from "@/shared/layout/AppShell"
@@ -18,7 +20,8 @@ export function ProtectedAppShell({ children }: ProtectedAppShellProps) {
     const { status } = useSession()
     if (status === AUTH_SESSION_STATUS.AUTHENTICATED) return <>
         <NotificationToastsListener />
-        <AppShell account={<AccountAvatar />}>{children}</AppShell>
+        <UtilitiesSession />
+        <AppShell account={<AccountAvatar />} utilityAction={<ReminderInboxButton />}>{children}</AppShell>
     </>
 
     const message = status === AUTH_SESSION_STATUS.LOADING

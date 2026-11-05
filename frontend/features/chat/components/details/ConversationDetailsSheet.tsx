@@ -13,6 +13,7 @@ import { ConversationDetailsMembers } from "./ConversationDetailsMembers"
 import { ConversationDetailsMedia } from "./ConversationDetailsMedia"
 import { ConversationDetailsPins } from "./ConversationDetailsPins"
 import { ConversationDetailsActions } from "./ConversationDetailsActions"
+import { ConversationUtilitiesLink } from "@/features/utilities/components/ConversationUtilitiesLink"
 
 export interface ConversationDetailsSheetProps {
   readonly details: ConversationDetailsViewModel
@@ -39,6 +40,7 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin [scrollbar-color:#a2adb755_transparent] flex flex-col">
         <div className="p-4 flex flex-col gap-4">
           <ConversationDetailsIdentity details={details} />
+          <ConversationUtilitiesLink />
 
           {details.description && (
             <div className="p-4 rounded-md bg-surface-subtle text-sm text-text-secondary leading-normal">
@@ -71,7 +73,7 @@ export function ConversationDetailsSheet({ details, onClose }: ConversationDetai
             <ConversationDetailsMedia photos={details.photos} files={details.files} />
           </Accordion>
 
-          {isGroup && (
+          {(
             <Accordion
               id="details-pins"
               title={CHAT_DETAILS_COPY.SECTION_PINS}

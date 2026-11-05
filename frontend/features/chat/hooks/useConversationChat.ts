@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
+import { useMessageContext } from "@/features/utilities/hooks/useMessageContext"
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { type CursorPage, type MessageDto } from "@linko/contracts"
 import type { InfiniteData } from "@tanstack/react-query"
@@ -151,6 +152,7 @@ export function useConversationChat(conversationId: string) {
     }
   }, [conversationId, queryClient, queryKey])
 
-  const messages = query.data?.pages.flatMap((page) => page.items) ?? []
-  return { query, messages, send }
+  const loaded = useMemo(() => query.data?.pages.flatMap((page) => page.items) ?? [], [query.data])
+  const context = useMessageContext(conversationId, loaded)
+  return { query, messages: context.messages, send, context }
 }

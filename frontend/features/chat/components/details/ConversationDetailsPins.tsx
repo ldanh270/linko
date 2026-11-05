@@ -2,6 +2,8 @@ import { Icon } from "@/shared/icons/Icon"
 import { ICON_NAMES } from "@/shared/icons/icon.constants"
 import { CHAT_DETAILS_COPY } from "../../chat.constants"
 import type { ConversationPinViewModel } from "../../chat.types"
+import { Button } from "@/shared/components/Button"
+import { useMessageNavigation } from "@/features/utilities/hooks/useMessageNavigation"
 
 export interface ConversationDetailsPinsProps {
   readonly pins: readonly ConversationPinViewModel[]
@@ -9,6 +11,7 @@ export interface ConversationDetailsPinsProps {
 
 /** Render pinned group messages inside the details accordion. UI only. */
 export function ConversationDetailsPins({ pins }: ConversationDetailsPinsProps) {
+  const navigation = useMessageNavigation()
   if (pins.length === 0) {
     return <p className="text-sm text-text-secondary text-center py-3 m-0">{CHAT_DETAILS_COPY.NO_PINS}</p>
   }
@@ -24,7 +27,7 @@ export function ConversationDetailsPins({ pins }: ConversationDetailsPinsProps) 
             </span>
             <time className="text-xs text-text-secondary">{pin.createdAt}</time>
           </div>
-          <p className="text-xs text-text-primary m-0 truncate">{pin.content}</p>
+          <Button variant="ghost" size="small" className="w-full justify-start" onClick={() => navigation.openMessage(pin.id)}><span className="truncate text-left">{pin.content}</span></Button>
         </li>
       ))}
     </ul>

@@ -27,6 +27,7 @@ export function mapTimeline({ messages, currentUserId, authors, pinnedIds }: Tim
     } : null
 
     return {
+      kind: message.kind, resourceId: message.resourceId, conversationId: message.conversationId,
       id: message[MESSAGE_FIELDS.ID], senderId: message[MESSAGE_FIELDS.SENDER_ID], content: message[MESSAGE_FIELDS.CONTENT] ?? "", isOwn: message[MESSAGE_FIELDS.SENDER_ID] === currentUserId,
       author: author?.name ?? CHAT_COPY.MEMBER, avatarUrl: author?.avatarUrl ?? null,
       createdAt: message[MESSAGE_FIELDS.CREATED_AT], time: date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),

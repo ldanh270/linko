@@ -1,3 +1,4 @@
+import { UtilityMessageCard } from "@/features/utilities/components/UtilityMessageCard"
 import { Fragment } from "react"
 import { Avatar } from "@/shared/components/Avatar"
 import { Link } from "@/shared/components/Link"
@@ -91,9 +92,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   <p className="truncate opacity-85 m-0 text-xs">{message.reply.content}</p>
                 </div>
               )}
-              <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-normal">
-                {renderHighlightedContent(message.content, message.searchQuery)}
-              </p>
+              <div className={message.resourceId ? "rounded-md bg-surface p-3" : ""}>
+                {message.kind && message.resourceId && message.conversationId ? <UtilityMessageCard kind={message.kind} resourceId={message.resourceId} conversationId={message.conversationId} /> : <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-normal">{renderHighlightedContent(message.content, message.searchQuery)}</p>}
+              </div>
               {message.attachments.map((file) => (
                 <MessageAttachment key={file.id} file={file} />
               ))}

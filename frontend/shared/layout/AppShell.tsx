@@ -9,10 +9,11 @@ import { useAppShell } from "./useAppShell"
 export interface AppShellProps {
   readonly children: ReactNode
   readonly account?: ReactNode
+  readonly utilityAction?: ReactNode
 }
 
 /** Compose the reference rail with workspace or secondary detail pages. UI only. */
-export function AppShell({ children, account }: AppShellProps) {
+export function AppShell({ children, account, utilityAction }: AppShellProps) {
   const { links, mobileLinks, isDetail } = useAppShell()
 
   return (
@@ -20,6 +21,7 @@ export function AppShell({ children, account }: AppShellProps) {
       <NavigationRail
         links={links}
         account={account}
+        utilityAction={utilityAction}
       />
       <main
         id="main-content"
@@ -29,7 +31,7 @@ export function AppShell({ children, account }: AppShellProps) {
       >
         {children}
       </main>
-      <MobileNavigation links={mobileLinks} />
+      <MobileNavigation links={mobileLinks} utilityAction={utilityAction} />
     </div>
   )
 }
