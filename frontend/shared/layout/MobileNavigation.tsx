@@ -1,10 +1,11 @@
 import { NavigationItem, type NavigationItemProps } from "./NavigationItem"
+import type { ReactNode } from "react"
 
 /** Mobile destinations prepared by the workspace navigation hook. */
-export interface MobileNavigationProps { readonly links: readonly NavigationItemProps[] }
+export interface MobileNavigationProps { readonly links: readonly NavigationItemProps[]; readonly utilityAction?: ReactNode }
 
 /** Render the reference's compact bottom navigation. UI only. */
-export function MobileNavigation({ links }: MobileNavigationProps) {
+export function MobileNavigation({ links, utilityAction }: MobileNavigationProps) {
   return (
     <nav
       aria-label="Điều hướng di động"
@@ -13,6 +14,7 @@ export function MobileNavigation({ links }: MobileNavigationProps) {
       {links.map((item) => (
         <NavigationItem key={item.destination} {...item} />
       ))}
+      {utilityAction}
     </nav>
   )
 }

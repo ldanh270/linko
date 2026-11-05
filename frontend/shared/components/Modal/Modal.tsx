@@ -18,6 +18,7 @@ export function Modal({ title, children, onClose }: ModalProps) {
       <div
         ref={ref}
         role="dialog"
+        data-modal-dialog
         aria-modal="true"
         aria-labelledby={titleId}
         className="w-[min(100%,560px)] max-h-[calc(100dvh-40px)] overflow-y-auto bg-surface rounded-lg shadow-modal border border-border-subtle"

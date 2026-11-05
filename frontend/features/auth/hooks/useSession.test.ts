@@ -13,6 +13,8 @@ const { replaceRoute, router, resetSocket } = vi.hoisted(() => {
 })
 
 vi.mock("@/features/chat/api/chatSocket", () => ({ resetSharedChatSocket: resetSocket }))
+vi.mock("@/features/utilities/components/UtilitiesSession", () => ({ UtilitiesSession: () => null }))
+vi.mock("@/features/utilities/components/ReminderInboxButton", () => ({ ReminderInboxButton: () => null }))
 
 vi.mock("next/navigation", () => ({ useRouter: () => router }))
 vi.mock("@/features/settings/components/NotificationToastsListener", () => ({

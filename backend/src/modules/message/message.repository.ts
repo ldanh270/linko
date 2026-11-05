@@ -20,6 +20,7 @@ import {
     MESSAGE_ERROR_MESSAGES,
 } from "./message.constants"
 import { MessageDuplicateKeyError } from "./MessageDuplicateKeyError"
+import { UTILITY_CONTEXT } from "../utility/utility.constants"
 import type {
     ConversationMessageAccessRecord,
     CreateMessageRecord,
@@ -110,6 +111,8 @@ export class MongooseMessageRepository implements MessageRepository {
                 [MESSAGE_MODEL_FIELDS.SENDER_ID]: input.senderId,
                 [MESSAGE_MODEL_FIELDS.CLIENT_MESSAGE_ID]: input.clientMessageId,
                 [MESSAGE_MODEL_FIELDS.CONTENT]: input.content,
+                [MESSAGE_MODEL_FIELDS.KIND]: input.kind,
+                [MESSAGE_MODEL_FIELDS.RESOURCE_ID]: input.resourceId,
                 [MESSAGE_MODEL_FIELDS.REPLY_TO]: input.replyToId,
                 [MESSAGE_MODEL_FIELDS.MENTIONS]: [...input.mentions],
                 [MESSAGE_MODEL_FIELDS.ATTACHMENTS]: input.attachments.map((attachment) => ({
@@ -201,8 +204,26 @@ export class MongooseMessageRepository implements MessageRepository {
         return { items: pageDocuments.map((document) => this.toMessageRecord(document)), hasMore }
     }
 
+    /** Load a bounded neighborhood after explicit membership/history authorization. */
+    async findContext(input: { readonly conversationId: ObjectId; readonly messageId: ObjectId; readonly viewerId: ObjectId; readonly joinedAt: Date }, transaction?: TransactionContext): Promise<readonly MessageRecord[]> {
+        const visible = {
+            [MESSAGE_MODEL_FIELDS.CONVERSATION_ID]: input.conversationId,
+            [MESSAGE_MODEL_FIELDS.CREATED_AT]: { $gte: input.joinedAt },
+            [MESSAGE_MODEL_FIELDS.HIDDEN_BY]: { $ne: input.viewerId },
+        }
+        const session = transaction?.session ?? null
+        const target = await Message.findOne({ ...visible, [MESSAGE_MODEL_FIELDS.ID]: input.messageId }).session(session)
+        if (!target) return []
+        const cursor = { id: target._id.toString(), createdAt: target.createdAt }
+        const before = await Message.find({ ...visible, $or: createCursorFilter(cursor) }).sort({ [MESSAGE_MODEL_FIELDS.CREATED_AT]: -1, [MESSAGE_MODEL_FIELDS.ID]: -1 }).limit(UTILITY_CONTEXT.SIDE_LIMIT).session(session)
+        const after = await Message.find({ ...visible, $or: createForwardCursorFilter(cursor) }).sort({ [MESSAGE_MODEL_FIELDS.CREATED_AT]: 1, [MESSAGE_MODEL_FIELDS.ID]: 1 }).limit(UTILITY_CONTEXT.SIDE_LIMIT).session(session)
+        return [...before.reverse(), target, ...after].map((message) => this.toMessageRecord(message))
+    }
+
     private toMessageRecord(message: MessageDocument): MessageRecord {
         return {
+            kind: message[MESSAGE_MODEL_FIELDS.KIND],
+            resourceId: message[MESSAGE_MODEL_FIELDS.RESOURCE_ID],
             id: message[MESSAGE_MODEL_FIELDS.ID],
             conversationId: message[MESSAGE_MODEL_FIELDS.CONVERSATION_ID],
             senderId: message[MESSAGE_MODEL_FIELDS.SENDER_ID],

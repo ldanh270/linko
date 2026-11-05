@@ -40,7 +40,8 @@
     "build:frontend": "pnpm run fe:build",
     "lint": "pnpm run be:lint && pnpm run fe:lint",
     "typecheck": "pnpm run be:typecheck && pnpm run fe:typecheck",
-    "test": "pnpm run be:test && pnpm run fe:test"
+    "test": "pnpm run be:test && pnpm run fe:test",
+    "db:migrate:chat-utilities": "pnpm -C backend db:migrate:chat-utilities"
   },
   "devDependencies": {
     "@antfu/ni": "^30.6.0",

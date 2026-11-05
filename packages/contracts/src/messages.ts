@@ -1,8 +1,11 @@
 import { CURSOR_PAGE_FIELDS, MESSAGE_ATTACHMENT_FIELDS, MESSAGE_FIELDS } from "./constants"
 import type { EntityId } from "./envelope"
+import type { ChatMessageKind } from "./chat-utilities"
 
 /** Message data safe to return from authenticated conversation endpoints. */
 export interface MessageDto {
+    readonly [MESSAGE_FIELDS.KIND]?: ChatMessageKind
+    readonly [MESSAGE_FIELDS.RESOURCE_ID]?: string | null
     readonly [MESSAGE_FIELDS.ID]: EntityId
     readonly [MESSAGE_FIELDS.CONVERSATION_ID]: EntityId
     readonly [MESSAGE_FIELDS.SENDER_ID]: EntityId

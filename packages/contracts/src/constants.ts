@@ -218,6 +218,8 @@ export const MESSAGE_QUERY_PARAMS = {
 
 /** Public message DTO and request field names shared across API boundaries. */
 export const MESSAGE_FIELDS = {
+    KIND: "kind",
+    RESOURCE_ID: "resourceId",
     ID: "id",
     CONVERSATION_ID: "conversationId",
     RECIPIENT_ID: "recipientId",

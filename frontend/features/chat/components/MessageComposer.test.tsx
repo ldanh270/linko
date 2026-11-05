@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest"
 import { MessageComposer } from "./MessageComposer"
 import type { useConversationPane } from "../hooks/useConversationPane"
 
+vi.mock("@/features/utilities/components/ComposerUtilityMenu", () => ({ ComposerUtilityMenu: () => null }))
+
 function createMockState(overrides: Record<string, unknown> = {}): ReturnType<typeof useConversationPane> {
   const defaultComposer = {
     content: "Xin chào",

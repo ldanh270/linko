@@ -74,6 +74,7 @@ export interface PinMessageInput {
 
 /** Constructor collaborators for pin use cases. */
 export interface PinServiceDependencies {
+    readonly onChanged?: (conversationId: string) => Promise<void>
     readonly repository: PinRepository
     readonly transactionRunner: PinTransactionRunner
 }

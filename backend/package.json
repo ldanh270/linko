@@ -22,7 +22,8 @@
         "db:migrate:joinAt": "tsx scripts/migrateLegacyJoinAt.ts",
         "test": "vitest run",
         "typecheck": "tsc --noEmit",
-        "lint": "tsc --noEmit"
+        "lint": "tsc --noEmit",
+        "db:migrate:chat-utilities": "tsx scripts/migrateChatUtilities.ts"
     },
     "type": "module",
     "author": "ldanh270",

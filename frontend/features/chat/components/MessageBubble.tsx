@@ -1,3 +1,4 @@
+import { UtilityMessageCard } from "@/features/utilities/components/UtilityMessageCard"
 import { Fragment } from "react"
 import { Avatar } from "@/shared/components/Avatar"
 import { Link } from "@/shared/components/Link"
@@ -65,11 +66,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         ) : (
           <span className="flex-none w-9" aria-hidden="true" />
         )}
-        <div className="max-w-[min(78%,600px)] min-w-0">
+        <div className={message.resourceId ? "w-105 max-w-[calc(100%_-_48px)] min-w-0" : "max-w-[min(78%,600px)] min-w-0"}>
           <div className={`flex items-start gap-1 ${message.isOwn ? "flex-row-reverse" : ""}`}>
             <div
-              className={`relative px-4 py-2.5 rounded-lg min-w-17.5 ${
-                message.isOwn
+              className={`relative rounded-lg ${message.resourceId ? "flex-1 min-w-0 px-3 py-3 border border-border bg-surface text-text-primary" : "px-4 py-2.5 min-w-17.5"} ${
+                message.resourceId ? "" : message.isOwn
                   ? "rounded-br-none bg-bubble-outgoing text-text-primary after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-bubble-outgoing after:border-r-bubble-outgoing after:right-0 after:-bottom-2.25"
                   : "rounded-bl-none bg-brand text-brand-contrast after:content-[''] after:absolute after:border-[5px] after:border-transparent after:border-t-brand after:border-l-brand after:left-0 after:-bottom-2.25"
               }`}
@@ -91,9 +92,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   <p className="truncate opacity-85 m-0 text-xs">{message.reply.content}</p>
                 </div>
               )}
-              <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-normal">
-                {renderHighlightedContent(message.content, message.searchQuery)}
-              </p>
+              <div>
+                {message.kind && message.resourceId && message.conversationId ? <UtilityMessageCard kind={message.kind} resourceId={message.resourceId} conversationId={message.conversationId} /> : <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-normal">{renderHighlightedContent(message.content, message.searchQuery)}</p>}
+              </div>
               {message.attachments.map((file) => (
                 <MessageAttachment key={file.id} file={file} />
               ))}

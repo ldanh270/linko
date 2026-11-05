@@ -1,5 +1,6 @@
 "use client"
 
+import { useUtilityPanel } from "@/features/utilities/hooks/useUtilityPanel"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
@@ -30,11 +31,12 @@ const DETAILS_SCHEMA = z.string().transform((value) => value === WORKSPACE_BOOLE
 export function useConversationPane(item: InboxItemDto) {
   const id = item[INBOX_FIELDS.ID]
   const kind = item[INBOX_FIELDS.TYPE] === CONVERSATION_TYPE.GROUP ? CHAT_KIND.GROUP : CHAT_KIND.DIRECT
-  const { query, messages, send } = useConversationChat(id)
+  const { query, messages, send, context } = useConversationChat(id)
   const profile = useCurrentProfile()
   const { backHref } = useWorkspaceNavigation()
   const router = useRouter()
-  const pins = useGroupPins(id, kind === CHAT_KIND.GROUP)
+  const pins = useGroupPins(id, true)
+  const utilityPanel = useUtilityPanel()
   const members = useQuery({ queryKey: [CHAT_QUERY_KEYS.MEMBERS, id], queryFn: () => listMembers(id), enabled: kind === CHAT_KIND.GROUP })
   const isHistoryAccessDenied = query.error instanceof ApiError && CHAT_ACCESS_ERRORS.has(query.error.code)
   const isIdentityAccessDenied = profile.error instanceof ApiError && CHAT_ACCESS_ERRORS.has(profile.error.code)
@@ -187,24 +189,28 @@ export function useConversationPane(item: InboxItemDto) {
   }, [kind, onToggleDetails, router, id])
 
   const onPin = useCallback(
-    (messageId: string, isPinned: boolean) => pins.update.mutate({ messageId, isPinned }),
+    (messageId: string, isPinned: boolean) => { if (!isPinned || window.confirm("Bỏ ghim tin nhắn này cho mọi người?")) pins.update.mutate({ messageId, isPinned }) },
     [pins.update]
   )
   const isPinPending = pins.update.isPending
   const pinnedCount = pinnedIds.size
   const onReplyMessage = composer.onReply
 
+  const currentRole = members.data?.find((member) => member.userId === profile.data?.id)?.role
+  const canManagePins = kind === CHAT_KIND.DIRECT || currentRole === "OWNER" || currentRole === "ADMIN"
   const actionRows = useMemo(() => {
     return rows.map((row) => ({
       ...row,
-      isSearchActive: row.id === activeMatchId,
+      isSearchActive: row.id === activeMatchId || row.id === context.focusedId,
       searchQuery: search.trim() ? search : undefined,
       actions: [
         { label: CHAT_COPY.REPLY, icon: ICON_NAMES.REPLY, onSelect: () => onReplyMessage(row.id) },
-        ...(kind === CHAT_KIND.GROUP ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: isPinPending || (!row.isPinned && pinnedCount >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
+        { label: "Nhắc tôi", icon: ICON_NAMES.BELL, disabled: row.id.startsWith("temp-"), onSelect: () => utilityPanel.remind(row.id) },
+        { label: "Tạo lịch hẹn từ tin này", icon: ICON_NAMES.CLOCK, disabled: row.id.startsWith("temp-") || isComposerDisabled, onSelect: () => utilityPanel.schedule(row.id) },
+        ...(canManagePins ? [{ label: row.isPinned ? CHAT_COPY.UNPIN : CHAT_COPY.PIN, icon: ICON_NAMES.PIN, disabled: isPinPending || (!row.isPinned && pinnedCount >= PIN_LIMITS.MAX_PINNED_MESSAGES), onSelect: () => onPin(row.id, row.isPinned) }] : []),
       ],
     }))
-  }, [rows, activeMatchId, search, onReplyMessage, kind, isPinPending, pinnedCount, onPin])
+  }, [rows, activeMatchId, search, onReplyMessage, canManagePins, isPinPending, pinnedCount, onPin, utilityPanel, context.focusedId, isComposerDisabled])
 
   const replyTargetRow = useMemo(() => {
     return composer.replyId ? rows.find((row) => row.id === composer.replyId) : null
@@ -218,7 +224,9 @@ export function useConversationPane(item: InboxItemDto) {
   }
   return {
     conversationId: id,
+    authors,
     query,
+    messageContext: context,
     profile,
     composer: composerState,
     members,

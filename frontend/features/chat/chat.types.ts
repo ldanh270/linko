@@ -1,3 +1,4 @@
+import type { ChatMessageKind } from "@linko/contracts"
 import type { DropdownAction } from "@/shared/components/DropdownMenu/dropdown.types"
 import type { CHAT_KIND } from "./chat.constants"
 
@@ -9,6 +10,7 @@ export interface ChatAuthor { readonly id: string; readonly name: string; readon
 export interface MessageReplyViewModel { readonly id: string; readonly author: string; readonly content: string }
 /** Presentation-only message fields avoid deriving business state inside JSX. */
 export interface MessageViewModel {
+  readonly kind?: ChatMessageKind; readonly resourceId?: string | null; readonly conversationId?: string
   readonly id: string; readonly content: string; readonly isOwn: boolean; readonly author: string
   readonly senderId?: string
   readonly avatarUrl: string | null; readonly createdAt: string; readonly time: string; readonly dateLabel: string

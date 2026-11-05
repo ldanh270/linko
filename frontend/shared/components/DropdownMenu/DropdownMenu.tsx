@@ -9,10 +9,10 @@ import { useDropdownMenu } from "./useDropdownMenu"
 export type { DropdownAction } from "./dropdown.types"
 
 /** Named menu with actions provided by the owning feature hook. */
-export interface DropdownMenuProps { readonly label: string; readonly items: readonly DropdownAction[] }
+export interface DropdownMenuProps { readonly label: string; readonly items: readonly DropdownAction[]; readonly placement?: "top" | "bottom" }
 
 /** Render a contextual menu with shared accessible interaction states. UI only. */
-export function DropdownMenu({ label, items }: DropdownMenuProps) {
+export function DropdownMenu({ label, items, placement = "bottom" }: DropdownMenuProps) {
   const { ref, triggerRef, isOpen, toggle, items: actions } = useDropdownMenu(items)
   return (
     <div className="relative" ref={ref}>
@@ -32,7 +32,7 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
         <div
           role="menu"
           aria-label={label}
-          className="absolute right-0 top-full z-30 min-w-40 p-1.5 border border-border rounded-md bg-surface shadow-dropdown"
+          className={`absolute ${placement === "top" ? "left-0 bottom-full mb-2" : "right-0 top-full"} z-30 min-w-52 p-1.5 border border-border rounded-md bg-surface shadow-dropdown`}
         >
           {actions.map((item) => (
             <Button

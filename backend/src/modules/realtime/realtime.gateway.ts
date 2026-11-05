@@ -1,4 +1,5 @@
 import { MESSAGE_FIELDS, PRESENCE_STATUS, SOCKET_LIFECYCLE, SOCKET_EVENTS, type MessageDto } from "@linko/contracts"
+import { UTILITY_EVENTS, type UtilityChangedEvent } from "@linko/contracts"
 import { REGEX } from "../../configs/constants/regex"
 import {
     conversationRoom,
@@ -23,6 +24,16 @@ import type { Server } from "socket.io"
  */
 export class RealtimeGateway implements RealtimeMessagePublisher, RealtimeMembershipRevoker, RealtimeConversationNotifier {
     private server: Server | null = null
+
+    /** Invalidate authorized queries without broadcasting private utility content. */
+    async publishUtilityChange(event: UtilityChangedEvent): Promise<void> {
+        this.requireServer().to(conversationRoom(event.conversationId)).emit(UTILITY_EVENTS.CHANGED, event)
+    }
+
+    /** Signal a durable reminder only to its recipient's authenticated sessions. */
+    async publishReminder(userId: string, reminderId: string): Promise<void> {
+        this.requireServer().to(userRoom(userId)).emit(UTILITY_EVENTS.REMINDER, { reminderId })
+    }
 
     /** Bind shared token verification and active membership persistence. */
     constructor(private readonly dependencies: RealtimeGatewayDependencies) {}

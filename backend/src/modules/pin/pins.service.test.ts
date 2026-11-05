@@ -91,22 +91,38 @@ describe("PinService", () => {
         expect(newMemberPins).toHaveLength(0)
     })
 
-    it("should_reject_a_pin_in_a_direct_conversation", async () => {
+    it("should_share_direct_pins_between_both_active_participants", async () => {
         const group = await createGroup("direct-pin")
         const directConversation = await Conversation.create({
             [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT,
             [CONVERSATION_FIELDS.PARTICIPANTS]: [
-                { [PARTICIPANT_FIELDS.USER_ID]: group.ownerId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
-                { [PARTICIPANT_FIELDS.USER_ID]: group.memberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
+                { [PARTICIPANT_FIELDS.USER_ID]: group.ownerId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT, joinedAt: MEMBER_JOINED_AT, clearedHistoryAt: MEMBER_JOINED_AT },
+                { [PARTICIPANT_FIELDS.USER_ID]: group.memberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT, joinedAt: MEMBER_JOINED_AT, clearedHistoryAt: MEMBER_JOINED_AT },
             ],
         })
         const directMessageId = await createMessage(directConversation._id, group.ownerId, MESSAGE_CREATED_AT)
 
-        await expect(createPinService().pin({
+        const pins = await createPinService().pin({
             conversationId: directConversation._id,
             messageId: directMessageId,
             actorId: group.ownerId,
-        })).rejects.toMatchObject({ code: ERROR_CODES.FORBIDDEN })
+        })
+        expect(pins.map((pin) => pin.id)).toEqual([directMessageId.toString()])
+        expect(await createPinService().unpin({ conversationId: directConversation._id, messageId: directMessageId, actorId: group.memberId })).toEqual([])
+    })
+
+    it("rejects a participant with leftAt even if delFlag is false", async () => {
+        const group = await createGroup("left-member")
+        await Conversation.updateOne({ _id: group.conversationId, "participants.userId": group.ownerId }, { $set: { "participants.$.leftAt": new Date() } })
+        await expect(createPinService().list(group.conversationId, group.ownerId)).rejects.toMatchObject({ code: ERROR_CODES.FORBIDDEN })
+    })
+
+    it("hides pins older than the viewer's cleared history boundary", async () => {
+        const group = await createGroup("cleared-history")
+        const messageId = await createMessage(group.conversationId, group.ownerId, MESSAGE_CREATED_AT)
+        await createPinService().pin({ conversationId: group.conversationId, messageId, actorId: group.ownerId })
+        await Conversation.updateOne({ _id: group.conversationId, "participants.userId": group.ownerId }, { $set: { "participants.$.clearedHistoryAt": new Date(MESSAGE_CREATED_AT.getTime() + 1) } })
+        expect(await createPinService().list(group.conversationId, group.ownerId)).toEqual([])
     })
 
     it("should_not_pin_a_hidden_or_other_conversation_message", async () => {
@@ -218,10 +234,10 @@ async function createGroup(suffix: string): Promise<{
         [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
         [CONVERSATION_FIELDS.STATUS]: CONVERSATION_STATUS.ACTIVE,
         [CONVERSATION_FIELDS.PARTICIPANTS]: [
-            { [PARTICIPANT_FIELDS.USER_ID]: ownerId, [PARTICIPANT_FIELDS.ROLE]: ROLE.OWNER, [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT },
-            { [PARTICIPANT_FIELDS.USER_ID]: adminId, [PARTICIPANT_FIELDS.ROLE]: ROLE.ADMIN, [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT },
-            { [PARTICIPANT_FIELDS.USER_ID]: memberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER, [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT },
-            { [PARTICIPANT_FIELDS.USER_ID]: newMemberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER, [PARTICIPANT_FIELDS.JOINED_AT]: NEW_MEMBER_JOINED_AT },
+            { [PARTICIPANT_FIELDS.USER_ID]: ownerId, [PARTICIPANT_FIELDS.ROLE]: ROLE.OWNER, [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT, [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: MEMBER_JOINED_AT },
+            { [PARTICIPANT_FIELDS.USER_ID]: adminId, [PARTICIPANT_FIELDS.ROLE]: ROLE.ADMIN, [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT, [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: MEMBER_JOINED_AT },
+            { [PARTICIPANT_FIELDS.USER_ID]: memberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER, [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT, [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: MEMBER_JOINED_AT },
+            { [PARTICIPANT_FIELDS.USER_ID]: newMemberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER, [PARTICIPANT_FIELDS.JOINED_AT]: NEW_MEMBER_JOINED_AT, [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: NEW_MEMBER_JOINED_AT },
         ],
         [CONVERSATION_FIELDS.GROUP]: {
             [GROUP_FIELDS.NAME]: `Group ${suffix}`,

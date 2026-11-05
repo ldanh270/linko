@@ -3,6 +3,8 @@ import { MEMBERSHIP_FIELDS, MESSAGE_FIELDS, MESSAGE_LIMITS } from "@linko/contra
 /** MongoDB fields persisted on messages and selected by message repositories. */
 export const MESSAGE_MODEL_FIELDS = {
     ID: "_id",
+    KIND: "kind",
+    RESOURCE_ID: "resourceId",
     CONVERSATION_ID: "conversationId",
     SENDER_ID: "senderId",
     CLIENT_MESSAGE_ID: "clientMessageId",

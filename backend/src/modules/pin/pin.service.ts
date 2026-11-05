@@ -30,16 +30,20 @@ export class PinService {
 
     /** Pin one visible group message after rechecking owner/admin access in a transaction. */
     async pin(input: PinMessageInput): Promise<PinnedMessageDto[]> {
-        return this.dependencies.transactionRunner.run((transaction) => this.pinInTransaction(input, transaction))
+        const pins = await this.dependencies.transactionRunner.run((transaction) => this.pinInTransaction(input, transaction))
+        await this.dependencies.onChanged?.(input.conversationId.toString())
+        return pins
     }
 
     /** Remove one group pin idempotently while retaining the three-pin bound. */
     async unpin(input: PinMessageInput): Promise<PinnedMessageDto[]> {
-        return this.dependencies.transactionRunner.run(async (transaction) => {
+        const pins = await this.dependencies.transactionRunner.run(async (transaction) => {
             await this.requireManager(input.conversationId, input.actorId, transaction)
             await this.dependencies.repository.removePin(input, transaction)
             return this.getVisiblePins(input.conversationId, input.actorId, transaction)
         })
+        await this.dependencies.onChanged?.(input.conversationId.toString())
+        return pins
     }
 
     /** List ordered pins visible to the current group member. */
@@ -97,9 +101,6 @@ export class PinService {
     ): Promise<CurrentPinMemberConversation> {
         const conversation = await this.dependencies.repository.findConversation(conversationId, viewerId, transaction)
         if (!conversation) throw new NotFoundException(PIN_ERROR_MESSAGES.GROUP_NOT_FOUND)
-        if (conversation.type !== CONVERSATION_TYPE.GROUP) {
-            throw new ForbiddenException(PIN_ERROR_MESSAGES.GROUP_ONLY)
-        }
         const member = conversation.member
         if (!member) throw new ForbiddenException(PIN_ERROR_MESSAGES.GROUP_ONLY)
         return { ...conversation, member }
@@ -111,7 +112,7 @@ export class PinService {
         transaction: TransactionContext,
     ): Promise<CurrentPinMemberConversation> {
         const conversation = await this.requireMember(conversationId, actorId, transaction)
-        if (conversation.member?.role !== ROLE.OWNER && conversation.member?.role !== ROLE.ADMIN) {
+        if (conversation.type === CONVERSATION_TYPE.GROUP && conversation.member.role !== ROLE.OWNER && conversation.member.role !== ROLE.ADMIN) {
             throw new ForbiddenException(PIN_ERROR_MESSAGES.INSUFFICIENT_ROLE, ERROR_CODES.INSUFFICIENT_ROLE)
         }
         return conversation

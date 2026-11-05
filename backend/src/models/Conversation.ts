@@ -11,6 +11,7 @@ import { auditPlugin } from "#/shared/persistence/auditPlugin"
 import { softDeletePlugin } from "#/shared/persistence/softDeletePlugin"
 import { PIN_ERROR_MESSAGES } from "#/modules/pin/pin.constants"
 import { DIRECT_CONVERSATION_FIELDS, FRIEND_INDEX_NAMES } from "../modules/friend/friend.constants"
+import { UTILITY_FIELDS } from "../modules/utility/utility.constants"
 
 const lastMessageSchema = new mongoose.Schema(
     {
@@ -153,6 +154,10 @@ const groupSchema = new mongoose.Schema(
 
 const conversationSchema = new mongoose.Schema(
     {
+        /** Direct pins are conversation-level; legacy group pins remain inside group. */
+        [UTILITY_FIELDS.DIRECT_PINS]: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }], default: [], validate: (ids: readonly unknown[]) => ids.length <= PIN_LIMITS.MAX_PINNED_MESSAGES },
+        /** A write fence makes utility transactions conflict with membership changes. */
+        [UTILITY_FIELDS.REVISION]: { type: Number, default: 0 },
         [CONVERSATION_FIELDS.TYPE]: {
             type: String,
             enum: Object.values(CONVERSATION_TYPE),

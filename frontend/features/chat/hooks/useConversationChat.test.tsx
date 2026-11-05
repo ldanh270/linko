@@ -8,6 +8,8 @@ import * as inboxCache from "@/features/inbox/inbox.cache"
 import { notificationSound } from "@/shared/sound/notificationSound"
 import { useConversationChat } from "./useConversationChat"
 
+vi.mock("@/features/utilities/hooks/useMessageContext", () => ({ useMessageContext: (_conversationId: string, messages: readonly MessageDto[]) => ({ messages, focusedId: "", query: { isPending: false, isError: false } }) }))
+
 const { mockMessage, fakeSocket } = vi.hoisted(() => ({
   mockMessage: {
     id: "msg-123",

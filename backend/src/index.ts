@@ -1,5 +1,6 @@
 import "dotenv/config"
 import { BestEffortPresenceActivityRecorder } from "./modules/realtime/presence.activity"
+import type { UtilityLifecycle } from "./modules/utility/utility.lifecycle"
 import mongoose from "mongoose"
 import { createRedisClient } from "./configs/redis.config"
 import { PresenceService } from "./modules/realtime/presence.service"
@@ -48,20 +49,27 @@ const realtimeGateway = new RealtimeGateway({
     tokenVerifier: new AuthTokenService(authConfig.accessTokenSecret),
     repository: realtimeRepository,
 })
-const app = createApp({ publicRoutes, privateRoutes, logger, authConfig, realtimeGateway, presence })
+let utilityLifecycle: UtilityLifecycle | undefined
+const app = createApp({ publicRoutes, privateRoutes, logger, authConfig, realtimeGateway, presence, registerUtilityLifecycle: (lifecycle) => { utilityLifecycle = lifecycle } })
 const server = createServer(app)
 const io = attachSocket(server, authConfig.clientOrigin, realtimeGateway)
 
 const port = Number(process.env.PORT ?? 5000)
 await connectDB()
 await presence.start()
+utilityLifecycle?.start()
 server.listen(port, () => {
     process.stdout.write(`${JSON.stringify({ level: "info", message: "Server started", port })}\n`)
 })
 
 /** Close socket transport first so final disconnects complete before persistence shutdown. */
 const shutdown = (): void => {
-    io.close(() => { void presence.stop().then(() => mongoose.disconnect()).catch(recordRealtimeFailure) })
+    io.close(() => {
+        void Promise.allSettled([presence.stop(), utilityLifecycle?.stop()]).then(async (results) => {
+            for (const result of results) if (result.status === "rejected") recordRealtimeFailure(result.reason)
+            await mongoose.disconnect()
+        }).catch(recordRealtimeFailure)
+    })
 }
 process.once("SIGTERM", shutdown)
 process.once("SIGINT", shutdown)

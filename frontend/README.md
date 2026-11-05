@@ -1,5 +1,11 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Live location maps
+
+Maps use client-only [Leaflet 1.9.4](https://leafletjs.com/reference-1.9.4.html) and load tile requests only after an explicit map-display action. Override `NEXT_PUBLIC_MAP_TILE_URL` and `NEXT_PUBLIC_MAP_ATTRIBUTION` together when choosing another provider. Browser requests retain ordinary cache/referrer behavior, and attribution remains visible on every map. There is no tile prefetch or offline download.
+
+The default follows the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Public OSM tiles provide best-effort service; choose a suitable provider for deployment traffic rather than assuming unrestricted capacity. Precise application coordinates are never placed in app URLs or browser storage.
+
 ## Getting Started
 
 First, run the development server:
