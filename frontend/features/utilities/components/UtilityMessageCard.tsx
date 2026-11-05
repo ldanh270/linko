@@ -11,5 +11,5 @@ const renderers: Partial<Record<ChatMessageKind, ComponentType<{ conversationId:
 /** Dispatch first-class utility messages through a single renderer registry. UI only. */
 export function UtilityMessageCard({ kind, resourceId, conversationId }: UtilityMessageCardProps) {
   const Card = renderers[kind]
-  return Card ? <div className="min-w-0 w-[min(320px,100%)]"><Card conversationId={conversationId} resourceId={resourceId} /></div> : <p className="text-sm">Loại nội dung này chưa được hỗ trợ.</p>
+  return Card ? <div className="min-w-0 w-full"><Card conversationId={conversationId} resourceId={resourceId} /></div> : <p className="text-sm">Loại nội dung này chưa được hỗ trợ.</p>
 }
