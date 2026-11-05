@@ -78,4 +78,12 @@ describe("real utility history and typed timeline", () => {
     await expect(withTransaction(async (transaction) => { await timeline.create(input, transaction); throw new Error("Rollback") })).rejects.toThrow("Rollback")
     expect(await timeline.find(input)).toBeNull()
   })
+  it("returns a business conflict when another message kind already owns the client key", async () => {
+    const group = await conversation()
+    const timeline = new UtilityTimeline({ repository, now: () => new Date(), publish: async () => undefined, onError: vi.fn() })
+    const input = { conversationId: group._id, actorId, clientMessageId: "cross-kind-key", kind: CHAT_MESSAGE_KIND.POLL, resourceId: new mongoose.Types.ObjectId(), content: "Bình chọn" }
+    await withTransaction((transaction) => timeline.create(input, transaction))
+    await expect(withTransaction((transaction) => timeline.create({ ...input, kind: CHAT_MESSAGE_KIND.APPOINTMENT, resourceId: new mongoose.Types.ObjectId() }, transaction))).rejects.toMatchObject({ code: ERROR_CODES.CONFLICT })
+    expect(await Message.countDocuments({ conversationId: group._id })).toBe(1)
+  })
 })

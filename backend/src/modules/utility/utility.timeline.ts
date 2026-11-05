@@ -1,8 +1,10 @@
-import type { MessageDto } from "@linko/contracts"
+import { ERROR_CODES, type MessageDto } from "@linko/contracts"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import type { MessageRepository } from "../message/message.types"
 import { toMessageDto } from "../message/message.mapper"
 import type { UtilityMessageInput, UtilityTimelinePort } from "./utility.types"
+import { ConflictException } from "../../shared/errors/ConflictException"
+import { UTILITY_ERRORS } from "./utility.constants"
 
 /** Adapt utility resource creation to the existing transactional chat timeline.
  * @pattern Adapter
@@ -14,6 +16,8 @@ export class UtilityTimeline implements UtilityTimelinePort {
 
   /** Insert a typed card and update unread/last-message state in one transaction. */
   async create(input: UtilityMessageInput, transaction: TransactionContext): Promise<MessageDto> {
+    const previous = await this.find(input, transaction)
+    if (previous) throw new ConflictException(ERROR_CODES.CONFLICT, UTILITY_ERRORS.CLIENT_KEY_USED)
     const message = await this.dependencies.repository.createMessage({
       conversationId: input.conversationId, senderId: input.actorId, clientMessageId: input.clientMessageId,
       content: input.content, kind: input.kind, resourceId: input.resourceId,

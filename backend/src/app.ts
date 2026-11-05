@@ -1,5 +1,17 @@
 import type { PresenceReader } from "./modules/realtime/presence.types"
 import { API_ROUTES, ERROR_CODES } from "@linko/contracts"
+import { REMINDER_ROUTES, UTILITY_KIND } from "@linko/contracts"
+import { createPollFeature } from "./modules/poll/poll.feature"
+import { createLocationFeature } from "./modules/location/location.feature"
+import { createSchedulingFeature } from "./modules/appointment/scheduling.feature"
+import { UtilityAccessService } from "./modules/utility/utility.access"
+import { MongooseUtilityAccessRepository } from "./modules/utility/utility.repository"
+import { UtilityTimeline } from "./modules/utility/utility.timeline"
+import { UtilityContextService } from "./modules/utility/utility.context"
+import { UtilityContextController } from "./modules/utility/utility.context.controller"
+import { createUtilityContextRouter } from "./modules/utility/utility.context.route"
+import { UtilityWorkers, type UtilityLifecycle } from "./modules/utility/utility.lifecycle"
+import type { UtilityRuntime } from "./modules/utility/utility.types"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import express, { type Express, type Router } from "express"
@@ -80,6 +92,7 @@ import { FriendService } from "./modules/friend/friend.service"
 
 /** Collaborators and route groups wired by the composition root. */
 export interface AppDependencies {
+    registerUtilityLifecycle?: (lifecycle: UtilityLifecycle) => void
     publicRoutes: Router
     privateRoutes: Router
     logger: ServerLogger
@@ -161,9 +174,29 @@ export function createApp(dependencies: AppDependencies): Express {
         clock: { now: () => new Date() },
     })
     const inboxService = new InboxService({ repository: new MongooseInboxRepository() })
+    const utilityMessageRepository = new MongooseMessageRepository()
+    const recordUtilityFailure = (error: unknown): void => {
+        dependencies.logger.error(error instanceof Error ? error : new Error(String(error)), { requestId: "chat-utility", method: "WORKER", path: API_ROUTES.CONVERSATIONS })
+    }
+    const utilityAccess = new UtilityAccessService(new MongooseUtilityAccessRepository(utilityMessageRepository))
+    const utilityRuntime: UtilityRuntime = {
+        access: utilityAccess, transactionRunner: { run: withTransaction }, clock: { now: () => new Date() },
+        timeline: new UtilityTimeline({ repository: utilityMessageRepository, now: () => new Date(), publish: (message) => dependencies.realtimeGateway?.publishMessage(message) ?? Promise.resolve(), onError: recordUtilityFailure }),
+        notifier: {
+            changed: (event) => (dependencies.realtimeGateway?.publishUtilityChange(event) ?? Promise.resolve()).catch(recordUtilityFailure),
+            reminder: (userId, reminderId) => (dependencies.realtimeGateway?.publishReminder(userId, reminderId) ?? Promise.resolve()).catch(recordUtilityFailure),
+        },
+        onError: recordUtilityFailure,
+    }
+    const polls = createPollFeature(utilityRuntime)
+    const locations = createLocationFeature(utilityRuntime)
+    const scheduling = createSchedulingFeature(utilityRuntime)
+    dependencies.registerUtilityLifecycle?.(new UtilityWorkers({ scheduling, cleanup: locations.cleanup, onError: recordUtilityFailure }))
+    const utilityContextController = new UtilityContextController(new UtilityContextService(utilityAccess, utilityMessageRepository))
     const pinService = new PinService({
         repository: new MongoosePinRepository(),
         transactionRunner: { run: withTransaction },
+        onChanged: (conversationId) => utilityRuntime.notifier.changed({ conversationId, kind: UTILITY_KIND.PIN, resourceId: conversationId, revision: Date.now() }),
     })
     const notificationPreferenceService = new NotificationPreferenceService({
         repository: new MongooseNotificationRepository(),
@@ -203,6 +236,11 @@ export function createApp(dependencies: AppDependencies): Express {
     app.use(API_ROUTES.USERS, createPeopleSearchRouter(friendController))
     app.use(API_ROUTES.MESSAGES, createAttachmentRouter(attachmentController))
     app.use(API_ROUTES.CONVERSATIONS, createPinRouter(pinController))
+    app.use(API_ROUTES.CONVERSATIONS, createUtilityContextRouter(utilityContextController))
+    app.use(API_ROUTES.CONVERSATIONS, polls.router)
+    app.use(API_ROUTES.CONVERSATIONS, locations.router)
+    app.use(API_ROUTES.CONVERSATIONS, scheduling.conversationRouter)
+    app.use(REMINDER_ROUTES.BASE, scheduling.reminderRouter)
     app.use(API_ROUTES.CONVERSATIONS, createNotificationPreferenceRouter(notificationPreferenceController))
     app.use(API_ROUTES.CONVERSATIONS, createReadStateRouter(readStateController))
     app.use(API_ROUTES.CONVERSATIONS, createInboxRouter(inboxController))
