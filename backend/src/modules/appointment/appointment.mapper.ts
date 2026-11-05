@@ -15,6 +15,7 @@ export function toAppointmentDto(input: { record: AppointmentDocument; responses
     return {
         id: record._id.toString(), conversationId: record.conversationId.toString(), messageId: record.messageId.toString(), creatorId: record.creatorId.toString(), createdAt: record.createdAt.toISOString(), revision: record.revision,
         title: record.title, description: record.description, startsAt: record.startsAt.toISOString(), endsAt: record.endsAt?.toISOString() ?? null,
+        updatedAt: record.updatedAt.toISOString(),
         timezone: record.timezone, place: record.place, status: record.status === UTILITY_STATUS.CANCELLED ? UTILITY_STATUS.CANCELLED : UTILITY_STATUS.ACTIVE,
         responses: responses.map((response) => ({ userId: response.userId.toString(), status: response.status as typeof RSVP_STATUS[keyof typeof RSVP_STATUS] })),
         myResponse: mine ? mine.status as typeof RSVP_STATUS[keyof typeof RSVP_STATUS] : null, reminderMinutes: mine?.reminderMinutes ?? null,

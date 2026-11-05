@@ -11,7 +11,7 @@ export const UTILITY_ROUTES = {
   MESSAGE_REMINDERS: "/:id/messages/:messageId/reminders",
 } as const
 /** Authenticated personal reminder API paths mounted at /api/reminders. */
-export const REMINDER_ROUTES = { BASE: "/api/reminders", LIST: "/", READ_ALL: "/read-all", ITEM: "/:resourceId", READ: "/:resourceId/read" } as const
+export const REMINDER_ROUTES = { BASE: "/api/reminders", LIST: "/", INBOX: "/inbox", READ_ALL: "/read-all", ITEM: "/:resourceId", READ: "/:resourceId/read" } as const
 /** Revisioned invalidation and private delivery events, never raw coordinates. */
 export const UTILITY_EVENTS = { CHANGED: "utility:changed", REMINDER: "reminder:delivered" } as const
 /** Resource categories understood by invalidation consumers. */
@@ -39,7 +39,7 @@ export interface CreatePollRequest { readonly clientMessageId: string; readonly 
 /** One named appointment response. */
 export interface AppointmentResponseDto { readonly userId: string; readonly status: "going" | "maybe" | "declined" }
 /** Viewer-authorized appointment card. */
-export interface AppointmentDto extends ChatUtilityDto { readonly title: string; readonly description: string; readonly startsAt: string; readonly endsAt: string | null; readonly timezone: string; readonly place: string; readonly status: "active" | "cancelled"; readonly responses: readonly AppointmentResponseDto[]; readonly myResponse: "going" | "maybe" | "declined" | null; readonly reminderMinutes: number | null; readonly canManage: boolean }
+export interface AppointmentDto extends ChatUtilityDto { readonly updatedAt?: string; readonly title: string; readonly description: string; readonly startsAt: string; readonly endsAt: string | null; readonly timezone: string; readonly place: string; readonly status: "active" | "cancelled"; readonly responses: readonly AppointmentResponseDto[]; readonly myResponse: "going" | "maybe" | "declined" | null; readonly reminderMinutes: number | null; readonly canManage: boolean }
 /** Idempotent one-off appointment creation command. */
 export interface CreateAppointmentRequest { readonly clientMessageId: string; readonly title: string; readonly description?: string; readonly startsAt: string; readonly endsAt?: string | null; readonly timezone: string; readonly place?: string; readonly sourceMessageId?: string }
 /** Appointment editable fields; optimistic concurrency uses revision. */
@@ -56,6 +56,8 @@ export interface CreateLocationRequest { readonly clientMessageId: string; reado
 export interface UpdateLocationRequest { readonly publisherId: string; readonly sequence: number; readonly latitude: number; readonly longitude: number; readonly accuracy: number }
 /** Persisted personal reminder or delivery; safe source preview comes from authorized reads. */
 export interface ReminderDto { readonly id: string; readonly conversationId: string; readonly messageId: string; readonly title: string; readonly note: string; readonly dueAt: string; readonly deliveredAt: string | null; readonly readAt: string | null; readonly status: "pending" | "delivered"; readonly appointmentId: string | null }
+/** Authorized cursor page and complete unread count for the personal inbox. */
+export interface ReminderInboxDto { readonly items: readonly ReminderDto[]; readonly nextCursor: string | null; readonly unreadCount: number }
 /** An explicit private message reminder. */
 export interface CreateReminderRequest { readonly dueAt: string; readonly note?: string; readonly clientMessageId: string }
 /** Versioned event safe to broadcast to conversation rooms without sensitive content. */
