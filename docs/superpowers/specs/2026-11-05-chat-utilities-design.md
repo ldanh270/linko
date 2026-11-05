@@ -1,6 +1,6 @@
 # Linko chat utilities: pins, appointments, polls, live location
 
-Date: 2026-11-05 (Asia/Saigon). Status: proposed; awaiting design approval before implementation.
+Date: 2026-11-05 (Asia/Saigon). Status: approved by the user with "implement đi"; implementation is tracked in the corresponding plan and progress ledger.
 
 Builder check: an independent read-only planning review on 2026-11-05 reported "nothing important left". This review is not user approval and does not establish implementation or test completion.
 
@@ -28,7 +28,7 @@ Everything below beyond those confirmed requirements is an engineering/product p
 2. Build a separate planning dashboard alongside chat. Offers more room for large calendars but introduces a second navigation model and weaker message context. Not proposed for this project.
 3. Add a native mobile client for continuous background tracking. Requires a separate application lifecycle and platform permissions. The user's confirmation removes the need for this scope.
 
-The web/foreground constraint is confirmed; the integrated UX and detailed rules remain proposals. Do not treat this document as approved implementation instructions yet.
+The user confirmed the web/foreground constraint and subsequently approved implementation of this design.
 
 ## Shared experience
 

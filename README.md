@@ -45,6 +45,7 @@ origins; keep the backend's `CLIENT_URL` set to the frontend origin.
 | `pnpm run db:clear`                 | Clear documents in Linko-owned collections               |
 | `pnpm run db:migrate:audit`         | Preview the audit-field and index migration              |
 | `pnpm run db:migrate:notifications` | Preview the notification preference migration            |
+| `pnpm run db:migrate:chat-utilities` | Preview indexes for polls, appointments and reminders    |
 
 `db:clear` refuses to run with `NODE_ENV=production` and asks you to type the
 connected database name. It deletes documents only from Linko's six collections
@@ -66,3 +67,6 @@ migrations.
 
 The older `pnpm run seed` command remains available as an alias for
 `pnpm run db:seed`.
+
+See [chat utility operations](docs/chat-utilities-operations.md) for reminder
+delivery, foreground location sharing, additive index deployment and rollback.
