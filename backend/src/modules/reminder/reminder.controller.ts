@@ -18,6 +18,11 @@ export class ReminderController {
     readonly list: RequestHandler<Record<string, string>> = async (request, response) => {
         response.json(ApiResponse.ok(await this.service.list(request.user._id)))
     }
+    /** Return a validated owner-scoped page and authoritative authorized unread count. */
+    readonly inbox: RequestHandler<Record<string, string>> = async (request, response) => {
+        const cursor = typeof request.query.cursor === "string" ? new Types.ObjectId(request.query.cursor) : undefined
+        response.json(ApiResponse.ok(await this.service.inbox(request.user._id, cursor)))
+    }
     /** Read one owned reminder and its source link. */
     readonly get: RequestHandler<Record<string, string>> = async (request, response) => {
         response.json(ApiResponse.ok(await this.service.get(request.user._id, new Types.ObjectId(request.params.resourceId))))
@@ -26,7 +31,7 @@ export class ReminderController {
     readonly read: RequestHandler<Record<string, string>> = async (request, response) => {
         response.json(ApiResponse.ok(await this.service.read(request.user._id, new Types.ObjectId(request.params.resourceId))))
     }
-    /** Mark the user's bounded currently visible inbox read. */
+    /** Mark all currently accessible delivered inbox records read. */
     readonly readAll: RequestHandler<Record<string, string>> = async (request, response) => {
         await this.service.readAll(request.user._id)
         response.json(ApiResponse.ok(null))

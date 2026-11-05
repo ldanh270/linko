@@ -1,11 +1,13 @@
-import type { Types } from "mongoose"
+import type { PipelineStage, Types } from "mongoose"
 import { UTILITY_LIMITS } from "@linko/contracts"
 import { ReminderJob } from "../../models/ReminderJob"
 import { ReminderDelivery } from "../../models/ReminderDelivery"
 import type { TransactionContext } from "../../shared/persistence/withTransaction"
 import { SCHEDULING_LIMITS } from "../appointment/appointment.constants"
 import { DELIVERY_FIELDS as D, REMINDER_FIELDS as F, REMINDER_STATUS as S } from "./reminder.constants"
-import type { ReminderDocument, ReminderRepository, ScheduleReminderInput } from "./reminder.types"
+import type { ReminderDocument, ReminderInboxRecords, ReminderRepository, ScheduleReminderInput } from "./reminder.types"
+import { visibleReminderPipeline } from "./reminder.inbox-pipeline"
+import type { ReminderJobRecord } from "../../models/ReminderJob"
 
 /** Persist reminder intent, leases and idempotent delivery receipts.
  * @pattern Repository
@@ -41,6 +43,34 @@ export class MongooseReminderRepository implements ReminderRepository {
     /** Read bounded pending/delivered inbox records for one owner. */
     async list(ownerId: Types.ObjectId): Promise<ReminderDocument[]> {
         return ReminderJob.find({ [F.OWNER]: ownerId, [F.STATUS]: { $in: [S.PENDING, S.CLAIMED, S.DELIVERED] } }).sort({ [F.DUE]: -1, [F.ID]: -1 }).limit(UTILITY_LIMITS.LIST).exec()
+    }
+    /** Page only authorized rows while counting every currently accessible unread delivery. */
+    async inbox(ownerId: Types.ObjectId, cursor?: ReminderDocument): Promise<ReminderInboxRecords> {
+        const boundary: PipelineStage.FacetPipelineStage[] = cursor ? [{ $match: { $or: [{ [F.DUE]: { $lt: cursor.dueAt } }, { [F.DUE]: cursor.dueAt, [F.ID]: { $lt: cursor._id } }] } }] : []
+        const [result] = await ReminderJob.aggregate<{ items: (ReminderJobRecord & { _id: Types.ObjectId })[]; unread: { count: number }[] }>([
+            ...visibleReminderPipeline(ownerId),
+            { $facet: {
+                items: [...boundary, { $sort: { [F.DUE]: -1, [F.ID]: -1 } }, { $limit: UTILITY_LIMITS.LIST + 1 }],
+                unread: [{ $match: { [F.STATUS]: S.DELIVERED, [F.READ]: null } }, { $count: "count" }],
+            } },
+        ]).exec()
+        const rows = result?.items ?? []
+        const items = rows.slice(0, UTILITY_LIMITS.LIST).map((row) => ReminderJob.hydrate(row))
+        return { items, nextCursor: rows.length > UTILITY_LIMITS.LIST ? items.at(-1)?._id.toString() ?? null : null, unreadCount: result?.unread[0]?.count ?? 0 }
+    }
+    /** Stream authorized delivery IDs in bounded batches instead of truncating mark-all at one page. */
+    async markAllRead(ownerId: Types.ObjectId, now: Date): Promise<void> {
+        const cursor = ReminderJob.aggregate<{ _id: Types.ObjectId }>([
+            ...visibleReminderPipeline(ownerId), { $match: { [F.STATUS]: S.DELIVERED, [F.READ]: null } }, { $project: { [F.ID]: 1 } },
+        ]).cursor({ batchSize: UTILITY_LIMITS.LIST })
+        let identifiers: Types.ObjectId[] = []
+        for await (const record of cursor) {
+            identifiers.push(record._id)
+            if (identifiers.length < UTILITY_LIMITS.LIST) continue
+            await this.markRead(identifiers, ownerId, now)
+            identifiers = []
+        }
+        if (identifiers.length) await this.markRead(identifiers, ownerId, now)
     }
     /** Mark only previously authorized delivery IDs read. */
     async markRead(ids: readonly Types.ObjectId[], ownerId: Types.ObjectId, now: Date): Promise<void> {

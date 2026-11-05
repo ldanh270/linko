@@ -6,6 +6,7 @@ import { MongooseReminderRepository } from "../reminder/reminder.repository"
 import { ReminderService } from "../reminder/reminder.service"
 import { ReminderWorker } from "../reminder/reminder.worker"
 import { ReminderController } from "../reminder/reminder.controller"
+import { reminderInboxSchema } from "../reminder/reminder.inbox.schema"
 import { MongooseAppointmentRepository } from "./appointment.repository"
 import { AppointmentService } from "./appointment.service"
 import { AppointmentController } from "./appointment.controller"
@@ -34,6 +35,7 @@ export function createSchedulingFeature(runtime: UtilityRuntime): SchedulingFeat
     conversationRouter.put(UTILITY_ROUTES.RSVP, validate(appointmentRsvpSchema), appointment.respond)
     conversationRouter.post(UTILITY_ROUTES.MESSAGE_REMINDERS, validate(createReminderSchema), reminder.create)
     const reminderRouter = express.Router()
+    reminderRouter.get(REMINDER_ROUTES.INBOX, validate(reminderInboxSchema), reminder.inbox)
     reminderRouter.get(REMINDER_ROUTES.LIST, reminder.list)
     reminderRouter.post(REMINDER_ROUTES.READ_ALL, reminder.readAll)
     reminderRouter.get(REMINDER_ROUTES.ITEM, validate(reminderResourceSchema), reminder.get)

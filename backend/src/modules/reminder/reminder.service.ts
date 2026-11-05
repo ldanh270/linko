@@ -1,4 +1,4 @@
-import { ERROR_CODES, type CreateReminderRequest, type ReminderDto } from "@linko/contracts"
+import { ERROR_CODES, type CreateReminderRequest, type ReminderDto, type ReminderInboxDto } from "@linko/contracts"
 import type { Types } from "mongoose"
 import { BusinessException } from "../../shared/errors/BusinessException"
 import { ConflictException } from "../../shared/errors/ConflictException"
@@ -52,6 +52,12 @@ export class ReminderService {
         }
         return visible
     }
+    /** Return an authorized keyset page and a count independent of its visible window. */
+    async inbox(actorId: Types.ObjectId, cursorId?: Types.ObjectId): Promise<ReminderInboxDto> {
+        const cursor = cursorId ? await this.requireOwned(actorId, cursorId) : undefined
+        const page = await this.dependencies.repository.inbox(actorId, cursor)
+        return { items: page.items.map(toReminderDto), nextCursor: page.nextCursor, unreadCount: page.unreadCount }
+    }
 
     /** Read one owned reminder without exposing an inaccessible source preview. */
     async get(actorId: Types.ObjectId, id: Types.ObjectId): Promise<ReminderDto> {
@@ -65,11 +71,9 @@ export class ReminderService {
         return this.get(actorId, id)
     }
 
-    /** Mark the bounded currently visible inbox read without touching another user's rows. */
+    /** Mark all currently accessible delivered reminders read across every page. */
     async readAll(actorId: Types.ObjectId): Promise<void> {
-        const visible = await this.list(actorId)
-        const { Types } = await import("mongoose")
-        await this.dependencies.repository.markRead(visible.map((item) => new Types.ObjectId(item.id)), actorId, this.dependencies.runtime.clock.now())
+        await this.dependencies.repository.markAllRead(actorId, this.dependencies.runtime.clock.now())
     }
 
     /** Edit a future private reminder while invalidating any in-flight lease. */
