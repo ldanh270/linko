@@ -1,4 +1,5 @@
 import { CONVERSATION_STATUS, CONVERSATION_TYPE, GROUP_FIELDS, PIN_LIMITS, ROLE } from "@linko/contracts"
+import { UTILITY_FIELDS } from "../utility/utility.constants"
 import type { HydratedDocument } from "mongoose"
 
 import Conversation from "../../models/Conversation"
@@ -28,7 +29,8 @@ export class MongoosePinRepository implements PinRepository {
         if (!conversation) return null
         const participant = conversation[CONVERSATION_FIELDS.PARTICIPANTS].find((candidate) =>
             candidate[PARTICIPANT_FIELDS.USER_ID].equals(viewerId)
-            && candidate[PARTICIPANT_FIELDS.DEL_FLAG] !== true,
+            && candidate[PARTICIPANT_FIELDS.DEL_FLAG] !== true
+            && !candidate[PARTICIPANT_FIELDS.LEFT_AT],
         )
         const group = conversation[CONVERSATION_FIELDS.GROUP]
         return {
@@ -36,11 +38,13 @@ export class MongoosePinRepository implements PinRepository {
             status: conversation[CONVERSATION_FIELDS.STATUS] ?? CONVERSATION_STATUS.ACTIVE,
             pinnedMessageIds: conversation[CONVERSATION_FIELDS.TYPE] === CONVERSATION_TYPE.GROUP
                 ? group?.[GROUP_FIELDS.PINNED_MESSAGE_IDS] ?? []
-                : [],
+                : conversation[UTILITY_FIELDS.DIRECT_PINS] ?? [],
             member: participant ? {
                 role: participant[PARTICIPANT_FIELDS.ROLE],
-                joinedAt: participant[PARTICIPANT_FIELDS.JOINED_AT]
-                    ?? conversation[CONVERSATION_FIELDS.CREATED_AT],
+                joinedAt: new Date(Math.max(
+                    (participant[PARTICIPANT_FIELDS.JOINED_AT] ?? conversation[CONVERSATION_FIELDS.CREATED_AT]).getTime(),
+                    participant[PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]?.getTime() ?? 0,
+                )),
             } : null,
         }
     }
@@ -65,18 +69,21 @@ export class MongoosePinRepository implements PinRepository {
 
     /** Atomically prepend one pin only while fewer than three IDs exist. */
     async addPin(input: AddPinRecordInput, transaction: TransactionContext): Promise<boolean> {
-        const pinsPath = `${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.PINNED_MESSAGE_IDS}`
+        const conversation = await this.findConversation(input.conversationId, input.actorId, transaction)
+        const isGroup = conversation?.type === CONVERSATION_TYPE.GROUP
+        const pinsPath = isGroup ? `${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.PINNED_MESSAGE_IDS}` : UTILITY_FIELDS.DIRECT_PINS
         const result = await Conversation.updateOne({
             [CONVERSATION_FIELDS.ID]: input.conversationId,
-            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
+            [CONVERSATION_FIELDS.TYPE]: isGroup ? CONVERSATION_TYPE.GROUP : CONVERSATION_TYPE.DIRECT,
             [CONVERSATION_FIELDS.STATUS]: CONVERSATION_STATUS.ACTIVE,
             [`${pinsPath}.${PIN_LIMITS.MAX_PINNED_MESSAGES - 1}`]: { $exists: false },
             [pinsPath]: { $ne: input.messageId },
             [CONVERSATION_FIELDS.PARTICIPANTS]: {
                 $elemMatch: {
                     [PARTICIPANT_FIELDS.USER_ID]: input.actorId,
-                    [PARTICIPANT_FIELDS.ROLE]: { $in: [ROLE.OWNER, ROLE.ADMIN] },
+                    ...(isGroup ? { [PARTICIPANT_FIELDS.ROLE]: { $in: [ROLE.OWNER, ROLE.ADMIN] } } : {}),
                     [PARTICIPANT_FIELDS.DEL_FLAG]: { $ne: true },
+                    [PARTICIPANT_FIELDS.LEFT_AT]: null,
                 },
             },
         }, {
@@ -87,17 +94,21 @@ export class MongoosePinRepository implements PinRepository {
 
     /** Pull one pin only while the actor still has owner/admin membership. */
     async removePin(input: AddPinRecordInput, transaction: TransactionContext): Promise<void> {
+        const conversation = await this.findConversation(input.conversationId, input.actorId, transaction)
+        const isGroup = conversation?.type === CONVERSATION_TYPE.GROUP
+        const pinsPath = isGroup ? `${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.PINNED_MESSAGE_IDS}` : UTILITY_FIELDS.DIRECT_PINS
         await Conversation.updateOne({
             [CONVERSATION_FIELDS.ID]: input.conversationId,
-            [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
+            [CONVERSATION_FIELDS.TYPE]: isGroup ? CONVERSATION_TYPE.GROUP : CONVERSATION_TYPE.DIRECT,
             [CONVERSATION_FIELDS.PARTICIPANTS]: {
                 $elemMatch: {
                     [PARTICIPANT_FIELDS.USER_ID]: input.actorId,
-                    [PARTICIPANT_FIELDS.ROLE]: { $in: [ROLE.OWNER, ROLE.ADMIN] },
+                    ...(isGroup ? { [PARTICIPANT_FIELDS.ROLE]: { $in: [ROLE.OWNER, ROLE.ADMIN] } } : {}),
                     [PARTICIPANT_FIELDS.DEL_FLAG]: { $ne: true },
+                    [PARTICIPANT_FIELDS.LEFT_AT]: null,
                 },
             },
-        }, { $pull: { [`${CONVERSATION_FIELDS.GROUP}.${GROUP_FIELDS.PINNED_MESSAGE_IDS}`]: input.messageId } }, {
+        }, { $pull: { [pinsPath]: input.messageId } }, {
             session: transaction.session,
         })
     }
@@ -125,6 +136,8 @@ export class MongoosePinRepository implements PinRepository {
 
 function toMessageRecord(message: MessageDocument): MessageRecord {
     return {
+        kind: message[MESSAGE_MODEL_FIELDS.KIND],
+        resourceId: message[MESSAGE_MODEL_FIELDS.RESOURCE_ID],
         id: message[MESSAGE_MODEL_FIELDS.ID],
         conversationId: message[MESSAGE_MODEL_FIELDS.CONVERSATION_ID],
         senderId: message[MESSAGE_MODEL_FIELDS.SENDER_ID],

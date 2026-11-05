@@ -100,8 +100,8 @@ describe("pin HTTP routes", () => {
 
         expect(memberResponse.status).toBe(403)
         expect(memberResponse.body.error.code).toBe(ERROR_CODES.INSUFFICIENT_ROLE)
-        expect(directResponse.status).toBe(403)
-        expect(directResponse.body.error.code).toBe(ERROR_CODES.FORBIDDEN)
+        expect(directResponse.status).toBe(200)
+        expect(directResponse.body.data).toHaveLength(1)
     })
 
     it("should_pin_idempotently_and_return_newest_pins_first", async () => {
@@ -177,10 +177,12 @@ async function createGroup(suffix: string) {
         [PARTICIPANT_FIELDS.USER_ID]: owner._id,
         [PARTICIPANT_FIELDS.ROLE]: ROLE.OWNER,
         [PARTICIPANT_FIELDS.JOINED_AT]: OWNER_JOINED_AT,
+        [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: OWNER_JOINED_AT,
     }, {
         [PARTICIPANT_FIELDS.USER_ID]: member._id,
         [PARTICIPANT_FIELDS.ROLE]: ROLE.MEMBER,
         [PARTICIPANT_FIELDS.JOINED_AT]: MEMBER_JOINED_AT,
+        [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: MEMBER_JOINED_AT,
     }]
     const conversation = await Conversation.create({
         [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.GROUP,
@@ -198,8 +200,8 @@ async function createDirectConversation(ownerId: mongoose.Types.ObjectId, member
     return Conversation.create({
         [CONVERSATION_FIELDS.TYPE]: CONVERSATION_TYPE.DIRECT,
         [CONVERSATION_FIELDS.PARTICIPANTS]: [
-            { [PARTICIPANT_FIELDS.USER_ID]: ownerId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
-            { [PARTICIPANT_FIELDS.USER_ID]: memberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT },
+            { [PARTICIPANT_FIELDS.USER_ID]: ownerId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT, [PARTICIPANT_FIELDS.JOINED_AT]: OWNER_JOINED_AT, [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: OWNER_JOINED_AT },
+            { [PARTICIPANT_FIELDS.USER_ID]: memberId, [PARTICIPANT_FIELDS.ROLE]: ROLE.DIRECT, [PARTICIPANT_FIELDS.JOINED_AT]: OWNER_JOINED_AT, [PARTICIPANT_FIELDS.CLEARED_HISTORY_AT]: OWNER_JOINED_AT },
         ],
     })
 }
