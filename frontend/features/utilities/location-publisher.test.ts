@@ -13,9 +13,30 @@ function harness() {
   const environment: PublisherEnvironment = { watch: vi.fn((accept, reject) => { callbacks.push(accept); success = accept; failure = reject; return 7 }), clear: vi.fn(), visible: () => visible, online: () => online, now: () => now, update: vi.fn(async () => share), stop: vi.fn(async () => ({ ...share, status: "ended" })) }
   const publisher = new LocationPublisher(environment)
   const position = { coords: { latitude: 10.7, longitude: 106.6, accuracy: 20 } } as GeolocationPosition
-  return { publisher, environment, send: () => success(position), sendOld: () => callbacks[0]?.(position), deny: () => failure({ code: 1 } as GeolocationPositionError), advance: (ms: number) => { now += ms }, hide: () => { visible = false }, show: () => { visible = true }, offline: () => { online = false } }
+  return { publisher, environment, send: (latitude = position.coords.latitude) => success({ ...position, coords: { ...position.coords, latitude } }), sendOld: () => callbacks[0]?.(position), deny: () => failure({ code: 1 } as GeolocationPositionError), advance: (ms: number) => { now += ms }, hide: () => { visible = false }, show: () => { visible = true }, offline: () => { online = false } }
 }
 describe("foreground live-location publisher", () => {
+  it("coalesces the latest fix during the cadence window even if movement then stops", async () => {
+    const state = harness()
+    state.publisher.start(share, "tab-1")
+    state.advance(1000); state.send(10.8)
+    state.advance(1000); state.send(10.9)
+    expect(state.environment.update).not.toHaveBeenCalled()
+    state.advance(3000); state.publisher.refresh()
+    await Promise.resolve()
+    expect(state.environment.update).toHaveBeenCalledOnce()
+    expect(state.environment.update).toHaveBeenCalledWith(share.conversationId, share.id, expect.objectContaining({ latitude: 10.9, sequence: 1 }))
+  })
+  it("discards a coalesced fix on pause and waits for a fresh foreground position", () => {
+    const state = harness()
+    state.publisher.start(share, "tab-1")
+    state.advance(1000); state.send(10.8)
+    state.hide(); state.publisher.refresh()
+    state.advance(5000); state.show(); state.publisher.refresh()
+    expect(state.environment.update).not.toHaveBeenCalled()
+    state.send(10.9)
+    expect(state.environment.update).toHaveBeenCalledWith(share.conversationId, share.id, expect.objectContaining({ latitude: 10.9 }))
+  })
   it("starts no watcher before explicit sharing and enforces the initial five-second cadence", async () => {
     const state = harness()
     expect(state.environment.watch).not.toHaveBeenCalled()

@@ -24,6 +24,7 @@ export class LocationPublisher {
   private readonly watches = new Map<string, number>()
   private readonly sentAt = new Map<string, number>()
   private readonly inFlight = new Set<string>()
+  private readonly pendingFixes = new Map<string, { readonly position: GeolocationPosition; readonly generation: number }>()
   private readonly generations = new Map<string, number>()
   private readonly stopping = new Set<string>()
   /** Bind browser and HTTP ports without starting a location request. */
@@ -54,7 +55,11 @@ export class LocationPublisher {
       if (!this.environment.visible() || !this.environment.online()) {
         this.release(entry.id); this.replace({ ...entry, paused: true }); continue
       }
-      if (this.watches.has(entry.id)) continue
+      if (this.watches.has(entry.id)) {
+        const pending = this.pendingFixes.get(entry.id)
+        if (pending) void this.publish(entry.id, pending.position, pending.generation)
+        continue
+      }
       const generation = this.generations.get(entry.id) ?? 0
       this.generations.set(entry.id, generation)
       const watch = this.environment.watch((position) => {
@@ -87,8 +92,12 @@ export class LocationPublisher {
   }
   private async publish(id: string, position: GeolocationPosition, generation: number): Promise<void> {
     const entry = this.entries.find((item) => item.id === id)
-    if (!entry || this.stopping.has(id) || !this.environment.visible() || !this.environment.online() || Date.parse(entry.expiresAt) <= this.environment.now()) return
-    if (this.inFlight.has(id) || this.environment.now() - (this.sentAt.get(id) ?? -Infinity) < UTILITY_LIMITS.LOCATION_INTERVAL_MS) return
+    if (!entry || this.generations.get(id) !== generation || this.stopping.has(id) || !this.environment.visible() || !this.environment.online() || Date.parse(entry.expiresAt) <= this.environment.now()) return
+    if (this.inFlight.has(id) || this.environment.now() - (this.sentAt.get(id) ?? -Infinity) < UTILITY_LIMITS.LOCATION_INTERVAL_MS) {
+      this.pendingFixes.set(id, { position, generation })
+      return
+    }
+    this.pendingFixes.delete(id)
     this.sentAt.set(id, this.environment.now()); this.inFlight.add(id)
     const sequence = entry.sequence + 1
     this.replace({ ...entry, sequence })
@@ -101,7 +110,7 @@ export class LocationPublisher {
       if (current && !this.stopping.has(id) && this.generations.get(id) === generation) this.replace({ ...current, paused: true, error: "Vị trí chưa được cập nhật. Đang chờ lần lấy vị trí tiếp theo." })
     } finally { this.inFlight.delete(id) }
   }
-  private release(id: string): void { this.generations.set(id, (this.generations.get(id) ?? 0) + 1); const watch = this.watches.get(id); if (watch !== undefined) this.environment.clear(watch); this.watches.delete(id) }
+  private release(id: string): void { this.generations.set(id, (this.generations.get(id) ?? 0) + 1); this.pendingFixes.delete(id); const watch = this.watches.get(id); if (watch !== undefined) this.environment.clear(watch); this.watches.delete(id) }
   private remove(id: string): void { this.entries = this.entries.filter((item) => item.id !== id); this.sentAt.delete(id); this.emit() }
   private replace(entry: PublishingShare): void { this.entries = [...this.entries.filter((item) => item.id !== entry.id), entry]; this.emit() }
   private emit(): void { this.listeners.forEach((listener) => listener()) }
