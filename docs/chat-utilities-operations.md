@@ -6,6 +6,8 @@ Start the backend normally. After MongoDB connects, composition starts the durab
 
 Reminders are stored in MongoDB. With Linko open, delivery IDs trigger an authorized inbox refresh and eligible foreground alerts. A closed browser receives stored reminders on return; this release does not provide Web Push, email/SMS or locked-screen location updates.
 
+The personal inbox uses `GET /api/reminders/inbox?cursor=<last-id>` for authorized cursor pages and a complete unread count. Notification previews resolve the delivered ID through its authorized item endpoint, independently of the current page. Mark-all-read covers every eligible delivered reminder, including unloaded pages. The original array list endpoint remains available for compatibility.
+
 Location updates require HTTPS (localhost is suitable for development), browser consent, a visible document and an unexpired share. Ended/expired sessions immediately omit coordinates in API responses, even before maintenance removes stored precise fields. No route history is stored. Generic Socket.IO invalidations carry IDs/revisions, never coordinates.
 
 ## Index migration
@@ -33,3 +35,5 @@ Rollback: stop the utility workers and deploy the previous application. Preserve
 Use isolated MongoDB replica sets for tests; never use the configured application database as a fixture store. This Windows sandbox cannot start mongod, so integration tests need an approved unsandboxed process. Optional Redis integration tests additionally require an isolated `REDIS_TEST_URL`; do not point them at production.
 
 Map provider configuration and attribution follow the frontend map adapter and environment example. Public map tile requests expose the requested map area to the chosen provider; maps load only after an explicit user action. Choose a provider whose usage policy fits deployment traffic.
+
+Map implementation references: [Leaflet stable 1.9.4 documentation](https://leafletjs.com/reference-1.9.4.html) and [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Browser requests retain normal HTTP caching and referrers, visible attribution remains on the map, and there is no bulk/offline tile prefetch. Public OSM tiles provide best-effort availability; configure another compliant provider when deployment traffic requires it.

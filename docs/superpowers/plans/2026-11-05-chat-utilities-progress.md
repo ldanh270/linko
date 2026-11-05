@@ -27,11 +27,28 @@ Branch: `codex/chat-utilities`; base `f61771d`. User approved implementation on 
 - Scheduling reviewer fix: RED both overdue pending/claimed cases; GREEN 11 focused scheduling tests and backend typecheck.
 - MongoMemoryServer cannot start inside the Windows sandbox (mongod fassert); integration runs use an approved unsandboxed process and isolated test databases, never the configured application DB.
 
-## In progress
+## Frontend and review follow-ups
 
-- Frontend integration, focused tests and responsive browser acceptance.
-- Appointment response/list hydration performance pass.
-- Whole-branch review and final workspace gates. No overall completion claim yet.
+- `d1a811a`: appointment lists hydrate visible resources and attendance in bounded batches; 13 scheduling/temporal tests passed, including hidden, rejoined and cleared-history eligibility.
+- `8761505` / `ec27a1c`: authorized reminder inbox pagination and complete unread counts. Four real HTTP/MongoDB regressions cover 50 future reminders hiding a delivery, source visibility, stable cursor ties and mark-all across 52 delivered records.
+- `370cf92`: shared modal keyboard/focus ownership is limited to the topmost dialog; composer menus can open above the trigger.
+- `26133a4` / `1fd903e`: complete utility forms/cards, app-scope location lifecycle, direct/group pins and context links, composer/overview actions, personal reminder entry and edit flow, timezone selection and responsive integration.
+- `724f999`: four actual Next.js/Chromium scenarios cover 390px/1440px, creation/voting/RSVP, location consent/stop, original-message navigation, nested edit Escape, failed-create draft/idempotency preservation and private reminder editing.
+- Whole-feature independent reviewer confirmed prior findings addressed: direct authorized delivery reads, membership/context cache resets and in-flight preview cancellation; source-aware paging/counts; topmost dialogs; immediate offline/socket location freshness. No remaining material production findings in that review.
+- `fb3cce5`: a final RED test proved a fix inside the throttle window was dropped when movement stopped. GREEN: nine publisher tests after retaining only the newest in-memory fix until the next eligible tick and discarding it on pause/stop.
+- `fa6f22c` / `fb5a384`: wider readable mobile activity cards and an explicit map recenter action. The four browser scenarios passed again after these refinements, including map-control access with unavailable external tiles.
+
+## Final gate evidence
+
+- Full backend: **55 files / 301 tests passed**; **2 files / 7 optional Redis-dependent tests skipped** without isolated `REDIS_TEST_URL`. Actual new utility HTTP/Socket.IO/MongoDB acceptance did run.
+- Full frontend baseline after fixture updates: **69 files / 229 tests passed**. The only subsequent behavior change was location-fix coalescing; all **9 publisher tests** passed afterward, including its two new regressions.
+- Workspace `pnpm typecheck` and `pnpm lint` passed. After final location changes, frontend typecheck and targeted lint passed again.
+- Production `pnpm -C frontend build` passed after the final location fix.
+- New utility browser suite: **4 passed** after final layout/map refinements. Screenshots at 390px/1440px were inspected for menu, poll, appointment and location content.
+- Additional legacy chat/standalone-route browser regressions: **12 passed**. Commit `7be9b71` updates four old messenger assertions referring to labels/classes already absent at base `f61771d`, preserving retry/idempotency, recipient draft reset, profile, contact, logout and theme behavior assertions. Total browser acceptance: **16 passed** across the new utility and existing-flow suites.
+- Browser acceptance uses API fixtures and simulated geolocation. Backend integration independently exercises actual authenticated HTTP, Socket.IO and isolated MongoDB. No physical-device accuracy test, production migration apply or closed-browser Web Push test is claimed.
+
+All six plan tasks are complete. Keep the verified commits on local branch `codex/chat-utilities`; no merge or push is part of this request.
 
 ## Rulings
 

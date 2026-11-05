@@ -35,9 +35,9 @@ Files: `packages/contracts/src/chat-utilities.ts`, `messages.ts`, `index.ts`; `b
 
 Interfaces: `UtilityAccess.require({conversationId, actorId, messageId?, write?}, transaction?)` returns member role/history; `UtilityTimeline.create({conversationId, actorId, clientMessageId, kind, resourceId, content}, transaction)` creates message/update preview; `publish(message)` emits after commit. Contracts define all DTO/request/route/event constants before feature work starts.
 
-- [ ] RED: reject departed member and pre-join/hidden source message; typed history preserves kind/resource IDs.
-- [ ] Implement access repository/service, timeline port, typed message mapping and registry contract.
-- [ ] GREEN: focused tests and typecheck; commit.
+- [x] RED: reject departed member and pre-join/hidden source message; typed history preserves kind/resource IDs.
+- [x] Implement access repository/service, timeline port, typed message mapping and registry contract.
+- [x] GREEN: focused tests and typecheck; commit.
 
 ### 2. Polls and live-location backend (worker)
 
@@ -45,9 +45,9 @@ Files owned: `backend/src/modules/poll/*`, `backend/src/modules/location/*`, cor
 
 Consumes shared contracts/utility ports. Produces feature routers/services with an explicit factory accepting ports; root mounts routers and worker cleanup.
 
-- [ ] RED: single/multiple/withdraw/deadline votes, idempotent creates, forbidden reads, ended/late/out-of-order fixes and stale timestamps.
-- [ ] Implement narrow repository/service/controller modules, indexes and safe DTOs.
-- [ ] GREEN: focused service/HTTP tests and typecheck; atomic commits.
+- [x] RED: single/multiple/withdraw/deadline votes, idempotent creates, forbidden reads, ended/late/out-of-order fixes and stale timestamps.
+- [x] Implement narrow repository/service/controller modules, indexes and safe DTOs.
+- [x] GREEN: focused service/HTTP tests and typecheck; atomic commits.
 
 ### 3. Appointments and durable reminders backend (worker)
 
@@ -55,18 +55,18 @@ Files owned: `backend/src/modules/appointment/*`, `backend/src/modules/reminder/
 
 Consumes shared contracts/utility ports. Produces feature routers plus `tick()`/`start()`/`stop()` worker lifecycle, with injectable time and transport.
 
-- [ ] RED: RSVP/edit/cancel, timezone/offset validation, private message reminders, duplicate job claims, revision invalidation, retry/restart and inbox authorization.
-- [ ] Implement persistence, scheduling, lease/delivery deduplication and safe inbox APIs.
-- [ ] GREEN: focused service/HTTP tests and typecheck; atomic commits.
+- [x] RED: RSVP/edit/cancel, timezone/offset validation, private message reminders, duplicate job claims, revision invalidation, retry/restart and inbox authorization.
+- [x] Implement persistence, scheduling, lease/delivery deduplication and safe inbox APIs.
+- [x] GREEN: focused service/HTTP tests and typecheck; atomic commits.
 
 ### 4. Existing pins and server integration (root)
 
 Files owned: existing pin module, Conversation direct-pin storage, app/index, migrations/docs and shared utility ports.
 
-- [ ] RED: direct pins, leftAt membership, capacity races, older-message context and utility event authorization.
-- [ ] Extend existing pins and publish invalidations; add authorized context lookup.
-- [ ] Mount feature factories and graceful worker lifecycle; document dry-run index migration.
-- [ ] GREEN: focused and integration tests; commit.
+- [x] RED: direct pins, leftAt membership, capacity races, older-message context and utility event authorization.
+- [x] Extend existing pins and publish invalidations; add authorized context lookup.
+- [x] Mount feature factories and graceful worker lifecycle; document dry-run index migration.
+- [x] GREEN: focused and integration tests; commit.
 
 ### 5. Complete frontend (worker)
 
@@ -74,16 +74,16 @@ Files owned: frontend (existing chat and new utility feature modules). No backen
 
 Consumes shared DTOs and route constants. Produces composer menu, typed cards, pins strip/context navigation, resource forms/details, durable reminder inbox and session-scoped location publisher.
 
-- [ ] RED: forms/vote errors, duplicate submit, stop/expiry and visibility lifecycle, pins context navigation.
-- [ ] Implement focused hooks/components, accessible dialogs, URL details state, realtime query invalidation/reconnect, and existing visual tokens.
-- [ ] GREEN: focused tests, frontend typecheck/lint, responsive browser acceptance; atomic commits.
+- [x] RED: forms/vote errors, duplicate submit, stop/expiry and visibility lifecycle, pins context navigation.
+- [x] Implement focused hooks/components, accessible dialogs, URL details state, realtime query invalidation/reconnect, and existing visual tokens.
+- [x] GREEN: focused tests, frontend typecheck/lint, responsive browser acceptance; atomic commits.
 
 ### 6. Whole-feature verification (root + fresh reviewer)
 
-- [ ] Check each spec acceptance condition, fix gaps; do not drop unfinished features.
-- [ ] Run `pnpm typecheck`, `pnpm lint`, full frontend/backend tests, and `pnpm -C frontend build`.
-- [ ] Run real HTTP/socket/database integration and targeted Playwright at 390px/1440px.
-- [ ] Independent whole-branch review, resolve findings, commit ledger/evidence, verify git status/log.
+- [x] Check each spec acceptance condition, fix gaps; do not drop unfinished features.
+- [x] Run `pnpm typecheck`, `pnpm lint`, full frontend/backend tests, and `pnpm -C frontend build`.
+- [x] Run real HTTP/socket/database integration and targeted Playwright at 390px/1440px.
+- [x] Independent whole-branch review, resolve findings, commit ledger/evidence, verify git status/log.
 
 ## Execution rulings and progress
 
