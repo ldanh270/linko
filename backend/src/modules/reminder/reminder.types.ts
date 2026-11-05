@@ -12,6 +12,8 @@ export interface ReminderRepository {
     findByClient(ownerId: Types.ObjectId, clientMessageId: string, transaction?: TransactionContext): Promise<ReminderDocument | null>
     schedule(input: ScheduleReminderInput, transaction: TransactionContext): Promise<ReminderDocument>
     invalidate(appointmentId: Types.ObjectId, transaction: TransactionContext, ownerId?: Types.ObjectId): Promise<void>
+    /** Carry unchanged scheduling intents forward without losing overdue work or active leases. */
+    rebase(input: { appointmentId: Types.ObjectId; fromRevision: number; toRevision: number }, transaction: TransactionContext): Promise<void>
     list(ownerId: Types.ObjectId): Promise<ReminderDocument[]>
     markRead(ids: readonly Types.ObjectId[], ownerId: Types.ObjectId, now: Date): Promise<void>
     dismiss(id: Types.ObjectId, ownerId: Types.ObjectId): Promise<void>

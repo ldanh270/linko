@@ -115,10 +115,9 @@ export class AppointmentService {
             await repository.respond({ appointmentId: id, userId: actor.actorId, status: input.status, reminderMinutes: offset, joinedAt: membership.joinedAt }, transaction)
             const updated = await repository.update({ id, revision: record.revision, fields: {} }, transaction)
             if (!updated) throw new ConflictException(ERROR_CODES.CONFLICT, SCHEDULING_ERRORS.REVISION)
-            await reminders.invalidate(id, transaction)
-            for (const response of await this.eligibleResponses(updated, transaction)) {
-                if (response.status !== RSVP_STATUS.DECLINED && response.reminderMinutes != null) await this.schedule(updated, response.userId, response.reminderMinutes, transaction)
-            }
+            await reminders.invalidate(id, transaction, actor.actorId)
+            await reminders.rebase({ appointmentId: id, fromRevision: record.revision, toRevision: updated.revision }, transaction)
+            if (offset !== null) await this.schedule(updated, actor.actorId, offset, transaction)
         })
         return this.changed(actor, id)
     }

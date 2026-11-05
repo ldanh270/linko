@@ -213,4 +213,24 @@ describe("appointments and durable reminders over real HTTP/MongoDB", () => {
         expect(await new MongooseReminderRepository().claim(now, "next-worker")).toBeNull()
         expect((await ReminderJob.findById(reminder?._id))?.status).toBe(REMINDER_STATUS.FAILED)
     })
+
+    it.each(["pending", "claimed"])("preserves another attendee's overdue %s reminder when RSVP changes", async (state) => {
+        const conversation = await group()
+        const { server, feature } = app()
+        const created = (await request(server).post(base(conversation._id)).send(appointmentInput())).body.data
+        const ownerJob = await ReminderJob.findOne({ ownerId: owner, status: REMINDER_STATUS.PENDING })
+        expect(ownerJob?.dueAt.toISOString()).toBe("2026-11-05T00:45:00.000Z")
+        now = new Date("2026-11-05T00:46:00Z")
+        if (state === "claimed") {
+            expect((await new MongooseReminderRepository().claim(now, "in-flight-owner-reminder"))?._id.equals(ownerJob?._id)).toBe(true)
+        }
+        const changed = await request(server).put(`${base(conversation._id)}/${created.id}/rsvp`).set("x-test-actor", member.toString()).send({ status: "going", reminderMinutes: null })
+        expect(changed.status).toBe(200)
+        expect((await ReminderJob.findById(ownerJob?._id))?.status).toBe(state)
+        if (state === "claimed") now = new Date(now.getTime() + SCHEDULING_LIMITS.LEASE_MS + 1)
+        await feature.tick()
+        expect(await ReminderDelivery.countDocuments({ ownerId: owner })).toBe(1)
+        expect(await ReminderDelivery.countDocuments({ ownerId: member })).toBe(0)
+        expect(transport.reminder).toHaveBeenCalledOnce()
+    })
 })

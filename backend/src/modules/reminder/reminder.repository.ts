@@ -34,6 +34,10 @@ export class MongooseReminderRepository implements ReminderRepository {
     async invalidate(appointmentId: Types.ObjectId, transaction: TransactionContext, ownerId?: Types.ObjectId): Promise<void> {
         await ReminderJob.updateMany({ [F.APPOINTMENT]: appointmentId, ...(ownerId ? { [F.OWNER]: ownerId } : {}), [F.STATUS]: { $in: [S.PENDING, S.CLAIMED] } }, { $set: { [F.STATUS]: S.CANCELLED, [F.TOKEN]: null, [F.LEASE]: null } }, { session: transaction.session }).exec()
     }
+    /** Advance only the appointment version of still-valid jobs, retaining their original due time and lease. */
+    async rebase(input: { appointmentId: Types.ObjectId; fromRevision: number; toRevision: number }, transaction: TransactionContext): Promise<void> {
+        await ReminderJob.updateMany({ [F.APPOINTMENT]: input.appointmentId, [F.REVISION]: input.fromRevision, [F.STATUS]: { $in: [S.PENDING, S.CLAIMED] }, [F.DELETED]: false }, { $set: { [F.REVISION]: input.toRevision } }, { session: transaction.session }).exec()
+    }
     /** Read bounded pending/delivered inbox records for one owner. */
     async list(ownerId: Types.ObjectId): Promise<ReminderDocument[]> {
         return ReminderJob.find({ [F.OWNER]: ownerId, [F.STATUS]: { $in: [S.PENDING, S.CLAIMED, S.DELIVERED] } }).sort({ [F.DUE]: -1, [F.ID]: -1 }).limit(UTILITY_LIMITS.LIST).exec()
