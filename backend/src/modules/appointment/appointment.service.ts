@@ -1,6 +1,5 @@
 import { CHAT_MESSAGE_KIND, ERROR_CODES, REMINDER_OFFSETS, RSVP_STATUS, UTILITY_KIND, UTILITY_STATUS, type AppointmentDto, type AppointmentRsvpRequest, type CreateAppointmentRequest, type UpdateAppointmentRequest } from "@linko/contracts"
 import { Types } from "mongoose"
-import { BusinessException } from "../../shared/errors/BusinessException"
 import { ConflictException } from "../../shared/errors/ConflictException"
 import { ForbiddenException } from "../../shared/errors/ForbiddenException"
 import { NotFoundException } from "../../shared/errors/NotFoundException"
@@ -61,14 +60,11 @@ export class AppointmentService {
 
     /** List a bounded set while omitting inaccessible historical resources. */
     async list(actor: UtilityActor): Promise<AppointmentDto[]> {
-        await this.dependencies.runtime.access.require(actor)
-        const records = await this.dependencies.repository.list(actor.conversationId)
-        const results: AppointmentDto[] = []
-        for (const record of records) {
-            try { results.push(await this.get(actor, record._id)) }
-            catch (error) { if (!(error instanceof BusinessException)) throw error }
-        }
-        return results
+        const { runtime, repository } = this.dependencies
+        const membership = await runtime.access.require(actor)
+        const records = await repository.listVisible(actor, membership.joinedAt)
+        const responses = await repository.eligibleResponsesMany(records)
+        return records.map((record) => toAppointmentDto({ record, responses: responses.get(record._id.toString()) ?? [], actorId: actor.actorId, membership }))
     }
 
     /** Edit with optimistic revision and rebuild pending jobs in the same transaction. */
@@ -130,17 +126,9 @@ export class AppointmentService {
         return record
     }
 
-    private async eligibleResponses(record: AppointmentDocument, transaction?: TransactionContext): Promise<AppointmentResponseDocument[]> {
-        const { runtime, repository } = this.dependencies
-        const responses = await repository.responses(record._id, transaction)
-        const eligible: AppointmentResponseDocument[] = []
-        for (const response of responses) {
-            try {
-                const member = await runtime.access.require({ conversationId: record.conversationId, actorId: response.userId, messageId: record.messageId }, transaction)
-                if (member.joinedAt.getTime() <= response.joinedAt.getTime()) eligible.push(response)
-            } catch (error) { if (!(error instanceof BusinessException)) throw error }
-        }
-        return eligible
+    private async eligibleResponses(record: AppointmentDocument, transaction?: TransactionContext): Promise<readonly AppointmentResponseDocument[]> {
+        const responses = await this.dependencies.repository.eligibleResponsesMany([record], transaction)
+        return responses.get(record._id.toString()) ?? []
     }
 
     private async schedule(record: AppointmentDocument, ownerId: Types.ObjectId, offset: number, transaction: TransactionContext): Promise<void> {
