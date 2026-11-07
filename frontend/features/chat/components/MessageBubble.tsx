@@ -66,7 +66,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         ) : (
           <span className="flex-none w-9" aria-hidden="true" />
         )}
-        <div className={message.resourceId ? "w-105 max-w-[calc(100%_-_48px)] min-w-0" : "max-w-[min(78%,600px)] min-w-0"}>
+        <div className={message.resourceId ? "w-105 max-w-[calc(100%-48px)] min-w-0" : "max-w-[min(78%,600px)] min-w-0"}>
           <div className={`flex items-start gap-1 ${message.isOwn ? "flex-row-reverse" : ""}`}>
             <div
               className={`relative rounded-lg ${message.resourceId ? "flex-1 min-w-0 px-3 py-3 border border-border bg-surface text-text-primary" : "px-4 py-2.5 min-w-17.5"} ${
