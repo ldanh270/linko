@@ -1,4 +1,4 @@
-import type { MessageDto } from "./messages"
+import type { MessageDto } from "./messages";
 
 /** Safe message data returned for one visible pinned message. */
-export type PinnedMessageDto = MessageDto
+export type PinnedMessageDto = MessageDto;

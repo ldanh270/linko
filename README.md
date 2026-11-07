@@ -8,7 +8,9 @@
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8-white.svg)](https://socket.io/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg)](https://tailwindcss.com/)
 
-Linko is an enterprise-ready, full-stack real-time messaging application designed for seamless team communication, 1-on-1 direct conversations, and rich interactive in-chat utilities (polls, appointments, durable reminders, and live foreground location sharing).
+Linko is an enterprise-ready, full-stack real-time messaging application designed for seamless team
+communication, 1-on-1 direct conversations, and rich interactive in-chat utilities (polls,
+appointments, durable reminders, and live foreground location sharing).
 
 ---
 
@@ -30,18 +32,29 @@ Linko is an enterprise-ready, full-stack real-time messaging application designe
 
 ## Core Features
 
-- **⚡ Real-Time Messaging & Presence:** Instant message delivery via Socket.IO, active typing indicators with debounced timeouts, and high-performance contact presence tracking backed by Redis bitfields with an in-memory fallback.
-- **👥 Direct & Group Conversations:** Rich 1-on-1 direct messaging, public group invitations, shareable preview links, and multi-tier role-based access control (`OWNER`, `ADMIN`, `MEMBER`).
+- **⚡ Real-Time Messaging & Presence:** Instant message delivery via Socket.IO, active typing
+  indicators with debounced timeouts, and high-performance contact presence tracking backed by Redis
+  bitfields with an in-memory fallback.
+- **👥 Direct & Group Conversations:** Rich 1-on-1 direct messaging, public group invitations,
+  shareable preview links, and multi-tier role-based access control (`OWNER`, `ADMIN`, `MEMBER`).
 - **📊 Interactive Chat Utilities:**
-  - **Polls:** Single-choice and multiple-choice voting with real-time tally bars and voter visibility.
-  - **Appointments:** Schedule events with attendance RSVP (`Going`, `Maybe`, `Declined`) and timezone awareness.
-  - **Durable Reminders:** Scheduled background reminder engine with distributed lease acquisition and unread synchronization.
-  - **Foreground Live Location:** Real-time privacy-preserving GPS sharing powered by Leaflet maps with monotonic sequence enforcement.
-- **📎 Dual-Bucket Storage (Cloudflare R2):** Public CDN bucket for cropped avatars and banners; isolated private bucket for message attachments with authenticated streaming verification.
+  - **Polls:** Single-choice and multiple-choice voting with real-time tally bars and voter
+    visibility.
+  - **Appointments:** Schedule events with attendance RSVP (`Going`, `Maybe`, `Declined`) and
+    timezone awareness.
+  - **Durable Reminders:** Scheduled background reminder engine with distributed lease acquisition
+    and unread synchronization.
+  - **Foreground Live Location:** Real-time privacy-preserving GPS sharing powered by Leaflet maps
+    with monotonic sequence enforcement.
+- **📎 Dual-Bucket Storage (Cloudflare R2):** Public CDN bucket for cropped avatars and banners;
+  isolated private bucket for message attachments with authenticated streaming verification.
 - **🛡️ Enterprise Data Governance:**
-  - Automated AOP audit columns (`createdBy`, `updatedBy`, `createdIp`, `updatedIp`) populated from request context via `AsyncLocalStorage`.
-  - Transparent soft delete (`delFlag`) on all collections with partial unique indexes preventing username/email reuse collisions.
-- **📦 Predictable API Envelopes:** All REST endpoints return uniform `{ success, data, error, meta }` envelopes, eliminating ad-hoc responses.
+  - Automated AOP audit columns (`createdBy`, `updatedBy`, `createdIp`, `updatedIp`) populated from
+    request context via `AsyncLocalStorage`.
+  - Transparent soft delete (`delFlag`) on all collections with partial unique indexes preventing
+    username/email reuse collisions.
+- **📦 Predictable API Envelopes:** All REST endpoints return uniform
+  `{ success, data, error, meta }` envelopes, eliminating ad-hoc responses.
 
 ---
 
@@ -183,32 +196,32 @@ Visit [http://localhost:3000](http://localhost:3000) to open the Linko web app.
 
 ### Backend (`backend/.env`)
 
-| Variable | Required | Default / Example | Purpose |
-|---|---|---|---|
-| `PORT` | No | `5000` | HTTP port for Express server |
-| `NODE_ENV` | No | `development` | Runtime environment (`development`, `production`, `test`) |
-| `CLIENT_URL` | Yes | `http://localhost:3000` | Allowed CORS origin for frontend |
-| `MONGODB_CONNECTION_STRING` | Yes | `mongodb://localhost:27017/linko` | MongoDB connection URI |
-| `DNS_SERVERS` | No | `1.1.1.1,8.8.8.8` | Trusted DNS resolvers for MongoDB SRV lookups |
-| `REDIS_URL` | No | `redis://localhost:6379` | Redis connection for presence bitfields |
-| `JWT_ACCESS_SECRET` | Yes | `(32+ characters secret)` | Secret key signing access JWTs |
-| `JWT_REFRESH_SECRET` | Yes | `(32+ characters secret)` | Secret key signing refresh JWTs |
-| `JWT_ACCESS_EXPIRES_IN` | No | `15m` | Lifetime of access tokens |
-| `JWT_REFRESH_EXPIRES_IN` | No | `7d` | Lifetime of refresh tokens |
-| `R2_ACCOUNT_ID` | Optional | `your_account_id` | Cloudflare account identifier |
-| `R2_ACCESS_KEY_ID` | Optional | `your_access_key` | S3-compatible access key |
-| `R2_SECRET_ACCESS_KEY` | Optional | `your_secret_key` | S3-compatible secret key |
-| `R2_PUBLIC_BUCKET` | Optional | `linko-public-media` | Public media bucket name |
-| `R2_PRIVATE_BUCKET` | Optional | `linko-private-attachments` | Private attachments bucket name |
-| `R2_PUBLIC_BASE_URL` | Optional | `https://media.linko.test` | Public CDN URL for images |
+| Variable                    | Required | Default / Example                 | Purpose                                                   |
+| --------------------------- | -------- | --------------------------------- | --------------------------------------------------------- |
+| `PORT`                      | No       | `5000`                            | HTTP port for Express server                              |
+| `NODE_ENV`                  | No       | `development`                     | Runtime environment (`development`, `production`, `test`) |
+| `CLIENT_URL`                | Yes      | `http://localhost:3000`           | Allowed CORS origin for frontend                          |
+| `MONGODB_CONNECTION_STRING` | Yes      | `mongodb://localhost:27017/linko` | MongoDB connection URI                                    |
+| `DNS_SERVERS`               | No       | `1.1.1.1,8.8.8.8`                 | Trusted DNS resolvers for MongoDB SRV lookups             |
+| `REDIS_URL`                 | No       | `redis://localhost:6379`          | Redis connection for presence bitfields                   |
+| `JWT_ACCESS_SECRET`         | Yes      | `(32+ characters secret)`         | Secret key signing access JWTs                            |
+| `JWT_REFRESH_SECRET`        | Yes      | `(32+ characters secret)`         | Secret key signing refresh JWTs                           |
+| `JWT_ACCESS_EXPIRES_IN`     | No       | `15m`                             | Lifetime of access tokens                                 |
+| `JWT_REFRESH_EXPIRES_IN`    | No       | `7d`                              | Lifetime of refresh tokens                                |
+| `R2_ACCOUNT_ID`             | Optional | `your_account_id`                 | Cloudflare account identifier                             |
+| `R2_ACCESS_KEY_ID`          | Optional | `your_access_key`                 | S3-compatible access key                                  |
+| `R2_SECRET_ACCESS_KEY`      | Optional | `your_secret_key`                 | S3-compatible secret key                                  |
+| `R2_PUBLIC_BUCKET`          | Optional | `linko-public-media`              | Public media bucket name                                  |
+| `R2_PRIVATE_BUCKET`         | Optional | `linko-private-attachments`       | Private attachments bucket name                           |
+| `R2_PUBLIC_BASE_URL`        | Optional | `https://media.linko.test`        | Public CDN URL for images                                 |
 
 ### Frontend (`frontend/.env.local`)
 
-| Variable | Required | Default / Example | Purpose |
-|---|---|---|---|
-| `NEXT_PUBLIC_API_URL` | Yes | `http://localhost:5000` | Target backend URL for REST & Socket.IO |
-| `NEXT_PUBLIC_MAP_TILE_URL` | No | `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png` | Leaflet tile provider URL template |
-| `NEXT_PUBLIC_MAP_ATTRIBUTION` | No | `&copy; OpenStreetMap contributors` | Leaflet map attribution string |
+| Variable                      | Required | Default / Example                                    | Purpose                                 |
+| ----------------------------- | -------- | ---------------------------------------------------- | --------------------------------------- |
+| `NEXT_PUBLIC_API_URL`         | Yes      | `http://localhost:5000`                              | Target backend URL for REST & Socket.IO |
+| `NEXT_PUBLIC_MAP_TILE_URL`    | No       | `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png` | Leaflet tile provider URL template      |
+| `NEXT_PUBLIC_MAP_ATTRIBUTION` | No       | `&copy; OpenStreetMap contributors`                  | Leaflet map attribution string          |
 
 ---
 
@@ -216,16 +229,16 @@ Visit [http://localhost:3000](http://localhost:3000) to open the Linko web app.
 
 Run all commands from the repository root:
 
-| Command | Target | Action |
-|---|---|---|
-| `pnpm dev` | Root | Run both backend and frontend concurrently in development mode |
-| `pnpm run be:dev` | Backend | Run backend with live file-watching (`tsx watch`) |
-| `pnpm run fe:dev` | Frontend | Run Next.js with Turbopack development server |
-| `pnpm build` | All | Typecheck backend and build Next.js production bundle |
-| `pnpm typecheck` | All | Run TypeScript type checks across all workspaces |
-| `pnpm lint` | All | Run backend type checks and frontend ESLint |
-| `pnpm test` | All | Run all backend (Vitest) and frontend (Vitest) tests |
-| `pnpm run fe:lint:tailwind` | Frontend | Verify all Tailwind CSS class names are canonical |
+| Command                     | Target   | Action                                                         |
+| --------------------------- | -------- | -------------------------------------------------------------- |
+| `pnpm dev`                  | Root     | Run both backend and frontend concurrently in development mode |
+| `pnpm run be:dev`           | Backend  | Run backend with live file-watching (`tsx watch`)              |
+| `pnpm run fe:dev`           | Frontend | Run Next.js with Turbopack development server                  |
+| `pnpm build`                | All      | Typecheck backend and build Next.js production bundle          |
+| `pnpm typecheck`            | All      | Run TypeScript type checks across all workspaces               |
+| `pnpm lint`                 | All      | Run backend type checks and frontend ESLint                    |
+| `pnpm test`                 | All      | Run all backend (Vitest) and frontend (Vitest) tests           |
+| `pnpm run fe:lint:tailwind` | Frontend | Verify all Tailwind CSS class names are canonical              |
 
 ---
 
@@ -271,9 +284,12 @@ pnpm run db:migrate:chat-utilities
 
 Linko maintains strict quality assurance across all layers:
 
-- **Backend Unit & Integration Tests (Vitest):** Tests execute against isolated in-memory replica sets via `mongodb-memory-server`.
-- **Frontend Unit & Component Tests (Vitest & Testing Library):** Verifies React hooks, form behaviors, rendering logic, and state synchronizations.
-- **End-to-End Tests (Playwright):** Exercises real browser flows for registration, group creation, messaging, and chat utilities.
+- **Backend Unit & Integration Tests (Vitest):** Tests execute against isolated in-memory replica
+  sets via `mongodb-memory-server`.
+- **Frontend Unit & Component Tests (Vitest & Testing Library):** Verifies React hooks, form
+  behaviors, rendering logic, and state synchronizations.
+- **End-to-End Tests (Playwright):** Exercises real browser flows for registration, group creation,
+  messaging, and chat utilities.
 
 ```sh
 # Run backend test suite
@@ -298,7 +314,8 @@ For exhaustive technical guides, consult the dedicated documentation folder:
 - 🔌 [**REST API Specification**](docs/api/rest-api-specification.md)
 - 🗄️ [**Database Models, Indexes & Migrations**](docs/database/schema-and-migrations.md)
 - ☁️ [**Cloudflare R2 Dual-Bucket Storage**](docs/storage/cloudflare-r2-dual-bucket.md)
-- 🎯 [**Chat Utilities Deep-Dive (Polls, Appointments, Reminders, Location)**](docs/features/chat-utilities-deep-dive.md)
+- 🎯
+  [**Chat Utilities Deep-Dive (Polls, Appointments, Reminders, Location)**](docs/features/chat-utilities-deep-dive.md)
 - 🚀 [**Local Development & Onboarding Guide**](docs/guides/local-development-setup.md)
 
 ---
@@ -307,8 +324,12 @@ For exhaustive technical guides, consult the dedicated documentation folder:
 
 All contributions must adhere to the core standards defined in [`AGENTS.md`](AGENTS.md):
 
-- **SOLID Principles:** Single Responsibility, Open/Closed through strategies, Interface Segregation, Dependency Inversion with constructor injection.
-- **AOP Everywhere:** Logging, authentication, validation, audit columns, and soft-delete filtering are implemented as aspects, never mixed into business code.
-- **Immutability by Default:** Strict TypeScript (`strict: true`), readonly interfaces, no non-null assertions without justification.
-- **Conventional Commits:** Clean, atomic Conventional Commits (`feat(...)`, `fix(...)`, `refactor(...)`, `docs(...)`, `style(...)`, `chore(...)`).
+- **SOLID Principles:** Single Responsibility, Open/Closed through strategies, Interface
+  Segregation, Dependency Inversion with constructor injection.
+- **AOP Everywhere:** Logging, authentication, validation, audit columns, and soft-delete filtering
+  are implemented as aspects, never mixed into business code.
+- **Immutability by Default:** Strict TypeScript (`strict: true`), readonly interfaces, no non-null
+  assertions without justification.
+- **Conventional Commits:** Clean, atomic Conventional Commits (`feat(...)`, `fix(...)`,
+  `refactor(...)`, `docs(...)`, `style(...)`, `chore(...)`).
 - **Immediate Commit Discipline:** Verified work is committed immediately.

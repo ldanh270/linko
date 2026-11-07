@@ -9,13 +9,13 @@
  * A MongoDB ObjectId string representation used across HTTP endpoints and Socket.IO payloads.
  * Conforms to a 24-character hexadecimal string format.
  */
-export type EntityId = string
+export type EntityId = string;
 
 /**
  * Pagination and cursor metadata returned by list endpoints.
  * Provides auxiliary information such as current page, page size, total item counts, or next cursors.
  */
-export type ApiMeta = Record<string, string | number | boolean | null>
+export type ApiMeta = Record<string, string | number | boolean | null>;
 
 /**
  * The standardized error body contained within API failure envelopes.
@@ -26,10 +26,10 @@ export type ApiMeta = Record<string, string | number | boolean | null>
  * @property requestId - Unique correlation ID assigned to the request for tracing and log auditing.
  */
 export interface ApiErrorBody {
-    code: string
-    message: string
-    details?: Record<string, unknown> | null
-    requestId?: string
+	code: string;
+	message: string;
+	details?: Record<string, unknown> | null;
+	requestId?: string;
 }
 
 /**
@@ -42,10 +42,10 @@ export interface ApiErrorBody {
  * @property meta - Optional pagination metadata or null.
  */
 export interface ApiSuccess<T> {
-    success: true
-    data: T
-    error: null
-    meta: ApiMeta | null
+	success: true;
+	data: T;
+	error: null;
+	meta: ApiMeta | null;
 }
 
 /**
@@ -57,10 +57,10 @@ export interface ApiSuccess<T> {
  * @property meta - Constant null.
  */
 export interface ApiFailure {
-    success: false
-    data: null
-    error: ApiErrorBody
-    meta: null
+	success: false;
+	data: null;
+	error: ApiErrorBody;
+	meta: null;
 }
 
 /**
@@ -68,5 +68,4 @@ export interface ApiFailure {
  *
  * @template T - The expected payload data type on success.
  */
-export type ApiEnvelope<T> = ApiSuccess<T> | ApiFailure
-
+export type ApiEnvelope<T> = ApiSuccess<T> | ApiFailure;

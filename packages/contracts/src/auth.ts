@@ -5,7 +5,7 @@
  * and user account identity.
  */
 
-import type { EntityId } from "./envelope"
+import type { EntityId } from "./envelope";
 
 /**
  * Public, safe user identity returned by authentication and profile endpoints.
@@ -17,10 +17,10 @@ import type { EntityId } from "./envelope"
  * @property email - User's registered contact email address.
  */
 export interface UserDto {
-    id: EntityId
-    username: string
-    displayName: string
-    email: string
+	id: EntityId;
+	username: string;
+	displayName: string;
+	email: string;
 }
 
 /**
@@ -30,7 +30,7 @@ export interface UserDto {
  * @property accessToken - Short-lived JSON Web Token (JWT) authorizing API requests.
  */
 export interface AuthAccessTokenDto {
-    accessToken: string
+	accessToken: string;
 }
 
 /**
@@ -42,10 +42,10 @@ export interface AuthAccessTokenDto {
  * @property displayName - Initial user-facing display name.
  */
 export interface SignupInput {
-    username: string
-    password: string
-    email: string
-    displayName: string
+	username: string;
+	password: string;
+	email: string;
+	displayName: string;
 }
 
 /**
@@ -55,7 +55,6 @@ export interface SignupInput {
  * @property password - User's raw password.
  */
 export interface LoginInput {
-    username: string
-    password: string
+	username: string;
+	password: string;
 }
-
