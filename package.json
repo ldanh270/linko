@@ -14,6 +14,7 @@
     "fe:build": "pnpm -C frontend build",
     "fe:start": "pnpm -C frontend start",
     "fe:lint": "pnpm -C frontend lint",
+    "fe:lint:tailwind": "pnpm -C frontend lint:tailwind",
     "fe:test": "pnpm -C frontend test",
     "fe:typecheck": "pnpm -C frontend typecheck",
     "be:install": "ni -C backend",
