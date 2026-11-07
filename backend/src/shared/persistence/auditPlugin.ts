@@ -1,10 +1,25 @@
+/**
+ * @file auditPlugin.ts
+ * @module backend/shared/persistence/auditPlugin
+ * @description Mongoose plugin implementing automatic AOP audit trails (createdBy, updatedBy, createdIp, updatedIp)
+ * derived from AsyncLocalStorage request context.
+ */
+
 import mongoose, { type Schema } from "mongoose"
 
 import { requestContext } from "../middlewares/requestContext"
 
-/** Reserved ObjectId for writes without an authenticated request actor. */
+/**
+ * Reserved system actor ObjectId used when writes originate outside an authenticated HTTP request
+ * (e.g., automated background workers, system migrations, or database initialization).
+ */
 export const SYSTEM_ACTOR_ID = new mongoose.Types.ObjectId("000000000000000000000001")
 
+/**
+ * Resolves current actor ID and IP address from the active request context.
+ *
+ * @returns Object containing the actor ObjectId and client IP string.
+ */
 const auditValues = () => {
     const context = requestContext.getStore()
     const actor = context?.userId ? new mongoose.Types.ObjectId(context.userId) : SYSTEM_ACTOR_ID
@@ -13,7 +28,12 @@ const auditValues = () => {
 
 const UNSUPPORTED_WRITE_ERROR = "Replacement and pipeline writes bypass audit fields"
 
-/** Add actor and IP audit fields to every persisted document and update. */
+/**
+ * Mongoose schema plugin that injects audit columns and attaches pre-save and pre-update hooks.
+ * Automatically populates `createdBy`, `updatedBy`, `createdIp`, and `updatedIp`.
+ *
+ * @param schema - The Mongoose schema to apply audit properties and hooks to.
+ */
 export function auditPlugin(schema: Schema): void {
     schema.add({
         createdBy: { type: mongoose.Schema.Types.ObjectId, default: SYSTEM_ACTOR_ID },
@@ -58,6 +78,7 @@ export function auditPlugin(schema: Schema): void {
             })
         }
     })
+
 
     schema.pre(["replaceOne", "findOneAndReplace"], function () {
         throw new Error(UNSUPPORTED_WRITE_ERROR)

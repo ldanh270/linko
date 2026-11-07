@@ -1,6 +1,15 @@
+/**
+ * @file ApiError.ts
+ * @module frontend/shared/http/ApiError
+ * @description Standard client-side error representation normalizing HTTP status codes,
+ * failure envelopes, and connection drops.
+ */
+
 import type { ApiFailure } from "@linko/contracts"
 
-/** Safe client-facing transport messages and codes. */
+/**
+ * Common fallback transport error messages and identifiers.
+ */
 export const HTTP_ERROR = {
   GENERIC_MESSAGE: "Something went wrong",
   INTERNAL: "INTERNAL",
@@ -9,7 +18,16 @@ export const HTTP_ERROR = {
   INVALID_RESPONSE: "INVALID_RESPONSE",
 } as const
 
-/** Describe a normalized API failure without exposing raw server internals. */
+/**
+ * Standard client exception class normalizing server and transport errors.
+ * Guarantees a stable machine-readable `code` and user-friendly `message`.
+ *
+ * @property code - Stable error code string.
+ * @property message - Human-readable error message.
+ * @property status - HTTP status code (0 for network disconnection).
+ * @property requestId - Unique request tracing ID if supplied by server.
+ * @property details - Structured validation error details if provided.
+ */
 export class ApiError extends Error {
   constructor(
     public readonly code: string,
@@ -22,7 +40,13 @@ export class ApiError extends Error {
     this.name = "ApiError"
   }
 
-  /** Convert a response envelope into a stable client error. */
+  /**
+   * Constructs a typed ApiError from a raw Fetch API Response and parsed body.
+   *
+   * @param response - The Fetch Response object.
+   * @param body - The parsed JSON body payload or null.
+   * @returns Normalized ApiError instance.
+   */
   static fromResponse(response: Response, body: unknown): ApiError {
     if (response.status >= 500) {
       return new ApiError(HTTP_ERROR.INTERNAL, HTTP_ERROR.GENERIC_MESSAGE, response.status, isApiFailure(body) ? body.error.requestId : undefined)
@@ -33,6 +57,7 @@ export class ApiError extends Error {
     return new ApiError(HTTP_ERROR.HTTP, HTTP_ERROR.GENERIC_MESSAGE, response.status)
   }
 }
+
 
 /** Narrow unknown JSON to the documented failure envelope. */
 function isApiFailure(value: unknown): value is ApiFailure {

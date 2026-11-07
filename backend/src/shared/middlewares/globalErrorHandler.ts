@@ -28,7 +28,14 @@ const mapClientError = (error: unknown): BusinessException | null => {
     return null
 }
 
-/** Translate expected errors and log unexpected errors once with safe context. */
+/**
+ * Express error-handling middleware factory.
+ * Translates known business exceptions and client validation errors into uniform API failure envelopes
+ * while safely logging unexpected technical failures with request context and generating correlation IDs.
+ *
+ * @param logger - The server logger instance.
+ * @returns An Express ErrorRequestHandler function.
+ */
 export function createGlobalErrorHandler(logger: ServerLogger): ErrorRequestHandler {
     return (error: unknown, request, response, _next) => {
         const businessError = error instanceof BusinessException ? error : mapClientError(error)
